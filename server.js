@@ -13,10 +13,12 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ MongoDB Atlas Connected!"))
     .catch(err => console.error("❌ Connection Error:", err));
 
-// প্রোডাক্ট স্কিমা (strict: false যুক্ত করা হয়েছে যাতে category ও supplier সেভ হয়)
+// প্রোডাক্ট স্কিমা (category ও supplier স্পষ্টভাবে যোগ করা হয়েছে)
 const ProductSchema = new mongoose.Schema({
     name: { type: String, required: true },
     barcode: { type: String, default: "" }, 
+    category: { type: String, default: "" }, // নতুন যুক্ত
+    supplier: { type: String, default: "" }, // নতুন যুক্ত
     costPrice: { type: Number, default: 0 }, 
     price: { type: Number, required: true },
     stock: { type: Number, required: true },
@@ -40,26 +42,38 @@ const Sale = mongoose.model('Sale', SaleSchema);
 
 // --- API ROUTES ---
 
-// ১. সব পণ্য দেখা
+// ১. সব পণ্য দেখা (সার্চ ও ফিল্টার সাপোর্টসহ)
 app.get('/api/products', async (req, res) => {
-    const products = await Product.find().sort({ date: -1 });
-    res.json(products);
+    try {
+        const products = await Product.find().sort({ date: -1 });
+        res.json(products);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// ২. বিক্রির রিপোর্ট দেখা
+// ২. বিক্রির রিপোর্ট দেখা (গ্রাফের জন্য লিমিট বা ফিল্টার লজিক)
 app.get('/api/sales', async (req, res) => {
-    const sales = await Sale.find().sort({ date: -1 });
-    res.json(sales);
+    try {
+        const sales = await Sale.find().sort({ date: -1 });
+        res.json(sales);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // ৩. নতুন পণ্য যোগ করা
 app.post('/api/products', async (req, res) => {
-    const newProduct = new Product(req.body);
-    await newProduct.save();
-    res.status(201).json(newProduct);
+    try {
+        const newProduct = new Product(req.body);
+        await newProduct.save();
+        res.status(201).json(newProduct);
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+    }
 });
 
-// ৪. পণ্য এডিট করা (ফ্রন্টেন্ডের editProduct ফাংশনের জন্য)
+// ৪. পণ্য এডিট করা
 app.put('/api/products/:id', async (req, res) => {
     try {
         const updatedProduct = await Product.findByIdAndUpdate(
@@ -73,7 +87,7 @@ app.put('/api/products/:id', async (req, res) => {
     }
 });
 
-// ৫. বাকি টাকা জমা দেওয়া (ফ্রন্টেন্ডের payDue ফাংশনের জন্য)
+// ৫. বাকি টাকা জমা দেওয়া
 app.post('/api/sales/pay-due/:id', async (req, res) => {
     try {
         const { paidAmount } = req.body;
@@ -102,6 +116,7 @@ app.post('/api/checkout', async (req, res) => {
             const p = await Product.findById(item._id);
             if (p) {
                 totalCost += (p.costPrice || 0) * item.qty;
+                // স্টক কমানো
                 await Product.findByIdAndUpdate(item._id, { $inc: { stock: -item.qty } });
             }
         }
@@ -125,6 +140,23 @@ app.delete('/api/products/:id', async (req, res) => {
     try {
         await Product.findByIdAndDelete(req.params.id);
         res.json({ message: "Deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ৮. ড্যাশবোর্ড স্ট্যাটস এপিআই (ঐচ্ছিক কিন্তু গ্রাফের জন্য কার্যকর)
+app.get('/api/stats', async (req, res) => {
+    try {
+        const products = await Product.find();
+        const sales = await Sale.find();
+        
+        let stockValue = products.reduce((acc, p) => acc + (p.costPrice * p.stock), 0);
+        let totalSales = sales.reduce((acc, s) => acc + s.totalAmount, 0);
+        let totalProfit = sales.reduce((acc, s) => acc + s.profit, 0);
+        let totalDue = sales.reduce((acc, s) => acc + s.dueAmount, 0);
+
+        res.json({ stockValue, totalSales, totalProfit, totalDue });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
