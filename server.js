@@ -119,9 +119,14 @@ app.post('/api/checkout', async (req, res) => {
     }
 });
 
+// ৭. পণ্য ডিলিট করা
 app.delete('/api/products/:id', async (req, res) => {
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ message: "Deleted" });
+    try {
+        await Product.findByIdAndDelete(req.params.id);
+        res.json({ message: "Deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 app.get('*', (req, res) => {
