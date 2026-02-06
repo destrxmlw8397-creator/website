@@ -2,17 +2,19 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>POS - সেলস সিস্টেম</title>
+    <title>POS - পিডিএফ সেলস সিস্টেম</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* প্রিন্ট করার সময় শুধুমাত্র রিসিট দেখানোর জন্য স্টাইল */
-        @media print { 
-            .no-print { display: none !important; } 
-            #inv { display: block !important; width: 100%; font-family: 'Arial', sans-serif; font-size: 14px; } 
-            body { background: white; margin: 0; }
-            @page { margin: 0; }
+        .no-print { display: block; }
+        /* পিডিএফ এর জন্য লুকানো মেমো ফরম্যাট */
+        #inv { 
+            display: none; 
+            padding: 30px; 
+            width: 400px; 
+            background: white;
+            font-family: 'Arial', sans-serif;
         }
-        #inv { display: none; padding: 20px; width: 350px; margin: auto; border: 1px solid #eee; }
         .cart-item { border-bottom: 1px solid #eee; padding: 5px 0; }
         .qty-input { width: 60px; display: inline-block; }
     </style>
@@ -21,7 +23,7 @@
 <div class="container py-4 no-print">
     <div class="row">
         <div class="col-md-7">
-            <input type="text" id="search" class="form-control mb-3 p-3 border-primary" placeholder="বারকোড স্ক্যান করুন বা নাম লিখুন..." onkeyup="render()" autofocus autocomplete="off">
+            <input type="text" id="search" class="form-control mb-3 p-3 border-primary" placeholder="বারকোড বা নাম লিখুন..." onkeyup="render()" autofocus autocomplete="off">
             <div class="row" id="pList"></div>
         </div>
         <div class="col-md-5">
@@ -33,40 +35,40 @@
                 <hr>
                 <h5>মোট: <span id="total">0</span> ৳</h5>
                 <input type="number" id="paid" class="form-control mb-2" placeholder="পেমেন্ট (টাকা)" autocomplete="off">
-                <button class="btn btn-success w-100 mt-2 fw-bold" onclick="pay()">পেমেন্ট ও প্রিন্ট</button>
+                <button class="btn btn-success w-100 mt-2 fw-bold" onclick="pay()">পেমেন্ট ও পিডিএফ প্রিন্ট</button>
             </div>
         </div>
     </div>
 </div>
 
 <div id="inv">
-    <div class="text-center">
-        <h3 style="margin-bottom: 5px;">🚀 SuperShop ERP Pro</h3>
-        <p style="font-size: 18px; font-weight: bold;">ক্যাশ মেমো</p>
+    <div style="text-align: center;">
+        <h2 style="margin: 0;">🚀 SuperShop ERP Pro</h2>
+        <p style="margin: 5px 0;">ক্যাশ মেমো</p>
     </div>
     <hr>
-    <div style="margin-bottom: 10px;">
+    <div style="margin-bottom: 15px;">
         <strong>কাস্টমার:</strong> <span id="invCName"></span><br>
-        <strong>মোবাইল:</strong> <span id="invCMobile"></span>
+        <strong>মোবাইল:</strong> <span id="invCMobile"></span><br>
+        <strong>তারিখ:</strong> <span id="invDate"></span>
     </div>
-    <table class="table table-sm" style="width: 100%;">
+    <table style="width: 100%; border-collapse: collapse;">
         <thead>
-            <tr style="border-bottom: 1px solid #000;">
-                <th style="text-align: left;">পণ্য</th>
-                <th style="text-align: center;">পরিমাণ</th>
-                <th style="text-align: right;">মূল্য</th>
+            <tr style="border-bottom: 2px solid #000;">
+                <th style="text-align: left; padding: 5px;">পণ্য</th>
+                <th style="text-align: center; padding: 5px;">পরিমাণ</th>
+                <th style="text-align: right; padding: 5px;">মূল্য</th>
             </tr>
         </thead>
         <tbody id="invItems"></tbody>
     </table>
-    <hr style="border-top: 1px dashed #000;">
+    <hr>
     <div style="text-align: right;">
-        <h5 id="invTotalText" style="margin-bottom: 5px;"></h5>
+        <h4 id="invTotalText" style="margin: 5px 0;"></h4>
         <p style="margin: 0;">পেইড: <span id="invPaid"></span></p>
         <p style="margin: 0; font-weight: bold;">বাকি: <span id="invDue"></span></p>
     </div>
-    <hr>
-    <p class="text-center" style="margin-top: 10px;"><small>ধন্যবাদ, আবার আসবেন!</small></p>
+    <p style="text-align: center; margin-top: 30px; font-size: 12px; border-top: 1px solid #eee; padding-top: 10px;">ধন্যবাদ, আবার আসবেন!</p>
 </div>
 
 <script>
@@ -93,9 +95,8 @@
             list.innerHTML += `
                 <div class="col-4 mb-2">
                     <div class="card p-2 text-center" onclick="add('${p._id}')" style="cursor:pointer; height: 100%;">
-                        <h6 class="mb-1">${p.name}</h6>
-                        <small class="text-primary">${p.price}৳</small><br>
-                        <small class="text-muted">Stock: ${p.stock}</small>
+                        <h6>${p.name}</h6>
+                        <small class="text-primary">${p.price}৳</small>
                     </div>
                 </div>`;
         });
@@ -112,14 +113,7 @@
     function updateQty(id, newQty) {
         const item = cart.find(i => i._id === id);
         if(item) {
-            if(newQty > item.stock) {
-                alert("স্টকের বেশি সম্ভব নয়!");
-                item.qty = item.stock;
-            } else if(newQty <= 0) {
-                cart = cart.filter(i => i._id !== id);
-            } else {
-                item.qty = Number(newQty);
-            }
+            item.qty = Number(newQty) <= 0 ? 1 : Number(newQty);
             updateCart();
         }
     }
@@ -132,9 +126,9 @@
             document.getElementById('cart').innerHTML += `
                 <div class="d-flex justify-content-between align-items-center mb-2 cart-item">
                     <span>${i.name}</span>
-                    <div class="d-flex align-items-center">
+                    <div>
                         <input type="number" class="form-control form-control-sm qty-input me-2" value="${i.qty}" onchange="updateQty('${i._id}', this.value)">
-                        <span class="fw-bold">${i.price * i.qty}৳</span>
+                        <span>${i.price*i.qty}৳</span>
                     </div>
                 </div>`; 
         });
@@ -142,49 +136,51 @@
     }
 
     async function pay() {
-        const totalAmount = Number(document.getElementById('total').innerText);
-        const paidAmount = Number(document.getElementById('paid').value);
-        const customerName = document.getElementById('cName').value || "নগদ";
-        const customerMobile = document.getElementById('cMobile').value || "N/A";
+        const total = Number(document.getElementById('total').innerText);
+        const paid = Number(document.getElementById('paid').value);
+        const cName = document.getElementById('cName').value || "নগদ";
+        const cMobile = document.getElementById('cMobile').value || "N/A";
 
-        if(cart.length === 0) return alert("কার্ট খালি!");
-        
-        // ১. সার্ভারে ডাটা পাঠানো
+        if(!cart.length) return alert("কার্ট খালি!");
+
+        // সার্ভারে ডাটা পাঠানো
         await fetch('/api/checkout', { 
             method:'POST', 
             headers:{'Content-Type':'application/json'}, 
-            body:JSON.stringify({cart, customerName, customerMobile, totalAmount, paidAmount}) 
+            body:JSON.stringify({cart, customerName: cName, customerMobile: cMobile, totalAmount: total, paidAmount: paid}) 
         });
-        
-        // ২. রিসিটে ডাটাগুলো নিখুঁতভাবে বসানো
-        document.getElementById('invCName').innerText = customerName;
-        document.getElementById('invCMobile').innerText = customerMobile;
-        
-        let invRows = '';
-        cart.forEach(i => {
-            invRows += `
-                <tr>
-                    <td style="padding: 5px 0;">${i.name}</td>
-                    <td style="text-align: center;">${i.qty}</td>
-                    <td style="text-align: right;">${i.price * i.qty}৳</td>
-                </tr>`;
-        });
-        document.getElementById('invItems').innerHTML = invRows;
-        
-        document.getElementById('invTotalText').innerText = "Total: " + totalAmount + " ৳";
-        document.getElementById('invPaid').innerText = paidAmount + " ৳";
-        document.getElementById('invDue').innerText = (totalAmount - paidAmount) + " ৳";
-        
-        // ৩. প্রিন্ট করার জন্য পেজ রেডি করা
-        // প্রিন্ট কমান্ড দেওয়ার আগে ডাটা রেন্ডার হওয়ার জন্য সামান্য সময় দেওয়া হলো
-        setTimeout(() => {
-            window.print();
-        }, 100);
 
-        // ৪. প্রিন্ট উইন্ডো বন্ধ (Print বা Cancel) করার পর পেজ রিলোড হবে
-        window.onafterprint = function() {
-            location.reload();
+        // পিডিএফ এর জন্য ডাটা ফিল করা
+        document.getElementById('invCName').innerText = cName;
+        document.getElementById('invCMobile').innerText = cMobile;
+        document.getElementById('invDate').innerText = new Date().toLocaleString('bn-BD');
+        
+        let rows = '';
+        cart.forEach(i => {
+            rows += `<tr><td style="padding:5px;">${i.name}</td><td style="text-align:center;">${i.qty}</td><td style="text-align:right;">${i.price*i.qty}৳</td></tr>`;
+        });
+        document.getElementById('invItems').innerHTML = rows;
+        document.getElementById('invTotalText').innerText = "Total: " + total + " ৳";
+        document.getElementById('invPaid').innerText = paid + " ৳";
+        document.getElementById('invDue').innerText = (total - paid) + " ৳";
+
+        // পিডিএফ জেনারেশন অপশন
+        const element = document.getElementById('inv');
+        element.style.display = 'block'; // পিডিএফ বানানোর সময় সাময়িক দেখানো
+
+        const opt = {
+            margin:       10,
+            filename:     `Memo_${cName}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
+
+        // পিডিএফ সেভ এবং রিলোড
+        html2pdf().set(opt).from(element).save().then(() => {
+            element.style.display = 'none';
+            location.reload();
+        });
     }
 
     window.onload = init;
