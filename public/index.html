@@ -187,7 +187,17 @@
     }
 
     function exportExcel() {
-        var wb = XLSX.utils.table_to_book(document.getElementById('pTable'), {sheet:"Inventory"});
+        // ফিক্সড এক্সপোর্ট ফাংশন: এটি টেবিল থেকে সরাসরি ডাটা নিয়ে ফরম্যাট ঠিক করে দেয়
+        const table = document.getElementById('pTable');
+        const rows = Array.from(table.rows);
+        const data = rows.map(row => Array.from(row.cells).map(cell => cell.innerText));
+        
+        // এক্সেল শিট তৈরি
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Inventory");
+        
+        // ফাইল সেভ
         XLSX.writeFile(wb, "Shop_Inventory.xlsx");
     }
     window.onload = load;
