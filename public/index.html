@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         body { font-family: 'Hind Siliguri', sans-serif; background: #f0f2f5; transition: 0.3s; }
@@ -27,9 +28,21 @@
         /* New Styles for Advanced Features */
         .log-container { max-height: 200px; overflow-y: auto; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 10px; }
         .dark-mode .log-container { background: #1a1a1a; color: #aaa; }
+        #qrcode { margin-top: 10px; display: flex; justify-content: center; }
     </style>
 </head>
 <body>
+<script>
+    let userRole = 'admin'; // Default. Real authentication would handle this.
+    function checkAdminAction(callback) {
+        if(userRole !== 'admin') {
+            alert("দুঃখিত, এই কাজটি করার অনুমতি শুধুমাত্র মালিকের আছে।");
+            return;
+        }
+        callback();
+    }
+</script>
+
 <nav class="navbar navbar-dark bg-primary p-3">
     <div class="container d-flex justify-content-between">
         <span class="navbar-brand fw-bold">🚀 SuperShop ERP Pro</span>
@@ -47,6 +60,14 @@
         ⚠️ <strong>সতর্কতা:</strong> নিচের পণ্যগুলোর স্টক ফুরিয়ে আসছে (৫ এর নিচে)! <span id="lowStockList"></span>
     </div>
 
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card p-2 border-0 shadow-sm bg-light text-dark">
+                <marquee scrollamount="5">⚡ <strong>ইন্টেলিজেন্ট ইনসাইট:</strong> <span id="insightText">ডাটা লোড হচ্ছে...</span></marquee>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-3 mb-4 text-center">
         <div class="col-md-2 col-6"><div class="card stat-card p-3"><h6>মোট বিক্রি</h6><h3 id="tSales">0</h3></div></div>
         <div class="col-md-2 col-6"><div class="card stat-card p-3 text-success"><h6>মোট লাভ</h6><h3 id="tProfit">0</h3></div></div>
@@ -60,11 +81,17 @@
         <div class="col-md-8">
             <div class="chart-container">
                 <div class="d-flex justify-content-between">
-                    <h5>বিক্রয় ও লাভ বিশ্লেষণ</h5>
-                    <select class="form-select w-auto btn-sm" id="chartFilter" onchange="load()">
-                        <option value="7">গত ৭ দিন</option>
-                        <option value="30">গত ৩০ দিন</option>
-                    </select>
+                    <h5>বিক্রয় বিশ্লেষণ (৬. বার ও লাইন চার্ট)</h5>
+                    <div class="d-flex gap-2">
+                        <select class="form-select w-auto btn-sm" id="chartType" onchange="load()">
+                            <option value="line">লাইন চার্ট</option>
+                            <option value="bar">বার চার্ট</option>
+                        </select>
+                        <select class="form-select w-auto btn-sm" id="chartFilter" onchange="load()">
+                            <option value="7">গত ৭ দিন</option>
+                            <option value="30">গত ৩০ দিন</option>
+                        </select>
+                    </div>
                 </div>
                 <canvas id="salesChart" height="100"></canvas>
             </div>
@@ -94,12 +121,21 @@
                 <input type="number" id="cost" class="form-control mb-2" placeholder="কেনা দাম">
                 <input type="number" id="price" class="form-control mb-2" placeholder="বিক্রয় মূল্য">
                 <input type="number" id="stock" class="form-control mb-3" placeholder="স্টক পরিমাণ">
-                <button onclick="save()" class="btn btn-primary w-100 mb-2">ইনভেন্টরি আপডেট</button>
+                <button onclick="checkAdminAction(save)" class="btn btn-primary w-100 mb-2">ইনভেন্টরি আপডেট</button>
                 <div class="d-flex gap-2">
                     <button onclick="generateBarcode()" class="btn btn-outline-secondary w-50 btn-sm">বারকোড তৈরী</button>
                     <button onclick="document.getElementById('fileInput').click()" class="btn btn-outline-dark w-50 btn-sm">ডাটা ইমপোর্ট</button>
                     <input type="file" id="fileInput" class="d-none" onchange="importJSON(event)">
                 </div>
+            </div>
+
+            <div class="card p-3 shadow-sm mb-4">
+                <h6>২. কাস্টমার লেজার (বাকি ইতিহাস)</h6>
+                <div class="input-group mb-2">
+                    <input type="text" id="cSearch" class="form-control form-control-sm" placeholder="নাম লিখে সার্চ করুন...">
+                    <button class="btn btn-sm btn-primary" onclick="searchCustomerLedger()">🔍</button>
+                </div>
+                <div id="ledgerResult" style="font-size: 12px; max-height: 100px; overflow-y: auto;"></div>
             </div>
 
             <div class="card p-3 shadow-sm mb-4">
@@ -109,18 +145,35 @@
         </div>
 
         <div class="col-md-8">
-            <div class="card p-4 shadow-sm mb-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5>ইনভেন্টরি ও সাপ্লায়ার লিস্ট</h5>
-                    <div class="d-flex gap-2 w-50">
-                        <input type="text" id="pSearch" class="form-control" placeholder="সার্চ..." onkeyup="filterProducts()">
+            <ul class="nav nav-tabs mb-3" id="productTab" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#inventoryTab">ইনভেন্টরি</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#supplierTab">৩. সাপ্লায়ার ট্র্যাকিং</button></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="inventoryTab">
+                    <div class="card p-4 shadow-sm mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5>ইনভেন্টরি লিস্ট</h5>
+                            <div class="d-flex gap-2 w-50">
+                                <input type="text" id="pSearch" class="form-control" placeholder="সার্চ..." onkeyup="filterProducts()">
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table" id="pTable">
+                                <thead><tr><th>বারকোড</th><th>নাম (ক্যাটাগরি/সাপ্লায়ার)</th><th>কেনা/বেচা</th><th>স্টক</th><th>অ্যাকশন</th></tr></thead>
+                                <tbody id="pBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-                <div class="table-responsive">
-                    <table class="table" id="pTable">
-                        <thead><tr><th>বারকোড</th><th>নাম (ক্যাটাগরি/সাপ্লায়ার)</th><th>কেনা/বেচা</th><th>স্টক</th><th>অ্যাকশন</th></tr></thead>
-                        <tbody id="pBody"></tbody>
-                    </table>
+                <div class="tab-pane fade" id="supplierTab">
+                    <div class="card p-4 shadow-sm">
+                        <h5>সাপ্লায়ার বকেয়া হিসাব</h5>
+                        <table class="table table-sm">
+                            <thead><tr><th>সাপ্লায়ার নাম</th><th>পণ্য</th><th>বকেয়া (কাল্পনিক)</th><th>অ্যাকশন</th></tr></thead>
+                            <tbody id="supBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -137,7 +190,7 @@
                 <input type="number" id="editCost" class="form-control mb-2" placeholder="কেনা দাম">
                 <input type="number" id="editPrice" class="form-control mb-2" placeholder="বিক্রয় মূল্য">
                 <input type="number" id="editStock" class="form-control mb-2" placeholder="স্টক">
-                <button onclick="updateProduct()" class="btn btn-success w-100">সংরক্ষণ করুন</button>
+                <button onclick="checkAdminAction(updateProduct)" class="btn btn-success w-100">সংরক্ষণ করুন</button>
             </div>
         </div>
     </div>
@@ -161,6 +214,7 @@
         <div class="modal-content p-4">
             <h5>বারকোড প্রিভিউ</h5>
             <svg id="barcodeSVG"></svg>
+            <div id="qrcode"></div>
             <button onclick="window.print()" class="btn btn-primary mt-3">প্রিন্ট করুন</button>
         </div>
     </div>
@@ -184,6 +238,23 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const hour = new Date().getHours();
+    if(hour >= 20 || hour < 6) document.body.classList.add('dark-mode');
+    
+    // অটো ব্যাকআপ প্রতিদিন একবার (localStorage ব্যবহার করে ট্র্যাকিং)
+    const lastBackup = localStorage.getItem('lastBackupDate');
+    const today = new Date().toDateString();
+    if(lastBackup !== today) {
+        setTimeout(() => { 
+            console.log("Auto Backup triggered...");
+            backupData(); 
+            localStorage.setItem('lastBackupDate', today);
+        }, 5000);
+    }
+</script>
+
 <script>
     let currentChart = null;
     let categoryChart = null;
@@ -196,6 +267,7 @@
         let val = 0;
         let lowStockNames = [];
         let catStats = {};
+        let supplierMap = {};
         document.getElementById('pBody').innerHTML = '';
         
         products.forEach(p => {
@@ -203,6 +275,9 @@
             if(p.stock < 5) lowStockNames.push(p.name);
             let stockClass = p.stock < 5 ? 'badge-critical' : (p.stock < 10 ? 'badge-low' : 'bg-success');
             
+            // ৩. সাপ্লায়ার ট্র্যাকিং ডাটা প্রিপারেশন
+            if(p.supplier) supplierMap[p.supplier] = (supplierMap[p.supplier] || 0) + 1;
+
             document.getElementById('pBody').innerHTML += `<tr>
                 <td>${p.barcode || 'N/A'}</td>
                 <td>${p.name} <br><small class="text-muted">${p.category || 'N/A'} | Sup: ${p.supplier || 'N/A'}</small></td>
@@ -214,6 +289,17 @@
                 </td>
             </tr>`;
         });
+
+        // ১. ইনসাইট লজিক
+        if(products.length > 0) {
+            let fastFinsih = products.sort((a,b) => a.stock - b.stock)[0].name;
+            document.getElementById('insightText').innerText = `সবচেয়ে দ্রুত ফুরিয়ে যাচ্ছে: ${fastFinsih}। স্টক চেক করুন।`;
+        }
+
+        // ৩. সাপ্লায়ার টেবিল রেন্ডার
+        document.getElementById('supBody').innerHTML = Object.keys(supplierMap).map(s => `
+            <tr><td>${s}</td><td>${supplierMap[s]} টি আইটেম</td><td>০৳</td><td><button class="btn btn-xs btn-outline-info">হিসাব</button></td></tr>
+        `).join('');
 
         if(lowStockNames.length > 0) {
             document.getElementById('lowStockAlert').classList.remove('d-none');
@@ -230,7 +316,6 @@
             tp += s.profit; 
             td += s.dueAmount; 
             
-            // Cat stats logic
             s.items.forEach(item => {
                 catStats[item.category || 'General'] = (catStats[item.category || 'General'] || 0) + item.qty;
             });
@@ -247,7 +332,6 @@
             }
         });
 
-        // Expenses calculations
         let totalExp = expenses.reduce((a, b) => a + b.amount, 0);
         
         document.getElementById('tSales').innerText = ts + '৳';
@@ -258,7 +342,6 @@
         document.getElementById('tVal').innerText = val + '৳';
         document.getElementById('dueBody').innerHTML = dueHtml;
 
-        // Progress Goal (1M target)
         let percent = Math.min((ts / 1000000) * 100, 100).toFixed(1);
         document.getElementById('goalProgress').style.width = percent + '%';
         document.getElementById('goalProgress').innerText = percent + '%';
@@ -268,34 +351,51 @@
         renderLogs();
     }
 
-    // PDF Invoice Generator
+    // ২. কাস্টমার লেজার সার্চ ফাংশন
+    async function searchCustomerLedger() {
+        const name = document.getElementById('cSearch').value.toLowerCase();
+        const sRes = await fetch('/api/sales');
+        const sales = await sRes.json();
+        const filtered = sales.filter(s => s.customerName && s.customerName.toLowerCase().includes(name));
+        let totalDue = filtered.reduce((a,b) => a + b.dueAmount, 0);
+        document.getElementById('ledgerResult').innerHTML = `
+            <strong>মোট বকেয়া: ${totalDue}৳</strong><br>
+            ${filtered.map(f => `🔹 ${new Date(f.date).toLocaleDateString()}: ${f.totalAmount}৳ (বাকি: ${f.dueAmount}৳)`).join('<br>')}
+        `;
+    }
+
+    // ৭. QR Code যুক্ত PDF ইনভয়েস
     async function printInvoice(saleId) {
         const sRes = await fetch('/api/sales');
         const sales = await sRes.json();
         const sale = sales.find(s => s._id === saleId);
-        
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
+        
         doc.setFontSize(20);
         doc.text("SuperShop Pro Memo", 70, 20);
-        doc.setFontSize(12);
+        doc.setFontSize(10);
+        doc.text("Scan QR to Pay or Contact", 75, 28);
+        
+        // QR Code generation for PDF
+        const qrDiv = document.createElement('div');
+        new QRCode(qrDiv, `SaleID:${saleId}-Amt:${sale.dueAmount}`);
+        const qrImg = qrDiv.querySelector('canvas').toDataURL("image/png");
+        doc.addImage(qrImg, 'PNG', 160, 10, 30, 30);
+
         doc.text(`Customer: ${sale.customerName || 'N/A'}`, 15, 40);
         doc.text(`Date: ${new Date(sale.date).toLocaleDateString()}`, 140, 40);
         
         const tableData = sale.items.map(i => [i.name, i.qty, i.price, i.qty * i.price]);
-        doc.autoTable({
-            startY: 50,
-            head: [['Product', 'Qty', 'Rate', 'Total']],
-            body: tableData
-        });
+        doc.autoTable({ startY: 50, head: [['Product', 'Qty', 'Rate', 'Total']], body: tableData });
         
-        doc.text(`Total: ${sale.totalAmount} Tk`, 140, doc.lastAutoTable.finalY + 10);
-        doc.text(`Paid: ${sale.paidAmount} Tk`, 140, doc.lastAutoTable.finalY + 20);
-        doc.text(`Due: ${sale.dueAmount} Tk`, 140, doc.lastAutoTable.finalY + 30);
+        let finalY = doc.lastAutoTable.finalY;
+        doc.text(`Total: ${sale.totalAmount} Tk`, 140, finalY + 10);
+        doc.text(`Paid: ${sale.paidAmount} Tk`, 140, finalY + 20);
+        doc.text(`Due: ${sale.dueAmount} Tk`, 140, finalY + 30);
         doc.save(`Invoice_${saleId}.pdf`);
     }
 
-    // Expense Logic
     function addExpense() {
         let title = document.getElementById('expTitle').value;
         let amount = Number(document.getElementById('expAmount').value);
@@ -307,7 +407,6 @@
         }
     }
 
-    // Backup & Import
     function backupData() {
         const data = { products: [], sales: [], expenses, logs: activityLogs };
         const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
@@ -328,14 +427,14 @@
         reader.readAsText(event.target.files[0]);
     }
 
-    // Barcode Generator
     function generateBarcode() {
         let code = document.getElementById('barcode').value || Math.floor(Math.random() * 1000000000);
         JsBarcode("#barcodeSVG", code, { format: "CODE128" });
+        document.getElementById('qrcode').innerHTML = "";
+        new QRCode(document.getElementById("qrcode"), "https://yourshop.com/pay/"+code);
         new bootstrap.Modal(document.getElementById('barcodeModal')).show();
     }
 
-    // Log Logic
     function addLog(action) {
         activityLogs.unshift(`${new Date().toLocaleString()}: ${action}`);
         if(activityLogs.length > 50) activityLogs.pop();
@@ -346,7 +445,6 @@
         document.getElementById('logContainer').innerHTML = activityLogs.map(log => `<div>${log}</div>`).join('');
     }
 
-    // Charts
     function renderCategoryChart(catStats) {
         const ctx = document.getElementById('categoryChart').getContext('2d');
         if(categoryChart) categoryChart.destroy();
@@ -359,7 +457,6 @@
         });
     }
 
-    // UI/UX Touches (Untouched mandatory original functions below)
     function openEditModal(id, name, cost, price, stock) {
         document.getElementById('editId').value = id;
         document.getElementById('editName').value = name;
@@ -405,9 +502,11 @@
 
     async function deleteProduct(id, name) {
         if (confirm(`আপনি কি নিশ্চিতভাবে "${name}" পণ্যটি ডিলিট করতে চান?`)) {
-            await fetch(`/api/products/${id}`, { method: 'DELETE' });
-            addLog(`Deleted Product: ${name}`);
-            location.reload();
+            checkAdminAction(async () => {
+                await fetch(`/api/products/${id}`, { method: 'DELETE' });
+                addLog(`Deleted Product: ${name}`);
+                location.reload();
+            });
         }
     }
 
@@ -436,17 +535,18 @@
     function renderGraph(sales) {
         const ctx = document.getElementById('salesChart').getContext('2d');
         const limit = document.getElementById('chartFilter').value;
+        const type = document.getElementById('chartType').value; // ৬. চার্ট টাইপ সুইচ
         const labels = sales.slice(0, limit).map(s => new Date(s.date).toLocaleDateString()).reverse();
         const saleData = sales.slice(0, limit).map(s => s.totalAmount).reverse();
         const profitData = sales.slice(0, limit).map(s => s.profit).reverse();
         if (currentChart) currentChart.destroy();
         currentChart = new Chart(ctx, {
-            type: 'line',
+            type: type,
             data: {
                 labels: labels,
                 datasets: [
-                    { label: 'বিক্রি (৳)', data: saleData, borderColor: '#0d6efd', tension: 0.3, fill: true, backgroundColor: 'rgba(13, 110, 253, 0.1)' },
-                    { label: 'লাভ (৳)', data: profitData, borderColor: '#198754', tension: 0.3, fill: false }
+                    { label: 'বিক্রি (৳)', data: saleData, borderColor: '#0d6efd', backgroundColor: 'rgba(13, 110, 253, 0.4)', tension: 0.3, fill: true },
+                    { label: 'লাভ (৳)', data: profitData, borderColor: '#198754', backgroundColor: 'rgba(25, 135, 84, 0.4)', tension: 0.3, fill: false }
                 ]
             },
             options: { responsive: true, plugins: { legend: { position: 'top' } } }
