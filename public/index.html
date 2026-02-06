@@ -3,148 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>সুপারশপ ইনভেন্টরি ম্যানেজমেন্ট</title>
+    <title>প্রফেশনাল ইনভেন্টরি | সুপারশপ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; font-family: 'Hind Siliguri', sans-serif; }
-        body { background-color: #f0f2f5; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #1a73e8; margin-bottom: 30px; }
-        
-        .form-section { display: flex; gap: 10px; flex-wrap: wrap; background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px; }
-        .form-section input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; min-width: 150px; }
-        .form-section button { background: #28a745; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: 0.3s; }
-        .form-section button:hover { background: #218838; }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background-color: #1a73e8; color: white; text-transform: uppercase; font-size: 14px; }
-        tr:hover { background-color: #f1f1f1; }
-        
-        .delete-btn { background: #ff4757; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; transition: 0.2s; }
-        .delete-btn:hover { background: #ff1f36; }
-
-        .loader { text-align: center; font-weight: bold; color: #666; display: none; }
-        
-        @media (max-width: 600px) {
-            .form-section { flex-direction: column; }
-            .form-section button { width: 100%; }
-        }
+        body { font-family: 'Hind Siliguri', sans-serif; background-color: #f4f7f6; }
+        .navbar { background: #1a73e8; color: white; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .stat-card { transition: transform 0.3s; cursor: pointer; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .btn-primary { background: #1a73e8; border: none; }
+        .table thead { background: #f8f9fa; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🛒 সুপারশপ হিসাব খাতা</h1>
+<nav class="navbar navbar-dark p-3">
+    <div class="container">
+        <span class="navbar-brand mb-0 h1">🏪 MySuperShop Admin</span>
+    </div>
+</nav>
 
-    <div class="form-section">
-        <input type="text" id="name" placeholder="পণ্যের নাম (যেমন: চাল)">
-        <input type="number" id="price" placeholder="মূল্য (টাকা)">
-        <input type="number" id="stock" placeholder="পরিমাণ (টি/কেজি)">
-        <button onclick="addProduct()">পণ্য যোগ করুন</button>
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card bg-white p-4 text-center">
+                <h6 class="text-muted">মোট পণ্য</h6>
+                <h2 id="totalItems">০</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card bg-white p-4 text-center border-start border-primary border-5">
+                <h6 class="text-muted">মোট স্টক ভ্যালু</h6>
+                <h2 id="totalValue">০ ৳</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card bg-white p-4 text-center">
+                <h6 class="text-muted">স্টক আউট (কম আছে)</h6>
+                <h2 class="text-danger" id="lowStock">০</h2>
+            </div>
+        </div>
     </div>
 
-    <div id="loader" class="loader">ডেটা লোড হচ্ছে...</div>
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card p-4 mb-4">
+                <h5 class="mb-3">নতুন স্টক এন্ট্রি</h5>
+                <div class="mb-3">
+                    <label class="form-label">পণ্যের নাম</label>
+                    <input type="text" id="name" class="form-control" placeholder="যেমন: বাসমতি চাল">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">বিক্রয় মূল্য (টাকা)</label>
+                    <input type="number" id="price" class="form-control" placeholder="0.00">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">স্টক পরিমাণ</label>
+                    <input type="number" id="stock" class="form-control" placeholder="0">
+                </div>
+                <button onclick="addProduct()" class="btn btn-primary w-100">স্টক আপডেট করুন</button>
+            </div>
+        </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>পণ্যের নাম</th>
-                <th>মূল্য</th>
-                <th>স্টক</th>
-                <th>অ্যাকশন</th>
-            </tr>
-        </thead>
-        <tbody id="productBody">
-            </tbody>
-    </table>
+        <div class="col-lg-8">
+            <div class="card p-4">
+                <div class="d-flex justify-content-between mb-3">
+                    <h5>ইনভেন্টরি লিস্ট</h5>
+                    <input type="text" id="search" class="form-control w-50" placeholder="পণ্য খুঁজুন..." onkeyup="searchProduct()">
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>পণ্য</th>
+                                <th>মূল্য</th>
+                                <th>স্টক</th>
+                                <th>অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-    // Render এ হোস্ট করার পর API_URL পরিবর্তন করে আপনার Render লিঙ্কি দিন
-    // যেমন: const API_URL = 'https://your-app-name.onrender.com/api/products';
     const API_URL = window.location.origin + '/api/products';
 
-    // ১. ডাটাবেস থেকে সব প্রোডাক্ট লোড করা
     async function fetchProducts() {
-        const loader = document.getElementById('loader');
-        loader.style.display = 'block';
         try {
             const res = await fetch(API_URL);
             const products = await res.json();
-            const tbody = document.getElementById('productBody');
-            tbody.innerHTML = '';
-
-            products.forEach(product => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td><strong>${product.name}</strong></td>
-                        <td>${product.price} ৳</td>
-                        <td>${product.stock} টি</td>
-                        <td>
-                            <button class="delete-btn" onclick="deleteProduct('${product._id}')">মুছে ফেলুন</button>
-                        </td>
-                    </tr>
-                `;
-            });
-        } catch (err) {
-            console.error("ডেটা আনতে সমস্যা হয়েছে:", err);
-        } finally {
-            loader.style.display = 'none';
-        }
+            displayProducts(products);
+            updateStats(products);
+        } catch (err) { console.error("Error fetching data"); }
     }
 
-    // ২. নতুন প্রোডাক্ট যোগ করা
+    function displayProducts(products) {
+        const tbody = document.getElementById('productBody');
+        tbody.innerHTML = '';
+        products.forEach(p => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${p.name}</strong></td>
+                    <td>${p.price} ৳</td>
+                    <td><span class="badge ${p.stock < 5 ? 'bg-danger' : 'bg-success'}">${p.stock} টি</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('${p._id}')">মুছে ফেলুন</button>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    function updateStats(products) {
+        document.getElementById('totalItems').innerText = products.length;
+        const totalValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
+        document.getElementById('totalValue').innerText = totalValue.toLocaleString() + ' ৳';
+        const low = products.filter(p => p.stock < 5).length;
+        document.getElementById('lowStock').innerText = low;
+    }
+
     async function addProduct() {
         const name = document.getElementById('name').value;
         const price = document.getElementById('price').value;
         const stock = document.getElementById('stock').value;
+        if (!name || !price || !stock) return alert("তথ্য পূরণ করুন");
 
-        if (!name || !price || !stock) {
-            alert("অনুগ্রহ করে সব তথ্য দিন!");
-            return;
-        }
-
-        const newProduct = { name, price, stock };
-
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newProduct)
-            });
-
-            if (response.ok) {
-                // ইনপুট বক্স পরিষ্কার করা
-                document.getElementById('name').value = '';
-                document.getElementById('price').value = '';
-                document.getElementById('stock').value = '';
-                fetchProducts(); // নতুন লিস্ট দেখানো
-            }
-        } catch (err) {
-            alert("পণ্য যোগ করা সম্ভব হয়নি!");
-        }
+        await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, price, stock })
+        });
+        
+        document.getElementById('name').value = '';
+        document.getElementById('price').value = '';
+        document.getElementById('stock').value = '';
+        fetchProducts();
     }
 
-    // ৩. প্রোডাক্ট ডিলিট করা
     async function deleteProduct(id) {
-        if (confirm('আপনি কি নিশ্চিত যে পণ্যটি মুছে ফেলতে চান?')) {
-            try {
-                const response = await fetch(`${API_URL}/${id}`, {
-                    method: 'DELETE'
-                });
-                if (response.ok) {
-                    fetchProducts();
-                }
-            } catch (err) {
-                alert("মুছে ফেলা সম্ভব হয়নি!");
-            }
+        if (confirm('মুছে ফেলবেন?')) {
+            await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+            fetchProducts();
         }
     }
 
-    // পেজ লোড হওয়ার সময় ডাটা নিয়ে আসা
+    function searchProduct() {
+        const term = document.getElementById('search').value.toLowerCase();
+        const rows = document.querySelectorAll('#productBody tr');
+        rows.forEach(row => {
+            const name = row.cells[0].innerText.toLowerCase();
+            row.style.display = name.includes(term) ? '' : 'none';
+        });
+    }
+
     window.onload = fetchProducts;
 </script>
-
 </body>
 </html>
