@@ -2,56 +2,51 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ড্যাশবোর্ড | সুপারশপ</title>
+    <title>অ্যাডভান্সড ড্যাশবোর্ড | সুপারশপ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Hind Siliguri', sans-serif; background: #f4f7f6; }
-        .navbar { background: #0d6efd; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        body { font-family: 'Hind Siliguri', sans-serif; background: #f0f2f5; }
+        .stat-card { border-radius: 15px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-dark p-3 text-white">
+<nav class="navbar navbar-dark bg-primary p-3">
     <div class="container d-flex justify-content-between">
-        <span class="navbar-brand fw-bold">🏪 My SuperShop</span>
-        <a href="pos.html" class="btn btn-warning fw-bold">🛒 POS কাউন্টার</a>
+        <span class="navbar-brand fw-bold">🚀 SuperShop ERP Pro</span>
+        <div>
+            <button onclick="exportExcel()" class="btn btn-light btn-sm me-2">📊 এক্সেল রিপোর্ট</button>
+            <a href="pos.html" class="btn btn-warning btn-sm fw-bold">🛒 POS কাউন্টার</a>
+        </div>
     </div>
 </nav>
 
 <div class="container mt-4">
     <div class="row g-3 mb-4 text-center">
-        <div class="col-md-3"><div class="card p-3"><h6>মোট আইটেম</h6><h3 id="tItems">0</h3></div></div>
-        <div class="col-md-3"><div class="card p-3"><h6>স্টক ভ্যালু</h6><h3 id="tValue">0 ৳</h3></div></div>
-        <div class="col-md-3"><div class="card p-3 border-start border-success border-5"><h6>মোট বিক্রি</h6><h3 id="tSales" class="text-success">0 ৳</h3></div></div>
-        <div class="col-md-3"><div class="card p-3 text-danger"><h6>লো স্টক</h6><h3 id="lStock">0</h3></div></div>
+        <div class="col-md-3"><div class="card stat-card p-3"><h6>মোট বিক্রি</h6><h3 id="tSales">0</h3></div></div>
+        <div class="col-md-3"><div class="card stat-card p-3 text-success"><h6>মোট লাভ</h6><h3 id="tProfit">0</h3></div></div>
+        <div class="col-md-3"><div class="card stat-card p-3 text-danger"><h6>মোট বাকি</h6><h3 id="tDue">0</h3></div></div>
+        <div class="col-md-3"><div class="card stat-card p-3 text-primary"><h6>স্টক মূল্য</h6><h3 id="tVal">0</h3></div></div>
     </div>
 
     <div class="row">
-        <div class="col-lg-4">
-            <div class="card p-4 mb-4">
-                <h5>নতুন পণ্য যোগ করুন</h5>
-                <input type="text" id="name" class="form-control mb-2" placeholder="নাম">
-                <input type="number" id="price" class="form-control mb-2" placeholder="মূল্য">
-                <input type="number" id="stock" class="form-control mb-3" placeholder="পরিমাণ">
-                <button onclick="save()" class="btn btn-primary w-100">সেভ করুন</button>
+        <div class="col-md-4">
+            <div class="card p-4 shadow-sm mb-4">
+                <h5>পণ্য যোগ করুন</h5>
+                <input type="text" id="barcode" class="form-control mb-2" placeholder="বারকোড (ঐচ্ছিক)">
+                <input type="text" id="name" class="form-control mb-2" placeholder="পণ্যের নাম">
+                <input type="number" id="cost" class="form-control mb-2" placeholder="কেনা দাম">
+                <input type="number" id="price" class="form-control mb-2" placeholder="বিক্রয় মূল্য">
+                <input type="number" id="stock" class="form-control mb-3" placeholder="স্টক পরিমাণ">
+                <button onclick="save()" class="btn btn-primary w-100">ইনভেন্টরি আপডেট</button>
             </div>
         </div>
-        <div class="col-lg-8">
-            <div class="card p-4 mb-4">
+        <div class="col-md-8">
+            <div class="card p-4 shadow-sm mb-4">
                 <h5>ইনভেন্টরি লিস্ট</h5>
-                <table class="table mt-2">
-                    <thead><tr><th>নাম</th><th>দাম</th><th>স্টক</th><th>অ্যাকশন</th></tr></thead>
+                <table class="table" id="pTable">
+                    <thead><tr><th>বারকোড</th><th>নাম</th><th>কেনা/বেচা</th><th>স্টক</th></tr></thead>
                     <tbody id="pBody"></tbody>
-                </table>
-            </div>
-            
-            <div class="card p-4">
-                <h5>সাম্প্রতিক বিক্রয় রিপোর্ট</h5>
-                <table class="table mt-2">
-                    <thead><tr><th>তারিখ</th><th>কাস্টমার</th><th>টাকা</th></tr></thead>
-                    <tbody id="sBody"></tbody>
                 </table>
             </div>
         </div>
@@ -60,39 +55,42 @@
 
 <script>
     async function load() {
-        // পণ্য লোড
         const pRes = await fetch('/api/products');
         const products = await pRes.json();
-        let val = 0, low = 0;
+        let val = 0;
         document.getElementById('pBody').innerHTML = '';
         products.forEach(p => {
-            val += (p.price * p.stock);
-            if(p.stock < 5) low++;
-            document.getElementById('pBody').innerHTML += `<tr><td>${p.name}</td><td>${p.price}৳</td><td><span class="badge ${p.stock < 5 ? 'bg-danger':'bg-success'}">${p.stock}</span></td><td><button onclick="del('${p._id}')" class="btn btn-sm btn-outline-danger">Del</button></td></tr>`;
+            val += (p.costPrice * p.stock);
+            document.getElementById('pBody').innerHTML += `<tr><td>${p.barcode || 'N/A'}</td><td>${p.name}</td><td>${p.costPrice}/${p.price}</td><td><span class="badge ${p.stock < 5 ? 'bg-danger':'bg-success'}">${p.stock}</span></td></tr>`;
         });
 
-        // সেলস রিপোর্ট লোড
         const sRes = await fetch('/api/sales');
         const sales = await sRes.json();
-        let totalS = 0;
-        document.getElementById('sBody').innerHTML = '';
-        sales.forEach(s => {
-            totalS += s.totalAmount;
-            document.getElementById('sBody').innerHTML += `<tr><td>${new Date(s.date).toLocaleDateString()}</td><td>${s.customerName}</td><td class="fw-bold">${s.totalAmount}৳</td></tr>`;
-        });
-
-        document.getElementById('tItems').innerText = products.length;
-        document.getElementById('tValue').innerText = val + ' ৳';
-        document.getElementById('tSales').innerText = totalS + ' ৳';
-        document.getElementById('lStock').innerText = low;
+        let ts = 0, tp = 0, td = 0;
+        sales.forEach(s => { ts += s.totalAmount; tp += s.profit; td += s.dueAmount; });
+        
+        document.getElementById('tSales').innerText = ts + '৳';
+        document.getElementById('tProfit').innerText = tp + '৳';
+        document.getElementById('tDue').innerText = td + '৳';
+        document.getElementById('tVal').innerText = val + '৳';
     }
 
     async function save() {
-        const payload = { name: document.getElementById('name').value, price: document.getElementById('price').value, stock: document.getElementById('stock').value };
+        const payload = { 
+            barcode: document.getElementById('barcode').value,
+            name: document.getElementById('name').value, 
+            costPrice: Number(document.getElementById('cost').value),
+            price: Number(document.getElementById('price').value), 
+            stock: Number(document.getElementById('stock').value) 
+        };
         await fetch('/api/products', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
         location.reload();
     }
-    async function del(id) { if(confirm('মুছে ফেলবেন?')) { await fetch(`/api/products/${id}`, {method:'DELETE'}); load(); } }
+
+    function exportExcel() {
+        var wb = XLSX.utils.table_to_book(document.getElementById('pTable'), {sheet:"Inventory"});
+        XLSX.writeFile(wb, "Shop_Inventory.xlsx");
+    }
     window.onload = load;
 </script>
 </body>
