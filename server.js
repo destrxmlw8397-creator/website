@@ -10,24 +10,29 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ MongoDB Atlas Connected!"))
+    .then(() => console.log("✅ MongoDB Connected!"))
     .catch(err => console.error("❌ Connection Error:", err));
 
-// প্রোডাক্ট স্কিমা
+// ১. প্রোডাক্ট স্কিমা (কেনা দাম ও বারকোড যুক্ত)
 const ProductSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    price: { type: Number, required: true },
+    barcode: { type: String, default: "" }, // বারকোড
+    costPrice: { type: Number, default: 0 }, // কেনা দাম
+    price: { type: Number, required: true }, // বিক্রয় মূল্য
     stock: { type: Number, required: true },
     date: { type: Date, default: Date.now }
 });
 const Product = mongoose.model('Product', ProductSchema);
 
-// সেলস স্কিমা
+// ২. সেলস স্কিমা (বাকির হিসাব যুক্ত)
 const SaleSchema = new mongoose.Schema({
     customerName: String,
     customerMobile: String,
     items: Array,
     totalAmount: Number,
+    paidAmount: Number, // কত টাকা দিয়েছে
+    dueAmount: Number,  // কত বাকি
+    profit: Number,     // কত লাভ হলো
     date: { type: Date, default: Date.now }
 });
 const Sale = mongoose.model('Sale', SaleSchema);
@@ -38,29 +43,46 @@ app.get('/api/products', async (req, res) => {
     res.json(products);
 });
 
-// API: বিক্রির রিপোর্ট দেখা (নতুন)
+// API: বিক্রির রিপোর্ট
 app.get('/api/sales', async (req, res) => {
     const sales = await Sale.find().sort({ date: -1 });
     res.json(sales);
 });
 
-// API: নতুন পণ্য যোগ করা
+// API: নতুন পণ্য যোগ
 app.post('/api/products', async (req, res) => {
     const newProduct = new Product(req.body);
     await newProduct.save();
     res.status(201).json(newProduct);
 });
 
-// API: স্টক আপডেট ও সেলস সেভ
+// API: অ্যাডভান্সড চেকআউট (লাভ ও বাকি ক্যালকুলেশন)
 app.post('/api/checkout', async (req, res) => {
     try {
-        const { cart, customerName, customerMobile, totalAmount } = req.body;
+        const { cart, customerName, customerMobile, paidAmount } = req.body;
+        let totalAmount = 0;
+        let totalCost = 0;
+
         for (let item of cart) {
-            await Product.findByIdAndUpdate(item._id, {
-                $inc: { stock: -item.qty }
-            });
+            const p = await Product.findById(item._id);
+            totalAmount += p.price * item.qty;
+            totalCost += (p.costPrice || 0) * item.qty;
+            // স্টক কমানো
+            await Product.findByIdAndUpdate(item._id, { $inc: { stock: -item.qty } });
         }
-        const newSale = new Sale({ customerName, customerMobile, items: cart, totalAmount });
+
+        const profit = totalAmount - totalCost;
+        const dueAmount = totalAmount - paidAmount;
+
+        const newSale = new Sale({
+            customerName,
+            customerMobile,
+            items: cart,
+            totalAmount,
+            paidAmount,
+            dueAmount,
+            profit
+        });
         await newSale.save();
         res.json({ success: true });
     } catch (err) {
@@ -78,4 +100,4 @@ app.get('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Advanced Server on port ${PORT}`));
