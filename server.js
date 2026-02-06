@@ -10,29 +10,29 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 mongoose.connect(process.env.MONGO_URI)
-    .then(() => console.log("✅ MongoDB Connected!"))
+    .then(() => console.log("✅ MongoDB Atlas Connected!"))
     .catch(err => console.error("❌ Connection Error:", err));
 
-// ১. প্রোডাক্ট স্কিমা (কেনা দাম ও বারকোড যুক্ত)
+// প্রোডাক্ট স্কিমা (আগের সব + বারকোড ও কেনা দাম)
 const ProductSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    barcode: { type: String, default: "" }, // বারকোড
-    costPrice: { type: Number, default: 0 }, // কেনা দাম
-    price: { type: Number, required: true }, // বিক্রয় মূল্য
+    barcode: { type: String, default: "" }, 
+    costPrice: { type: Number, default: 0 }, 
+    price: { type: Number, required: true },
     stock: { type: Number, required: true },
     date: { type: Date, default: Date.now }
 });
 const Product = mongoose.model('Product', ProductSchema);
 
-// ২. সেলস স্কিমা (বাকির হিসাব যুক্ত)
+// সেলস স্কিমা (আগের সব + বাকি ও লাভ)
 const SaleSchema = new mongoose.Schema({
     customerName: String,
     customerMobile: String,
     items: Array,
     totalAmount: Number,
-    paidAmount: Number, // কত টাকা দিয়েছে
-    dueAmount: Number,  // কত বাকি
-    profit: Number,     // কত লাভ হলো
+    paidAmount: Number,
+    dueAmount: Number,
+    profit: Number,
     date: { type: Date, default: Date.now }
 });
 const Sale = mongoose.model('Sale', SaleSchema);
@@ -43,31 +43,28 @@ app.get('/api/products', async (req, res) => {
     res.json(products);
 });
 
-// API: বিক্রির রিপোর্ট
+// API: বিক্রির রিপোর্ট দেখা
 app.get('/api/sales', async (req, res) => {
     const sales = await Sale.find().sort({ date: -1 });
     res.json(sales);
 });
 
-// API: নতুন পণ্য যোগ
+// API: নতুন পণ্য যোগ করা
 app.post('/api/products', async (req, res) => {
     const newProduct = new Product(req.body);
     await newProduct.save();
     res.status(201).json(newProduct);
 });
 
-// API: অ্যাডভান্সড চেকআউট (লাভ ও বাকি ক্যালকুলেশন)
+// API: অ্যাডভান্সড চেকআউট (স্টক, লাভ ও বাকি হিসাব)
 app.post('/api/checkout', async (req, res) => {
     try {
-        const { cart, customerName, customerMobile, paidAmount } = req.body;
-        let totalAmount = 0;
+        const { cart, customerName, customerMobile, paidAmount, totalAmount } = req.body;
         let totalCost = 0;
 
         for (let item of cart) {
             const p = await Product.findById(item._id);
-            totalAmount += p.price * item.qty;
             totalCost += (p.costPrice || 0) * item.qty;
-            // স্টক কমানো
             await Product.findByIdAndUpdate(item._id, { $inc: { stock: -item.qty } });
         }
 
@@ -75,13 +72,8 @@ app.post('/api/checkout', async (req, res) => {
         const dueAmount = totalAmount - paidAmount;
 
         const newSale = new Sale({
-            customerName,
-            customerMobile,
-            items: cart,
-            totalAmount,
-            paidAmount,
-            dueAmount,
-            profit
+            customerName, customerMobile, items: cart,
+            totalAmount, paidAmount, dueAmount, profit
         });
         await newSale.save();
         res.json({ success: true });
@@ -100,4 +92,4 @@ app.get('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Advanced Server on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
