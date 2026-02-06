@@ -13,12 +13,12 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ MongoDB Atlas Connected!"))
     .catch(err => console.error("❌ Connection Error:", err));
 
-// প্রোডাক্ট স্কিমা (category ও supplier স্পষ্টভাবে যোগ করা হয়েছে)
+// ১. প্রোডাক্ট স্কিমা
 const ProductSchema = new mongoose.Schema({
     name: { type: String, required: true },
     barcode: { type: String, default: "" }, 
-    category: { type: String, default: "" }, // নতুন যুক্ত
-    supplier: { type: String, default: "" }, // নতুন যুক্ত
+    category: { type: String, default: "" }, 
+    supplier: { type: String, default: "" }, 
     costPrice: { type: Number, default: 0 }, 
     price: { type: Number, required: true },
     stock: { type: Number, required: true },
@@ -27,7 +27,7 @@ const ProductSchema = new mongoose.Schema({
 
 const Product = mongoose.model('Product', ProductSchema);
 
-// সেলস স্কিমা
+// ২. সেলস স্কিমা
 const SaleSchema = new mongoose.Schema({
     customerName: String,
     customerMobile: String,
@@ -40,73 +40,101 @@ const SaleSchema = new mongoose.Schema({
 });
 const Sale = mongoose.model('Sale', SaleSchema);
 
+// ৩. নতুন যুক্ত: এক্সপেন্স (Expense) স্কিমা
+const ExpenseSchema = new mongoose.Schema({
+    title: String,
+    amount: Number,
+    date: { type: Date, default: Date.now }
+});
+const Expense = mongoose.model('Expense', ExpenseSchema);
+
+// ৪. নতুন যুক্ত: অ্যাক্টিভিটি লগ (Activity Log) স্কিমা
+const LogSchema = new mongoose.Schema({
+    action: String,
+    date: { type: Date, default: Date.now }
+});
+const Log = mongoose.model('Log', LogSchema);
+
+// --- সাহায্যকারী ফাংশন: লগ সেভ করা ---
+async function createLog(msg) {
+    try {
+        const newLog = new Log({ action: msg });
+        await newLog.save();
+    } catch (e) { console.log("Log Error:", e); }
+}
+
 // --- API ROUTES ---
 
-// ১. সব পণ্য দেখা (সার্চ ও ফিল্টার সাপোর্টসহ)
+// পণ্যের তালিকা
 app.get('/api/products', async (req, res) => {
-    try {
-        const products = await Product.find().sort({ date: -1 });
-        res.json(products);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+    const products = await Product.find().sort({ date: -1 });
+    res.json(products);
 });
 
-// ২. বিক্রির রিপোর্ট দেখা (গ্রাফের জন্য লিমিট বা ফিল্টার লজিক)
+// বিক্রির রিপোর্ট
 app.get('/api/sales', async (req, res) => {
-    try {
-        const sales = await Sale.find().sort({ date: -1 });
-        res.json(sales);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+    const sales = await Sale.find().sort({ date: -1 });
+    res.json(sales);
 });
 
-// ৩. নতুন পণ্য যোগ করা
+// নতুন পণ্য যোগ
 app.post('/api/products', async (req, res) => {
-    try {
-        const newProduct = new Product(req.body);
-        await newProduct.save();
-        res.status(201).json(newProduct);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
-    }
+    const newProduct = new Product(req.body);
+    await newProduct.save();
+    await createLog(`পণ্য যোগ করা হয়েছে: ${newProduct.name}`);
+    res.status(201).json(newProduct);
 });
 
-// ৪. পণ্য এডিট করা
+// পণ্য আপডেট
 app.put('/api/products/:id', async (req, res) => {
-    try {
-        const updatedProduct = await Product.findByIdAndUpdate(
-            req.params.id, 
-            req.body, 
-            { new: true }
-        );
-        res.json(updatedProduct);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    await createLog(`পণ্য আপডেট করা হয়েছে: ${updatedProduct.name}`);
+    res.json(updatedProduct);
 });
 
-// ৫. বাকি টাকা জমা দেওয়া
+// পণ্য ডিলিট
+app.delete('/api/products/:id', async (req, res) => {
+    const p = await Product.findById(req.params.id);
+    if(p) await createLog(`পণ্য ডিলিট করা হয়েছে: ${p.name}`);
+    await Product.findByIdAndDelete(req.params.id);
+    res.json({ message: "Deleted" });
+});
+
+// ৫. নতুন যুক্ত: এক্সপেন্স এপিআই
+app.get('/api/expenses', async (req, res) => {
+    const expenses = await Expense.find().sort({ date: -1 });
+    res.json(expenses);
+});
+
+app.post('/api/expenses', async (req, res) => {
+    const newExpense = new Expense(req.body);
+    await newExpense.save();
+    await createLog(`খরচ এন্ট্রি: ${newExpense.title} - ${newExpense.amount}৳`);
+    res.status(201).json(newExpense);
+});
+
+// ৬. নতুন যুক্ত: লগ এপিআই
+app.get('/api/logs', async (req, res) => {
+    const logs = await Log.find().sort({ date: -1 }).limit(50);
+    res.json(logs);
+});
+
+// বাকি পরিশোধ
 app.post('/api/sales/pay-due/:id', async (req, res) => {
-    try {
-        const { paidAmount } = req.body;
-        const sale = await Sale.findById(req.params.id);
-        
-        if (sale) {
-            sale.paidAmount += paidAmount;
-            sale.dueAmount -= paidAmount;
-            await sale.save();
-            res.json({ success: true, message: "Due payment updated" });
-        } else {
-            res.status(404).json({ error: "Sale record not found" });
-        }
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+    const { paidAmount } = req.body;
+    const sale = await Sale.findById(req.params.id);
+    if (sale) {
+        sale.paidAmount += paidAmount;
+        sale.dueAmount -= paidAmount;
+        await sale.save();
+        await createLog(`বাকি টাকা জমা নেওয়া হয়েছে: কাস্টমার ${sale.customerName}, পরিমাণ ${paidAmount}৳`);
+        res.json({ success: true });
+    } else {
+        res.status(404).json({ error: "Not found" });
     }
 });
 
-// ৬. চেকআউট (স্টক ও লাভ হিসাব)
+// চেকআউট (স্টক ম্যানেজমেন্ট ও প্রফিট ক্যালকুলেশন)
 app.post('/api/checkout', async (req, res) => {
     try {
         const { cart, customerName, customerMobile, paidAmount, totalAmount } = req.body;
@@ -116,7 +144,6 @@ app.post('/api/checkout', async (req, res) => {
             const p = await Product.findById(item._id);
             if (p) {
                 totalCost += (p.costPrice || 0) * item.qty;
-                // স্টক কমানো
                 await Product.findByIdAndUpdate(item._id, { $inc: { stock: -item.qty } });
             }
         }
@@ -129,34 +156,39 @@ app.post('/api/checkout', async (req, res) => {
             totalAmount, paidAmount, dueAmount, profit
         });
         await newSale.save();
+        await createLog(`নতুন বিক্রি সম্পন্ন: কাস্টমার ${customerName}, মোট ${totalAmount}৳`);
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// ৭. পণ্য ডিলিট করা
-app.delete('/api/products/:id', async (req, res) => {
-    try {
-        await Product.findByIdAndDelete(req.params.id);
-        res.json({ message: "Deleted" });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// ৮. ড্যাশবোর্ড স্ট্যাটস এপিআই (ঐচ্ছিক কিন্তু গ্রাফের জন্য কার্যকর)
+// ৭. অ্যাডভান্সড ড্যাশবোর্ড স্ট্যাটস
 app.get('/api/stats', async (req, res) => {
     try {
         const products = await Product.find();
         const sales = await Sale.find();
+        const expenses = await Expense.find();
         
         let stockValue = products.reduce((acc, p) => acc + (p.costPrice * p.stock), 0);
         let totalSales = sales.reduce((acc, s) => acc + s.totalAmount, 0);
-        let totalProfit = sales.reduce((acc, s) => acc + s.profit, 0);
+        let grossProfit = sales.reduce((acc, s) => acc + s.profit, 0);
         let totalDue = sales.reduce((acc, s) => acc + s.dueAmount, 0);
+        let totalExpense = expenses.reduce((acc, e) => acc + e.amount, 0);
+        let netProfit = grossProfit - totalExpense;
 
-        res.json({ stockValue, totalSales, totalProfit, totalDue });
+        // ক্যাটাগরি অনুযায়ী বিক্রির ডাটা (Pie Chart-এর জন্য)
+        let categoryStats = {};
+        sales.forEach(sale => {
+            sale.items.forEach(item => {
+                categoryStats[item.category] = (categoryStats[item.category] || 0) + item.qty;
+            });
+        });
+
+        res.json({ 
+            stockValue, totalSales, grossProfit, 
+            totalDue, totalExpense, netProfit, categoryStats 
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
