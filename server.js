@@ -13,7 +13,7 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ MongoDB Atlas Connected!"))
     .catch(err => console.error("❌ Connection Error:", err));
 
-// প্রোডাক্ট স্কিমা (আগের সব + বারকোড ও কেনা দাম)
+// প্রোডাক্ট স্কিমা
 const ProductSchema = new mongoose.Schema({
     name: { type: String, required: true },
     barcode: { type: String, default: "" }, 
@@ -24,7 +24,7 @@ const ProductSchema = new mongoose.Schema({
 });
 const Product = mongoose.model('Product', ProductSchema);
 
-// সেলস স্কিমা (আগের সব + বাকি ও লাভ)
+// সেলস স্কিমা
 const SaleSchema = new mongoose.Schema({
     customerName: String,
     customerMobile: String,
@@ -37,26 +37,61 @@ const SaleSchema = new mongoose.Schema({
 });
 const Sale = mongoose.model('Sale', SaleSchema);
 
-// API: সব পণ্য দেখা
+// --- API ROUTES ---
+
+// ১. সব পণ্য দেখা
 app.get('/api/products', async (req, res) => {
     const products = await Product.find().sort({ date: -1 });
     res.json(products);
 });
 
-// API: বিক্রির রিপোর্ট দেখা
+// ২. বিক্রির রিপোর্ট দেখা
 app.get('/api/sales', async (req, res) => {
     const sales = await Sale.find().sort({ date: -1 });
     res.json(sales);
 });
 
-// API: নতুন পণ্য যোগ করা
+// ৩. নতুন পণ্য যোগ করা
 app.post('/api/products', async (req, res) => {
     const newProduct = new Product(req.body);
     await newProduct.save();
     res.status(201).json(newProduct);
 });
 
-// API: অ্যাডভান্সড চেকআউট (স্টক, লাভ ও বাকি হিসাব)
+// ৪. পণ্য এডিট করা (ফ্রন্টেন্ডের editProduct ফাংশনের জন্য)
+app.put('/api/products/:id', async (req, res) => {
+    try {
+        const updatedProduct = await Product.findByIdAndUpdate(
+            req.params.id, 
+            req.body, 
+            { new: true }
+        );
+        res.json(updatedProduct);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ৫. বাকি টাকা জমা দেওয়া (ফ্রন্টেন্ডের payDue ফাংশনের জন্য)
+app.post('/api/sales/pay-due/:id', async (req, res) => {
+    try {
+        const { paidAmount } = req.body;
+        const sale = await Sale.findById(req.params.id);
+        
+        if (sale) {
+            sale.paidAmount += paidAmount;
+            sale.dueAmount -= paidAmount;
+            await sale.save();
+            res.json({ success: true, message: "Due payment updated" });
+        } else {
+            res.status(404).json({ error: "Sale record not found" });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ৬. চেকআউট (স্টক ও লাভ হিসাব)
 app.post('/api/checkout', async (req, res) => {
     try {
         const { cart, customerName, customerMobile, paidAmount, totalAmount } = req.body;
@@ -64,8 +99,10 @@ app.post('/api/checkout', async (req, res) => {
 
         for (let item of cart) {
             const p = await Product.findById(item._id);
-            totalCost += (p.costPrice || 0) * item.qty;
-            await Product.findByIdAndUpdate(item._id, { $inc: { stock: -item.qty } });
+            if (p) {
+                totalCost += (p.costPrice || 0) * item.qty;
+                await Product.findByIdAndUpdate(item._id, { $inc: { stock: -item.qty } });
+            }
         }
 
         const profit = totalAmount - totalCost;
