@@ -5,12 +5,14 @@
     <title>POS - সেলস সিস্টেম</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* প্রিন্ট করার সময় শুধুমাত্র রিসিট দেখানোর জন্য স্টাইল */
         @media print { 
-            .no-print { display: none; } 
-            #inv { display: block !important; width: 100%; font-family: 'Arial', sans-serif; } 
-            body { background: white; }
+            .no-print { display: none !important; } 
+            #inv { display: block !important; width: 100%; font-family: 'Arial', sans-serif; font-size: 14px; } 
+            body { background: white; margin: 0; }
+            @page { margin: 0; }
         }
-        #inv { display: none; padding: 30px; border: 1px solid #eee; width: 400px; margin: auto; }
+        #inv { display: none; padding: 20px; width: 350px; margin: auto; border: 1px solid #eee; }
         .cart-item { border-bottom: 1px solid #eee; padding: 5px 0; }
         .qty-input { width: 60px; display: inline-block; }
     </style>
@@ -39,49 +41,69 @@
 
 <div id="inv">
     <div class="text-center">
-        <h3>🚀 SuperShop ERP Pro</h3>
-        <p>ক্যাশ মেমো</p>
+        <h3 style="margin-bottom: 5px;">🚀 SuperShop ERP Pro</h3>
+        <p style="font-size: 18px; font-weight: bold;">ক্যাশ মেমো</p>
     </div>
     <hr>
-    <p><strong>কাস্টমার:</strong> <span id="invCName"></span><br><strong>মোবাইল:</strong> <span id="invCMobile"></span></p>
-    <table class="table table-sm">
+    <div style="margin-bottom: 10px;">
+        <strong>কাস্টমার:</strong> <span id="invCName"></span><br>
+        <strong>মোবাইল:</strong> <span id="invCMobile"></span>
+    </div>
+    <table class="table table-sm" style="width: 100%;">
         <thead>
-            <tr>
-                <th>পণ্য</th>
-                <th>পরিমাণ</th>
-                <th class="text-end">মূল্য</th>
+            <tr style="border-bottom: 1px solid #000;">
+                <th style="text-align: left;">পণ্য</th>
+                <th style="text-align: center;">পরিমাণ</th>
+                <th style="text-align: right;">মূল্য</th>
             </tr>
         </thead>
         <tbody id="invItems"></tbody>
     </table>
-    <hr>
-    <div class="text-end">
-        <h5 id="invTotalText"></h5>
-        <p>পেইড: <span id="invPaid"></span><br>বাকি: <span id="invDue"></span></p>
+    <hr style="border-top: 1px dashed #000;">
+    <div style="text-align: right;">
+        <h5 id="invTotalText" style="margin-bottom: 5px;"></h5>
+        <p style="margin: 0;">পেইড: <span id="invPaid"></span></p>
+        <p style="margin: 0; font-weight: bold;">বাকি: <span id="invDue"></span></p>
     </div>
-    <p class="text-center mt-4"><small>ধন্যবাদ, আবার আসবেন!</small></p>
+    <hr>
+    <p class="text-center" style="margin-top: 10px;"><small>ধন্যবাদ, আবার আসবেন!</small></p>
 </div>
 
 <script>
     let products = [], cart = [];
+    
     async function init() {
         const res = await fetch('/api/products');
         products = await res.json();
         render();
     }
+
     function render() {
         const s = document.getElementById('search').value.toLowerCase();
         const bMatch = products.find(p => p.barcode === s);
-        if(bMatch && s !== "") { add(bMatch._id); document.getElementById('search').value = ''; return; }
+        if(bMatch && s !== "") { 
+            add(bMatch._id); 
+            document.getElementById('search').value = ''; 
+            return; 
+        }
 
-        const list = document.getElementById('pList'); list.innerHTML = '';
+        const list = document.getElementById('pList'); 
+        list.innerHTML = '';
         products.filter(p => p.name.toLowerCase().includes(s)).forEach(p => {
-            list.innerHTML += `<div class="col-4 mb-2"><div class="card p-2 text-center" onclick="add('${p._id}')" style="cursor:pointer"><h6>${p.name}</h6><small>${p.price}৳ (Stock: ${p.stock})</small></div></div>`;
+            list.innerHTML += `
+                <div class="col-4 mb-2">
+                    <div class="card p-2 text-center" onclick="add('${p._id}')" style="cursor:pointer; height: 100%;">
+                        <h6 class="mb-1">${p.name}</h6>
+                        <small class="text-primary">${p.price}৳</small><br>
+                        <small class="text-muted">Stock: ${p.stock}</small>
+                    </div>
+                </div>`;
         });
     }
+
     function add(id) {
         const p = products.find(i => i._id === id);
-        if(p.stock <= 0) return alert("স্টক নেই!");
+        if(!p || p.stock <= 0) return alert("স্টক নেই!");
         const exists = cart.find(i => i._id === id);
         exists ? exists.qty++ : cart.push({...p, qty: 1});
         updateCart();
@@ -103,7 +125,8 @@
     }
 
     function updateCart() {
-        let t = 0; document.getElementById('cart').innerHTML = '';
+        let t = 0; 
+        document.getElementById('cart').innerHTML = '';
         cart.forEach(i => { 
             t += i.price * i.qty; 
             document.getElementById('cart').innerHTML += `
@@ -111,7 +134,7 @@
                     <span>${i.name}</span>
                     <div class="d-flex align-items-center">
                         <input type="number" class="form-control form-control-sm qty-input me-2" value="${i.qty}" onchange="updateQty('${i._id}', this.value)">
-                        <span>${i.price*i.qty}৳</span>
+                        <span class="fw-bold">${i.price * i.qty}৳</span>
                     </div>
                 </div>`; 
         });
@@ -119,33 +142,51 @@
     }
 
     async function pay() {
-        const total = Number(document.getElementById('total').innerText);
-        const paid = Number(document.getElementById('paid').value);
-        const customer = { customerName: document.getElementById('cName').value || "নগদ", customerMobile: document.getElementById('cMobile').value || "N/A" };
-        if(!cart.length) return;
+        const totalAmount = Number(document.getElementById('total').innerText);
+        const paidAmount = Number(document.getElementById('paid').value);
+        const customerName = document.getElementById('cName').value || "নগদ";
+        const customerMobile = document.getElementById('cMobile').value || "N/A";
+
+        if(cart.length === 0) return alert("কার্ট খালি!");
         
-        await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({cart, ...customer, totalAmount: total, paidAmount: paid}) });
+        // ১. সার্ভারে ডাটা পাঠানো
+        await fetch('/api/checkout', { 
+            method:'POST', 
+            headers:{'Content-Type':'application/json'}, 
+            body:JSON.stringify({cart, customerName, customerMobile, totalAmount, paidAmount}) 
+        });
         
-        // রিসিটে ডাটা ফিল করা শুরু
-        document.getElementById('invCName').innerText = customer.customerName;
-        document.getElementById('invCMobile').innerText = customer.customerMobile;
+        // ২. রিসিটে ডাটাগুলো নিখুঁতভাবে বসানো
+        document.getElementById('invCName').innerText = customerName;
+        document.getElementById('invCMobile').innerText = customerMobile;
         
         let invRows = '';
         cart.forEach(i => {
-            invRows += `<tr><td>${i.name}</td><td>${i.qty}</td><td class="text-end">${i.price * i.qty}৳</td></tr>`;
+            invRows += `
+                <tr>
+                    <td style="padding: 5px 0;">${i.name}</td>
+                    <td style="text-align: center;">${i.qty}</td>
+                    <td style="text-align: right;">${i.price * i.qty}৳</td>
+                </tr>`;
         });
         document.getElementById('invItems').innerHTML = invRows;
         
-        document.getElementById('invTotalText').innerText = "Total: " + total + " ৳";
-        document.getElementById('invPaid').innerText = paid + " ৳";
-        document.getElementById('invDue').innerText = (total - paid) + " ৳";
+        document.getElementById('invTotalText').innerText = "Total: " + totalAmount + " ৳";
+        document.getElementById('invPaid').innerText = paidAmount + " ৳";
+        document.getElementById('invDue').innerText = (totalAmount - paidAmount) + " ৳";
         
-        // ব্রাউজারকে ডাটা রেন্ডার করার জন্য ৫০০ মিলিসেকেন্ড সময় দেওয়া হলো
+        // ৩. প্রিন্ট করার জন্য পেজ রেডি করা
+        // প্রিন্ট কমান্ড দেওয়ার আগে ডাটা রেন্ডার হওয়ার জন্য সামান্য সময় দেওয়া হলো
         setTimeout(() => {
-            window.print(); 
+            window.print();
+        }, 100);
+
+        // ৪. প্রিন্ট উইন্ডো বন্ধ (Print বা Cancel) করার পর পেজ রিলোড হবে
+        window.onafterprint = function() {
             location.reload();
-        }, 500);
+        };
     }
+
     window.onload = init;
 </script>
 </body>
