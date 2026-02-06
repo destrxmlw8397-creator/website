@@ -13,6 +13,7 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ MongoDB Atlas Connected!"))
     .catch(err => console.error("❌ Connection Error:", err));
 
+// প্রোডাক্ট স্কিমা
 const ProductSchema = new mongoose.Schema({
     name: { type: String, required: true },
     price: { type: Number, required: true },
@@ -21,10 +22,26 @@ const ProductSchema = new mongoose.Schema({
 });
 const Product = mongoose.model('Product', ProductSchema);
 
+// সেলস স্কিমা
+const SaleSchema = new mongoose.Schema({
+    customerName: String,
+    customerMobile: String,
+    items: Array,
+    totalAmount: Number,
+    date: { type: Date, default: Date.now }
+});
+const Sale = mongoose.model('Sale', SaleSchema);
+
 // API: সব পণ্য দেখা
 app.get('/api/products', async (req, res) => {
     const products = await Product.find().sort({ date: -1 });
     res.json(products);
+});
+
+// API: বিক্রির রিপোর্ট দেখা (নতুন)
+app.get('/api/sales', async (req, res) => {
+    const sales = await Sale.find().sort({ date: -1 });
+    res.json(sales);
 });
 
 // API: নতুন পণ্য যোগ করা
@@ -34,16 +51,18 @@ app.post('/api/products', async (req, res) => {
     res.status(201).json(newProduct);
 });
 
-// API: স্টক আপডেট (বিক্রয়ের সময়)
+// API: স্টক আপডেট ও সেলস সেভ
 app.post('/api/checkout', async (req, res) => {
     try {
-        const { cart } = req.body;
+        const { cart, customerName, customerMobile, totalAmount } = req.body;
         for (let item of cart) {
             await Product.findByIdAndUpdate(item._id, {
-                $inc: { stock: -item.qty } // স্টক বিয়োগ করা
+                $inc: { stock: -item.qty }
             });
         }
-        res.json({ success: true, message: "Stock updated!" });
+        const newSale = new Sale({ customerName, customerMobile, items: cart, totalAmount });
+        await newSale.save();
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
