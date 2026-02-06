@@ -89,13 +89,16 @@
         document.getElementById('pBody').innerHTML = '';
         products.forEach(p => {
             val += (p.costPrice * p.stock);
-            // এখানে এডিট বাটন যুক্ত করা হয়েছে যা editProduct ফাংশনকে কল করবে
+            // এখানে এডিট বাটনের পাশে ডিলিট বাটন যুক্ত করা হয়েছে
             document.getElementById('pBody').innerHTML += `<tr>
                 <td>${p.barcode || 'N/A'}</td>
                 <td>${p.name}</td>
                 <td>${p.costPrice}/${p.price}</td>
                 <td><span class="badge ${p.stock < 5 ? 'bg-danger':'bg-success'}">${p.stock}</span></td>
-                <td><button class="btn btn-sm btn-outline-primary" onclick="editProduct('${p._id}', '${p.name}', ${p.costPrice}, ${p.price}, ${p.stock})">✏️ এডিট</button></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="editProduct('${p._id}', '${p.name}', ${p.costPrice}, ${p.price}, ${p.stock})">✏️ এডিট</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('${p._id}', '${p.name}')">🗑️ ডিলিট</button>
+                </td>
             </tr>`;
         });
 
@@ -161,6 +164,16 @@
         }
     }
 
+    // প্রোডাক্ট ডিলিট ফাংশন
+    async function deleteProduct(id, name) {
+        if (confirm(`আপনি কি নিশ্চিতভাবে "${name}" পণ্যটি ডিলিট করতে চান?`)) {
+            await fetch(`/api/products/${id}`, { 
+                method: 'DELETE' 
+            });
+            location.reload();
+        }
+    }
+
     function filterProducts() {
         let input = document.getElementById('pSearch').value.toUpperCase();
         let tr = document.getElementById('pTable').getElementsByTagName('tr');
@@ -202,5 +215,7 @@
     }
     window.onload = load;
 </script>
+</body>
+</html>
 </body>
 </html>
