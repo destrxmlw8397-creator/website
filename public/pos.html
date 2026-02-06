@@ -13,14 +13,14 @@
 <div class="container py-4 no-print">
     <div class="row">
         <div class="col-md-7">
-            <div class="card p-3 mb-3">
-                <input type="text" id="search" class="form-control" placeholder="পণ্য খুঁজুন..." onkeyup="render()">
-            </div>
+            <input type="text" id="search" class="form-control mb-3" placeholder="পণ্য খুঁজুন..." onkeyup="render()">
             <div class="row" id="pList"></div>
         </div>
         <div class="col-md-5">
-            <div class="card p-4">
+            <div class="card p-4 shadow">
                 <h4>কার্ট</h4>
+                <input type="text" id="cName" class="form-control mb-2" placeholder="কাস্টমারের নাম">
+                <input type="text" id="cMobile" class="form-control mb-3" placeholder="মোবাইল নম্বর">
                 <div id="cart" class="my-3"></div>
                 <hr>
                 <h5>মোট: <span id="total">0</span> ৳</h5>
@@ -32,6 +32,7 @@
 
 <div id="inv">
     <h2 class="text-center">ক্যাশ মেমো</h2>
+    <p>কাস্টমার: <span id="invCName"></span> | মোবাইল: <span id="invCMobile"></span></p>
     <div id="invItems"></div>
     <hr>
     <h3 class="text-end" id="invTotal"></h3>
@@ -54,26 +55,33 @@
     }
     function add(id) {
         const p = products.find(i => i._id === id);
+        if(p.stock <= 0) return alert("স্টক নেই!");
         const exists = cart.find(i => i._id === id);
-        if(p.stock <= 0) return alert("স্টক আউট!");
         exists ? exists.qty++ : cart.push({...p, qty: 1});
         updateCart();
     }
     function updateCart() {
         const div = document.getElementById('cart');
         let t = 0; div.innerHTML = '';
-        cart.forEach((i, idx) => {
+        cart.forEach(i => {
             t += i.price * i.qty;
             div.innerHTML += `<div class="d-flex justify-content-between"><span>${i.name} x ${i.qty}</span><span>${i.price*i.qty}৳</span></div>`;
         });
         document.getElementById('total').innerText = t;
     }
     async function pay() {
+        const total = document.getElementById('total').innerText;
+        const customer = { 
+            customerName: document.getElementById('cName').value || "নগদ কাস্টমার", 
+            customerMobile: document.getElementById('cMobile').value || "N/A" 
+        };
         if(!cart.length) return;
-        await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({cart}) });
+        await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({cart, ...customer, totalAmount: Number(total)}) });
         
+        document.getElementById('invCName').innerText = customer.customerName;
+        document.getElementById('invCMobile').innerText = customer.customerMobile;
         document.getElementById('invItems').innerHTML = document.getElementById('cart').innerHTML;
-        document.getElementById('invTotal').innerText = "Total: " + document.getElementById('total').innerText + " ৳";
+        document.getElementById('invTotal').innerText = "Total: " + total + " ৳";
         window.print();
         location.reload();
     }
