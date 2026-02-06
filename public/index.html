@@ -22,9 +22,10 @@
 
 <div class="container mt-4">
     <div class="row g-3 mb-4 text-center">
-        <div class="col-md-4"><div class="card p-3"><h6>মোট আইটেম</h6><h3 id="tItems">0</h3></div></div>
-        <div class="col-md-4"><div class="card p-3 border-start border-primary border-5"><h6>মোট স্টক মূল্য</h6><h3 id="tValue">0 ৳</h3></div></div>
-        <div class="col-md-4"><div class="card p-3 text-danger"><h6>লো স্টক অ্যালার্ট</h6><h3 id="lStock">0</h3></div></div>
+        <div class="col-md-3"><div class="card p-3"><h6>মোট আইটেম</h6><h3 id="tItems">0</h3></div></div>
+        <div class="col-md-3"><div class="card p-3"><h6>স্টক ভ্যালু</h6><h3 id="tValue">0 ৳</h3></div></div>
+        <div class="col-md-3"><div class="card p-3 border-start border-success border-5"><h6>মোট বিক্রি</h6><h3 id="tSales" class="text-success">0 ৳</h3></div></div>
+        <div class="col-md-3"><div class="card p-3 text-danger"><h6>লো স্টক</h6><h3 id="lStock">0</h3></div></div>
     </div>
 
     <div class="row">
@@ -38,11 +39,19 @@
             </div>
         </div>
         <div class="col-lg-8">
-            <div class="card p-4">
+            <div class="card p-4 mb-4">
                 <h5>ইনভেন্টরি লিস্ট</h5>
-                <table class="table mt-3">
+                <table class="table mt-2">
                     <thead><tr><th>নাম</th><th>দাম</th><th>স্টক</th><th>অ্যাকশন</th></tr></thead>
                     <tbody id="pBody"></tbody>
+                </table>
+            </div>
+            
+            <div class="card p-4">
+                <h5>সাম্প্রতিক বিক্রয় রিপোর্ট</h5>
+                <table class="table mt-2">
+                    <thead><tr><th>তারিখ</th><th>কাস্টমার</th><th>টাকা</th></tr></thead>
+                    <tbody id="sBody"></tbody>
                 </table>
             </div>
         </div>
@@ -50,28 +59,40 @@
 </div>
 
 <script>
-    const API = '/api/products';
     async function load() {
-        const res = await fetch(API);
-        const data = await res.json();
-        const body = document.getElementById('pBody');
-        body.innerHTML = '';
+        // পণ্য লোড
+        const pRes = await fetch('/api/products');
+        const products = await pRes.json();
         let val = 0, low = 0;
-        data.forEach(p => {
+        document.getElementById('pBody').innerHTML = '';
+        products.forEach(p => {
             val += (p.price * p.stock);
             if(p.stock < 5) low++;
-            body.innerHTML += `<tr><td>${p.name}</td><td>${p.price}৳</td><td><span class="badge ${p.stock < 5 ? 'bg-danger':'bg-success'}">${p.stock}</span></td><td><button onclick="del('${p._id}')" class="btn btn-sm btn-outline-danger">Del</button></td></tr>`;
+            document.getElementById('pBody').innerHTML += `<tr><td>${p.name}</td><td>${p.price}৳</td><td><span class="badge ${p.stock < 5 ? 'bg-danger':'bg-success'}">${p.stock}</span></td><td><button onclick="del('${p._id}')" class="btn btn-sm btn-outline-danger">Del</button></td></tr>`;
         });
-        document.getElementById('tItems').innerText = data.length;
+
+        // সেলস রিপোর্ট লোড
+        const sRes = await fetch('/api/sales');
+        const sales = await sRes.json();
+        let totalS = 0;
+        document.getElementById('sBody').innerHTML = '';
+        sales.forEach(s => {
+            totalS += s.totalAmount;
+            document.getElementById('sBody').innerHTML += `<tr><td>${new Date(s.date).toLocaleDateString()}</td><td>${s.customerName}</td><td class="fw-bold">${s.totalAmount}৳</td></tr>`;
+        });
+
+        document.getElementById('tItems').innerText = products.length;
         document.getElementById('tValue').innerText = val + ' ৳';
+        document.getElementById('tSales').innerText = totalS + ' ৳';
         document.getElementById('lStock').innerText = low;
     }
+
     async function save() {
         const payload = { name: document.getElementById('name').value, price: document.getElementById('price').value, stock: document.getElementById('stock').value };
-        await fetch(API, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+        await fetch('/api/products', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
         location.reload();
     }
-    async function del(id) { if(confirm('Are you sure?')) { await fetch(`${API}/${id}`, {method:'DELETE'}); load(); } }
+    async function del(id) { if(confirm('মুছে ফেলবেন?')) { await fetch(`/api/products/${id}`, {method:'DELETE'}); load(); } }
     window.onload = load;
 </script>
 </body>
