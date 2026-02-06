@@ -13,7 +13,7 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log("✅ MongoDB Atlas Connected!"))
     .catch(err => console.error("❌ Connection Error:", err));
 
-// প্রোডাক্ট স্কিমা
+// প্রোডাক্ট স্কিমা (strict: false যুক্ত করা হয়েছে যাতে category ও supplier সেভ হয়)
 const ProductSchema = new mongoose.Schema({
     name: { type: String, required: true },
     barcode: { type: String, default: "" }, 
@@ -21,7 +21,8 @@ const ProductSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     stock: { type: Number, required: true },
     date: { type: Date, default: Date.now }
-});
+}, { strict: false }); 
+
 const Product = mongoose.model('Product', ProductSchema);
 
 // সেলস স্কিমা
