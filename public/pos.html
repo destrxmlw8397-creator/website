@@ -5,8 +5,14 @@
     <title>POS - সেলস সিস্টেম</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        @media print { .no-print { display: none; } #inv { display: block !important; } }
-        #inv { display: none; padding: 20px; border: 1px solid #000; }
+        @media print { 
+            .no-print { display: none; } 
+            #inv { display: block !important; width: 100%; font-family: 'Arial', sans-serif; } 
+            body { background: white; }
+        }
+        #inv { display: none; padding: 30px; border: 1px solid #eee; width: 400px; margin: auto; }
+        .cart-item { border-bottom: 1px solid #eee; padding: 5px 0; }
+        .qty-input { width: 60px; display: inline-block; }
     </style>
 </head>
 <body class="bg-light">
@@ -32,12 +38,28 @@
 </div>
 
 <div id="inv">
-    <h2 class="text-center">ক্যাশ মেমো</h2>
-    <p>কাস্টমার: <span id="invCName"></span> | মোবাইল: <span id="invCMobile"></span></p>
-    <div id="invItems"></div>
+    <div class="text-center">
+        <h3>🚀 SuperShop ERP Pro</h3>
+        <p>ক্যাশ মেমো</p>
+    </div>
     <hr>
-    <h3 class="text-end" id="invTotal"></h3>
-    <p class="text-end">পেইড: <span id="invPaid"></span> | বাকি: <span id="invDue"></span></p>
+    <p>কাস্টমার: <span id="invCName"></span><br>মোবাইল: <span id="invCMobile"></span></p>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>পণ্য</th>
+                <th>পরিমাণ</th>
+                <th class="text-end">মূল্য</th>
+            </tr>
+        </thead>
+        <tbody id="invItems"></tbody>
+    </table>
+    <hr>
+    <div class="text-end">
+        <h5 id="invTotal"></h5>
+        <p>পেইড: <span id="invPaid"></span><br>বাকি: <span id="invDue"></span></p>
+    </div>
+    <p class="text-center mt-4"><small>ধন্যবাদ, আবার আসবেন!</small></p>
 </div>
 
 <script>
@@ -49,7 +71,6 @@
     }
     function render() {
         const s = document.getElementById('search').value.toLowerCase();
-        // বারকোড অটো-অ্যাড লজিক
         const bMatch = products.find(p => p.barcode === s);
         if(bMatch) { add(bMatch._id); document.getElementById('search').value = ''; return; }
 
@@ -65,11 +86,39 @@
         exists ? exists.qty++ : cart.push({...p, qty: 1});
         updateCart();
     }
+
+    // পরিমাণ পরিবর্তন করার ফাংশন
+    function updateQty(id, newQty) {
+        const item = cart.find(i => i._id === id);
+        if(item) {
+            if(newQty > item.stock) {
+                alert("স্টকের বেশি সম্ভব নয়!");
+                item.qty = item.stock;
+            } else if(newQty <= 0) {
+                cart = cart.filter(i => i._id !== id);
+            } else {
+                item.qty = Number(newQty);
+            }
+            updateCart();
+        }
+    }
+
     function updateCart() {
         let t = 0; document.getElementById('cart').innerHTML = '';
-        cart.forEach(i => { t += i.price * i.qty; document.getElementById('cart').innerHTML += `<div class="d-flex justify-content-between"><span>${i.name} x ${i.qty}</span><span>${i.price*i.qty}৳</span></div>`; });
+        cart.forEach(i => { 
+            t += i.price * i.qty; 
+            document.getElementById('cart').innerHTML += `
+                <div class="d-flex justify-content-between align-items-center mb-2 cart-item">
+                    <span>${i.name}</span>
+                    <div class="d-flex align-items-center">
+                        <input type="number" class="form-control form-control-sm qty-input me-2" value="${i.qty}" onchange="updateQty('${i._id}', this.value)">
+                        <span>${i.price*i.qty}৳</span>
+                    </div>
+                </div>`; 
+        });
         document.getElementById('total').innerText = t;
     }
+
     async function pay() {
         const total = Number(document.getElementById('total').innerText);
         const paid = Number(document.getElementById('paid').value);
@@ -77,13 +126,22 @@
         if(!cart.length) return;
         await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({cart, ...customer, totalAmount: total, paidAmount: paid}) });
         
+        // ইনভয়েস ডেটা সেট করা (টেবিল ফরম্যাটে)
         document.getElementById('invCName').innerText = customer.customerName;
         document.getElementById('invCMobile').innerText = customer.customerMobile;
-        document.getElementById('invItems').innerHTML = document.getElementById('cart').innerHTML;
+        
+        let invRows = '';
+        cart.forEach(i => {
+            invRows += `<tr><td>${i.name}</td><td>${i.qty}</td><td class="text-end">${i.price * i.qty}৳</td></tr>`;
+        });
+        document.getElementById('invItems').innerHTML = invRows;
+        
         document.getElementById('invTotal').innerText = "Total: " + total + " ৳";
         document.getElementById('invPaid').innerText = paid + " ৳";
         document.getElementById('invDue').innerText = (total - paid) + " ৳";
-        window.print(); location.reload();
+        
+        window.print(); 
+        location.reload();
     }
     window.onload = init;
 </script>
