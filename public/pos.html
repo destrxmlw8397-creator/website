@@ -19,18 +19,18 @@
 <div class="container py-4 no-print">
     <div class="row">
         <div class="col-md-7">
-            <input type="text" id="search" class="form-control mb-3 p-3 border-primary" placeholder="বারকোড স্ক্যান করুন বা নাম লিখুন..." onkeyup="render()" autofocus>
+            <input type="text" id="search" class="form-control mb-3 p-3 border-primary" placeholder="বারকোড স্ক্যান করুন বা নাম লিখুন..." onkeyup="render()" autofocus autocomplete="off">
             <div class="row" id="pList"></div>
         </div>
         <div class="col-md-5">
             <div class="card p-4 shadow">
                 <h4>কার্ট</h4>
-                <input type="text" id="cName" class="form-control mb-2" placeholder="কাস্টমারের নাম">
-                <input type="text" id="cMobile" class="form-control mb-3" placeholder="মোবাইল নম্বর">
+                <input type="text" id="cName" class="form-control mb-2" placeholder="কাস্টমারের নাম" autocomplete="off">
+                <input type="text" id="cMobile" class="form-control mb-3" placeholder="মোবাইল নম্বর" autocomplete="off">
                 <div id="cart" class="my-3"></div>
                 <hr>
                 <h5>মোট: <span id="total">0</span> ৳</h5>
-                <input type="number" id="paid" class="form-control mb-2" placeholder="পেমেন্ট (টাকা)">
+                <input type="number" id="paid" class="form-control mb-2" placeholder="পেমেন্ট (টাকা)" autocomplete="off">
                 <button class="btn btn-success w-100 mt-2 fw-bold" onclick="pay()">পেমেন্ট ও প্রিন্ট</button>
             </div>
         </div>
@@ -43,7 +43,7 @@
         <p>ক্যাশ মেমো</p>
     </div>
     <hr>
-    <p>কাস্টমার: <span id="invCName"></span><br>মোবাইল: <span id="invCMobile"></span></p>
+    <p><strong>কাস্টমার:</strong> <span id="invCName"></span><br><strong>মোবাইল:</strong> <span id="invCMobile"></span></p>
     <table class="table table-sm">
         <thead>
             <tr>
@@ -56,7 +56,7 @@
     </table>
     <hr>
     <div class="text-end">
-        <h5 id="invTotal"></h5>
+        <h5 id="invTotalText"></h5>
         <p>পেইড: <span id="invPaid"></span><br>বাকি: <span id="invDue"></span></p>
     </div>
     <p class="text-center mt-4"><small>ধন্যবাদ, আবার আসবেন!</small></p>
@@ -72,7 +72,7 @@
     function render() {
         const s = document.getElementById('search').value.toLowerCase();
         const bMatch = products.find(p => p.barcode === s);
-        if(bMatch) { add(bMatch._id); document.getElementById('search').value = ''; return; }
+        if(bMatch && s !== "") { add(bMatch._id); document.getElementById('search').value = ''; return; }
 
         const list = document.getElementById('pList'); list.innerHTML = '';
         products.filter(p => p.name.toLowerCase().includes(s)).forEach(p => {
@@ -87,7 +87,6 @@
         updateCart();
     }
 
-    // পরিমাণ পরিবর্তন করার ফাংশন
     function updateQty(id, newQty) {
         const item = cart.find(i => i._id === id);
         if(item) {
@@ -124,9 +123,10 @@
         const paid = Number(document.getElementById('paid').value);
         const customer = { customerName: document.getElementById('cName').value || "নগদ", customerMobile: document.getElementById('cMobile').value || "N/A" };
         if(!cart.length) return;
+        
         await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({cart, ...customer, totalAmount: total, paidAmount: paid}) });
         
-        // ইনভয়েস ডেটা সেট করা (টেবিল ফরম্যাটে)
+        // রিসিটে ডাটা ফিল করা শুরু
         document.getElementById('invCName').innerText = customer.customerName;
         document.getElementById('invCMobile').innerText = customer.customerMobile;
         
@@ -136,12 +136,15 @@
         });
         document.getElementById('invItems').innerHTML = invRows;
         
-        document.getElementById('invTotal').innerText = "Total: " + total + " ৳";
+        document.getElementById('invTotalText').innerText = "Total: " + total + " ৳";
         document.getElementById('invPaid').innerText = paid + " ৳";
         document.getElementById('invDue').innerText = (total - paid) + " ৳";
         
-        window.print(); 
-        location.reload();
+        // ব্রাউজারকে ডাটা রেন্ডার করার জন্য ৫০০ মিলিসেকেন্ড সময় দেওয়া হলো
+        setTimeout(() => {
+            window.print(); 
+            location.reload();
+        }, 500);
     }
     window.onload = init;
 </script>
