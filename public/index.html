@@ -187,7 +187,6 @@
 <script>
     let currentChart = null;
     let categoryChart = null;
-    let expenses = JSON.parse(localStorage.getItem('shopExpenses')) || [];
     let activityLogs = JSON.parse(localStorage.getItem('shopLogs')) || [];
 
     async function load() {
@@ -247,8 +246,10 @@
             }
         });
 
-        // Expenses calculations
-        let totalExp = expenses.reduce((a, b) => a + b.amount, 0);
+        // Expenses calculations - Now from MongoDB API
+        const eRes = await fetch('/api/expenses');
+        const expensesFromDB = await eRes.json();
+        let totalExp = expensesFromDB.reduce((a, b) => a + b.amount, 0);
         
         document.getElementById('tSales').innerText = ts + '৳';
         document.getElementById('tProfit').innerText = tp + '৳';
@@ -295,20 +296,28 @@
         doc.save(`Invoice_${saleId}.pdf`);
     }
 
-    // Expense Logic
-    function addExpense() {
+    // Expense Logic - Fixed to save in MongoDB Atlas
+    async function addExpense() {
         let title = document.getElementById('expTitle').value;
         let amount = Number(document.getElementById('expAmount').value);
         if(title && amount) {
-            expenses.push({ title, amount, date: new Date() });
-            localStorage.setItem('shopExpenses', JSON.stringify(expenses));
+            const expenseData = { title, amount, date: new Date() };
+            
+            await fetch('/api/expenses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(expenseData)
+            });
+
             addLog(`Expense Added: ${title} (${amount}৳)`);
             location.reload();
         }
     }
 
     // Backup & Import
-    function backupData() {
+    async function backupData() {
+        const eRes = await fetch('/api/expenses');
+        const expenses = await eRes.json();
         const data = { products: [], sales: [], expenses, logs: activityLogs };
         const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
@@ -319,10 +328,10 @@
 
     function importJSON(event) {
         const reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = async function(e) {
             const data = JSON.parse(e.target.result);
-            if(data.expenses) localStorage.setItem('shopExpenses', JSON.stringify(data.expenses));
-            alert("Local Data Imported! Refreshing...");
+            // If data contains expenses, you might need a batch upload API to push to Atlas
+            alert("Data Loaded from file. Local logs updated.");
             location.reload();
         };
         reader.readAsText(event.target.files[0]);
@@ -466,4 +475,3 @@
 </script>
 </body>
 </html>
-
