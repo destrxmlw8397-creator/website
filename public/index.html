@@ -2,51 +2,54 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>ড্যাশবোর্ড | সুপারশপ</title>
+    <title>অ্যাডভান্সড ড্যাশবোর্ড | সুপারশপ</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Hind Siliguri', sans-serif; background: #f4f7f6; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        body { font-family: 'Hind Siliguri', sans-serif; background: #f0f2f5; }
+        .stat-card { border-radius: 15px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-dark bg-primary p-3 text-white">
+<nav class="navbar navbar-dark bg-primary p-3">
     <div class="container d-flex justify-content-between">
-        <span class="navbar-brand fw-bold">🏪 My SuperShop Pro</span>
+        <span class="navbar-brand fw-bold">🚀 SuperShop ERP Pro</span>
         <div>
-            <button onclick="exportExcel()" class="btn btn-light btn-sm fw-bold me-2">📊 এক্সেল রিপোর্ট</button>
-            <a href="pos.html" class="btn btn-warning fw-bold btn-sm">🛒 POS কাউন্টার</a>
+            <button onclick="exportExcel()" class="btn btn-light btn-sm me-2">📊 এক্সেল রিপোর্ট</button>
+            <a href="pos.html" class="btn btn-warning btn-sm fw-bold">🛒 POS কাউন্টার</a>
         </div>
     </div>
 </nav>
 
 <div class="container mt-4">
     <div class="row g-3 mb-4 text-center">
-        <div class="col-md-3"><div class="card p-3"><h6>মোট বিক্রি</h6><h3 id="tSales">0 ৳</h3></div></div>
-        <div class="col-md-3"><div class="card p-3 text-success"><h6>মোট লাভ</h6><h3 id="tProfit">0 ৳</h3></div></div>
-        <div class="col-md-3"><div class="card p-3 text-danger"><h6>মোট বাকি</h6><h3 id="tDue">0 ৳</h3></div></div>
-        <div class="col-md-3"><div class="card p-3 text-primary"><h6>স্টক মূল্য</h6><h3 id="tVal">0 ৳</h3></div></div>
+        <div class="col-md-3"><div class="card stat-card p-3"><h6>মোট বিক্রি</h6><h3 id="tSales">0</h3></div></div>
+        <div class="col-md-3"><div class="card stat-card p-3 text-success"><h6>মোট লাভ</h6><h3 id="tProfit">0</h3></div></div>
+        <div class="col-md-3" data-bs-toggle="modal" data-bs-target="#dueModal"><div class="card stat-card p-3 text-danger"><h6>মোট বাকি</h6><h3 id="tDue">0</h3></div></div>
+        <div class="col-md-3"><div class="card stat-card p-3 text-primary"><h6>স্টক মূল্য</h6><h3 id="tVal">0</h3></div></div>
     </div>
 
     <div class="row">
-        <div class="col-lg-4">
-            <div class="card p-4 mb-4">
+        <div class="col-md-4">
+            <div class="card p-4 shadow-sm mb-4">
                 <h5>পণ্য যোগ করুন</h5>
-                <input type="text" id="barcode" class="form-control mb-2" placeholder="বারকোড">
-                <input type="text" id="name" class="form-control mb-2" placeholder="নাম">
+                <input type="text" id="barcode" class="form-control mb-2" placeholder="বারকোড (ঐচ্ছিক)">
+                <input type="text" id="name" class="form-control mb-2" placeholder="পণ্যের নাম">
                 <input type="number" id="cost" class="form-control mb-2" placeholder="কেনা দাম">
                 <input type="number" id="price" class="form-control mb-2" placeholder="বিক্রয় মূল্য">
-                <input type="number" id="stock" class="form-control mb-3" placeholder="পরিমাণ">
-                <button onclick="save()" class="btn btn-primary w-100 fw-bold">ইনভেন্টরি সেভ</button>
+                <input type="number" id="stock" class="form-control mb-3" placeholder="স্টক পরিমাণ">
+                <button onclick="save()" class="btn btn-primary w-100">ইনভেন্টরি আপডেট</button>
             </div>
         </div>
-        <div class="col-lg-8">
-            <div class="card p-4 mb-4">
-                <h5>ইনভেন্টরি লিস্ট</h5>
-                <table class="table mt-2" id="pTable">
-                    <thead><tr><th>বারকোড</th><th>নাম</th><th>কেনা/বেচা</th><th>স্টক</th></tr></thead>
+        <div class="col-md-8">
+            <div class="card p-4 shadow-sm mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>ইনভেন্টরি লিস্ট</h5>
+                    <input type="text" id="pSearch" class="form-control w-50" placeholder="পণ্য সার্চ করুন..." onkeyup="filterProducts()">
+                </div>
+                <table class="table" id="pTable">
+                    <thead><tr><th>বারকোড</th><th>নাম</th><th>কেনা/বেচা</th><th>স্টক</th><th>অ্যাকশন</th></tr></thead>
                     <tbody id="pBody"></tbody>
                 </table>
             </div>
@@ -54,32 +57,138 @@
     </div>
 </div>
 
+<div class="modal fade" id="dueModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">বাকি তালিকা ও টাকা জমা</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>কাস্টমার নাম</th>
+                    <th>বাকি টাকা</th>
+                    <th>অ্যাকশন</th>
+                </tr>
+            </thead>
+            <tbody id="dueBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     async function load() {
         const pRes = await fetch('/api/products');
         const products = await pRes.json();
-        let val = 0; document.getElementById('pBody').innerHTML = '';
+        let val = 0;
+        document.getElementById('pBody').innerHTML = '';
         products.forEach(p => {
             val += (p.costPrice * p.stock);
-            document.getElementById('pBody').innerHTML += `<tr><td>${p.barcode || '-'}</td><td>${p.name}</td><td>${p.costPrice}/${p.price}</td><td><span class="badge ${p.stock < 5 ? 'bg-danger':'bg-success'}">${p.stock}</span></td></tr>`;
+            // এখানে এডিট বাটন যুক্ত করা হয়েছে যা editProduct ফাংশনকে কল করবে
+            document.getElementById('pBody').innerHTML += `<tr>
+                <td>${p.barcode || 'N/A'}</td>
+                <td>${p.name}</td>
+                <td>${p.costPrice}/${p.price}</td>
+                <td><span class="badge ${p.stock < 5 ? 'bg-danger':'bg-success'}">${p.stock}</span></td>
+                <td><button class="btn btn-sm btn-outline-primary" onclick="editProduct('${p._id}', '${p.name}', ${p.costPrice}, ${p.price}, ${p.stock})">✏️ এডিট</button></td>
+            </tr>`;
         });
+
         const sRes = await fetch('/api/sales');
         const sales = await sRes.json();
         let ts = 0, tp = 0, td = 0;
-        sales.forEach(s => { ts += s.totalAmount; tp += s.profit; td += s.dueAmount; });
-        document.getElementById('tSales').innerText = ts + ' ৳';
-        document.getElementById('tProfit').innerText = tp + ' ৳';
-        document.getElementById('tDue').innerText = td + ' ৳';
-        document.getElementById('tVal').innerText = val + ' ৳';
+        
+        let dueHtml = '';
+        sales.forEach(s => { 
+            ts += s.totalAmount; 
+            tp += s.profit; 
+            td += s.dueAmount; 
+
+            if(s.dueAmount > 0) {
+                dueHtml += `<tr>
+                    <td>${s.customerName || 'Unknown'}</td>
+                    <td>${s.dueAmount}৳</td>
+                    <td><button class="btn btn-sm btn-success" onclick="payDue('${s._id}', ${s.dueAmount})">টাকা জমা</button></td>
+                </tr>`;
+            }
+        });
+        
+        document.getElementById('tSales').innerText = ts + '৳';
+        document.getElementById('tProfit').innerText = tp + '৳';
+        document.getElementById('tDue').innerText = td + '৳';
+        document.getElementById('tVal').innerText = val + '৳';
+        document.getElementById('dueBody').innerHTML = dueHtml;
     }
+
     async function save() {
-        const payload = { barcode: document.getElementById('barcode').value, name: document.getElementById('name').value, costPrice: Number(document.getElementById('cost').value), price: Number(document.getElementById('price').value), stock: Number(document.getElementById('stock').value) };
+        const payload = { 
+            barcode: document.getElementById('barcode').value,
+            name: document.getElementById('name').value, 
+            costPrice: Number(document.getElementById('cost').value),
+            price: Number(document.getElementById('price').value), 
+            stock: Number(document.getElementById('stock').value) 
+        };
         await fetch('/api/products', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
         location.reload();
     }
+
+    // প্রোডাক্ট এডিট ফাংশন
+    async function editProduct(id, oldName, oldCost, oldPrice, oldStock) {
+        let newName = prompt("পণ্যের নাম পরিবর্তন করুন:", oldName);
+        let newCost = prompt("নতুন কেনা দাম:", oldCost);
+        let newPrice = prompt("নতুন বিক্রয় মূল্য:", oldPrice);
+        let newStock = prompt("নতুন স্টক পরিমাণ:", oldStock);
+
+        if (newName && newCost && newPrice && newStock) {
+            const payload = {
+                name: newName,
+                costPrice: Number(newCost),
+                price: Number(newPrice),
+                stock: Number(newStock)
+            };
+            // এডিট করার জন্য আপনার API এর PUT/PATCH মেথড ব্যবহার হবে
+            await fetch(`/api/products/${id}`, { 
+                method:'PUT', 
+                headers:{'Content-Type':'application/json'}, 
+                body:JSON.stringify(payload)
+            });
+            location.reload();
+        }
+    }
+
+    function filterProducts() {
+        let input = document.getElementById('pSearch').value.toUpperCase();
+        let tr = document.getElementById('pTable').getElementsByTagName('tr');
+        for (let i = 1; i < tr.length; i++) {
+            let tdName = tr[i].getElementsByTagName('td')[1];
+            let tdCode = tr[i].getElementsByTagName('td')[0];
+            if (tdName || tdCode) {
+                let txtValue = (tdName.textContent || tdName.innerText) + (tdCode.textContent || tdCode.innerText);
+                tr[i].style.display = txtValue.toUpperCase().indexOf(input) > -1 ? "" : "none";
+            }
+        }
+    }
+
+    async function payDue(saleId, currentDue) {
+        let amount = prompt(`বাকি আছে ${currentDue}৳। কত টাকা জমা নিতে চান?`, currentDue);
+        if(amount && !isNaN(amount)) {
+            await fetch(`/api/sales/pay-due/${saleId}`, { 
+                method:'POST', 
+                headers:{'Content-Type':'application/json'}, 
+                body:JSON.stringify({ paidAmount: Number(amount) })
+            });
+            location.reload();
+        }
+    }
+
     function exportExcel() {
-        const wb = XLSX.utils.table_to_book(document.getElementById('pTable'));
-        XLSX.writeFile(wb, "Inventory_Report.xlsx");
+        var wb = XLSX.utils.table_to_book(document.getElementById('pTable'), {sheet:"Inventory"});
+        XLSX.writeFile(wb, "Shop_Inventory.xlsx");
     }
     window.onload = load;
 </script>
