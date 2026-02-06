@@ -2,40 +2,46 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <title>POS - সেলস সিস্টেম</title>
+    <title>POS Pro | বারকোড ও পেমেন্ট</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         @media print { .no-print { display: none; } #inv { display: block !important; } }
-        #inv { display: none; padding: 20px; border: 1px solid #000; }
+        #inv { display: none; font-size: 12px; }
     </style>
 </head>
-<body class="bg-light">
-<div class="container py-4 no-print">
+<body class="bg-light" onkeydown="handleShortcut(event)">
+<div class="container-fluid py-3 no-print">
     <div class="row">
         <div class="col-md-7">
-            <input type="text" id="search" class="form-control mb-3" placeholder="পণ্য খুঁজুন..." onkeyup="render()">
-            <div class="row" id="pList"></div>
+            <div class="card p-3 mb-2">
+                <input type="text" id="barcodeSearch" class="form-control form-control-lg bg-warning-subtle" placeholder="বারকোড স্ক্যান করুন বা নাম লিখুন..." autofocus onkeyup="render()">
+            </div>
+            <div class="row" id="pList" style="height: 70vh; overflow-y: auto;"></div>
         </div>
         <div class="col-md-5">
             <div class="card p-4 shadow">
-                <h4>কার্ট</h4>
-                <input type="text" id="cName" class="form-control mb-2" placeholder="কাস্টমারের নাম">
+                <h5>🛒 ক্যাশ কাউন্টার</h5>
+                <input type="text" id="cName" class="form-control mb-1" placeholder="কাস্টমারের নাম">
                 <input type="text" id="cMobile" class="form-control mb-3" placeholder="মোবাইল নম্বর">
-                <div id="cart" class="my-3"></div>
+                <div id="cart" style="min-height: 150px; font-size: 14px;"></div>
                 <hr>
-                <h5>মোট: <span id="total">0</span> ৳</h5>
-                <button class="btn btn-success w-100 mt-3" onclick="pay()">পেমেন্ট ও প্রিন্ট</button>
+                <h4 class="text-primary">মোট: <span id="total">0</span> ৳</h4>
+                <input type="number" id="paid" class="form-control mb-2" placeholder="কত টাকা দিয়েছে?" onkeyup="calcDue()">
+                <h6 class="text-danger">বাকি: <span id="due">0</span> ৳</h6>
+                <button class="btn btn-success w-100 btn-lg mt-2 fw-bold" onclick="pay()">পেমেন্ট ও প্রিন্ট (F8)</button>
             </div>
         </div>
     </div>
 </div>
 
-<div id="inv">
-    <h2 class="text-center">ক্যাশ মেমো</h2>
-    <p>কাস্টমার: <span id="invCName"></span> | মোবাইল: <span id="invCMobile"></span></p>
-    <div id="invItems"></div>
+<div id="inv" class="p-4 border">
+    <h3 class="text-center">মেসার্স সুপারশপ</h3>
     <hr>
-    <h3 class="text-end" id="invTotal"></h3>
+    <p>কাস্টমার: <span id="iName"></span> | মোবাইল: <span id="iMob"></span></p>
+    <div id="iItems"></div>
+    <hr>
+    <h5 class="text-end" id="iTotal"></h5>
+    <p class="text-end">পরিশোধ: <span id="iPaid"></span> | বাকি: <span id="iDue"></span></p>
 </div>
 
 <script>
@@ -45,14 +51,20 @@
         products = await res.json();
         render();
     }
+
     function render() {
-        const s = document.getElementById('search').value.toLowerCase();
+        const s = document.getElementById('barcodeSearch').value.toLowerCase();
+        // বারকোড অটো-অ্যাড লজিক
+        const barcodeMatch = products.find(p => p.barcode === s);
+        if(barcodeMatch) { add(barcodeMatch._id); document.getElementById('barcodeSearch').value = ''; return; }
+
         const list = document.getElementById('pList');
         list.innerHTML = '';
         products.filter(p => p.name.toLowerCase().includes(s)).forEach(p => {
-            list.innerHTML += `<div class="col-4 mb-2"><div class="card p-2 shadow-sm text-center" onclick="add('${p._id}')" style="cursor:pointer"><h6>${p.name}</h6><small>${p.price}৳ (Stock: ${p.stock})</small></div></div>`;
+            list.innerHTML += `<div class="col-4 mb-2"><div class="card p-2 text-center" onclick="add('${p._id}')" style="cursor:pointer"><h6>${p.name}</h6><small>${p.price}৳</small></div></div>`;
         });
     }
+
     function add(id) {
         const p = products.find(i => i._id === id);
         if(p.stock <= 0) return alert("স্টক নেই!");
@@ -60,31 +72,40 @@
         exists ? exists.qty++ : cart.push({...p, qty: 1});
         updateCart();
     }
+
     function updateCart() {
-        const div = document.getElementById('cart');
-        let t = 0; div.innerHTML = '';
-        cart.forEach(i => {
-            t += i.price * i.qty;
-            div.innerHTML += `<div class="d-flex justify-content-between"><span>${i.name} x ${i.qty}</span><span>${i.price*i.qty}৳</span></div>`;
-        });
+        let t = 0; document.getElementById('cart').innerHTML = '';
+        cart.forEach(i => { t += i.price * i.qty; document.getElementById('cart').innerHTML += `<div class="d-flex justify-content-between"><span>${i.name} x ${i.qty}</span><span>${i.price*i.qty}৳</span></div>`; });
         document.getElementById('total').innerText = t;
+        calcDue();
     }
+
+    function calcDue() {
+        const t = Number(document.getElementById('total').innerText);
+        const p = Number(document.getElementById('paid').value);
+        document.getElementById('due').innerText = t - p;
+    }
+
     async function pay() {
-        const total = document.getElementById('total').innerText;
-        const customer = { 
-            customerName: document.getElementById('cName').value || "নগদ কাস্টমার", 
-            customerMobile: document.getElementById('cMobile').value || "N/A" 
+        const payload = {
+            cart,
+            customerName: document.getElementById('cName').value || "নগদ",
+            customerMobile: document.getElementById('cMobile').value || "N/A",
+            paidAmount: Number(document.getElementById('paid').value)
         };
-        if(!cart.length) return;
-        await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({cart, ...customer, totalAmount: Number(total)}) });
+        await fetch('/api/checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
         
-        document.getElementById('invCName').innerText = customer.customerName;
-        document.getElementById('invCMobile').innerText = customer.customerMobile;
-        document.getElementById('invItems').innerHTML = document.getElementById('cart').innerHTML;
-        document.getElementById('invTotal').innerText = "Total: " + total + " ৳";
+        document.getElementById('iName').innerText = payload.customerName;
+        document.getElementById('iMob').innerText = payload.customerMobile;
+        document.getElementById('iItems').innerHTML = document.getElementById('cart').innerHTML;
+        document.getElementById('iTotal').innerText = "Total: " + document.getElementById('total').innerText + " ৳";
+        document.getElementById('iPaid').innerText = payload.paidAmount;
+        document.getElementById('iDue').innerText = document.getElementById('due').innerText;
         window.print();
         location.reload();
     }
+
+    function handleShortcut(e) { if(e.key === 'F8') pay(); }
     window.onload = init;
 </script>
 </body>
