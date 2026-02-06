@@ -9,6 +9,8 @@
         body { font-family: 'Hind Siliguri', sans-serif; background: #f0f2f5; }
         .stat-card { border-radius: 15px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; }
         .stat-card:hover { transform: translateY(-5px); }
+        /* নতুন স্টাইল: Low Stock Alert */
+        .low-stock-warning { background: #fff3cd; color: #856404; padding: 10px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #ffc107; display: none; }
     </style>
 </head>
 <body>
@@ -23,11 +25,15 @@
 </nav>
 
 <div class="container mt-4">
+    <div id="stockAlert" class="low-stock-warning">
+        ⚠️ <strong>সতর্কতা:</strong> কিছু পণ্যের স্টক ফুরিয়ে আসছে! দয়া করে চেক করুন।
+    </div>
+
     <div class="row g-3 mb-4 text-center">
-        <div class="col-md-3"><div class="card stat-card p-3"><h6>মোট বিক্রি</h6><h3 id="tSales">0</h3></div></div>
-        <div class="col-md-3"><div class="card stat-card p-3 text-success"><h6>মোট লাভ</h6><h3 id="tProfit">0</h3></div></div>
-        <div class="col-md-3" data-bs-toggle="modal" data-bs-target="#dueModal"><div class="card stat-card p-3 text-danger"><h6>মোট বাকি</h6><h3 id="tDue">0</h3></div></div>
-        <div class="col-md-3"><div class="card stat-card p-3 text-primary"><h6>স্টক মূল্য</h6><h3 id="tVal">0</h3></div></div>
+        <div class="col-md-3"><div class="card stat-card p-3 bg-white"><h6>মোট বিক্রি</h6><h3 id="tSales">0</h3></div></div>
+        <div class="col-md-3"><div class="card stat-card p-3 text-success bg-white"><h6>মোট লাভ</h6><h3 id="tProfit">0</h3></div></div>
+        <div class="col-md-3" data-bs-toggle="modal" data-bs-target="#dueModal"><div class="card stat-card p-3 text-danger bg-white"><h6>মোট বাকি</h6><h3 id="tDue">0</h3></div></div>
+        <div class="col-md-3"><div class="card stat-card p-3 text-primary bg-white"><h6>স্টক মূল্য</h6><h3 id="tVal">0</h3></div></div>
     </div>
 
     <div class="row">
@@ -48,10 +54,12 @@
                     <h5>ইনভেন্টরি লিস্ট</h5>
                     <input type="text" id="pSearch" class="form-control w-50" placeholder="পণ্য সার্চ করুন..." onkeyup="filterProducts()">
                 </div>
-                <table class="table" id="pTable">
-                    <thead><tr><th>বারকোড</th><th>নাম</th><th>কেনা/বেচা</th><th>স্টক</th><th>অ্যাকশন</th></tr></thead>
-                    <tbody id="pBody"></tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table" id="pTable">
+                        <thead><tr><th>বারকোড</th><th>নাম</th><th>কেনা/বেচা</th><th>স্টক</th><th>অ্যাকশন</th></tr></thead>
+                        <tbody id="pBody"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -86,10 +94,15 @@
         const pRes = await fetch('/api/products');
         const products = await pRes.json();
         let val = 0;
+        let isLowStock = false;
+        
         document.getElementById('pBody').innerHTML = '';
         products.forEach(p => {
             val += (p.costPrice * p.stock);
-            // এখানে এডিট বাটনের পাশে ডিলিট বাটন যুক্ত করা হয়েছে
+            
+            // নতুন কন্ডিশন: স্টক ৫ এর নিচে হলে অ্যালার্ট ফ্ল্যাগ ট্রু হবে
+            if(p.stock < 5) isLowStock = true;
+
             document.getElementById('pBody').innerHTML += `<tr>
                 <td>${p.barcode || 'N/A'}</td>
                 <td>${p.name}</td>
@@ -101,6 +114,9 @@
                 </td>
             </tr>`;
         });
+
+        // লো স্টক অ্যালার্ট দেখানো বা লুকানো
+        document.getElementById('stockAlert').style.display = isLowStock ? 'block' : 'none';
 
         const sRes = await fetch('/api/sales');
         const sales = await sRes.json();
@@ -154,7 +170,6 @@
                 price: Number(newPrice),
                 stock: Number(newStock)
             };
-            // এডিট করার জন্য আপনার API এর PUT/PATCH মেথড ব্যবহার হবে
             await fetch(`/api/products/${id}`, { 
                 method:'PUT', 
                 headers:{'Content-Type':'application/json'}, 
@@ -200,22 +215,15 @@
     }
 
     function exportExcel() {
-        // ফিক্সড এক্সপোর্ট ফাংশন: এটি টেবিল থেকে সরাসরি ডাটা নিয়ে ফরম্যাট ঠিক করে দেয়
         const table = document.getElementById('pTable');
         const rows = Array.from(table.rows);
         const data = rows.map(row => Array.from(row.cells).map(cell => cell.innerText));
-        
-        // এক্সেল শিট তৈরি
         const ws = XLSX.utils.aoa_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Inventory");
-        
-        // ফাইল সেভ
         XLSX.writeFile(wb, "Shop_Inventory.xlsx");
     }
     window.onload = load;
 </script>
-</body>
-</html>
 </body>
 </html>
