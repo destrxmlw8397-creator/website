@@ -7,21 +7,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .no-print { display: block; }
+        
         /* পিডিএফ এর জন্য লুকানো মেমো ফরম্যাট - ছবির হুবহু ডিজাইন */
         #inv { 
             display: none; 
             width: 800px; 
             background: white;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Arial', 'Noto Sans Bengali', sans-serif;
             border: 2px solid #000;
             position: relative;
+            overflow: hidden;
         }
         
-        /* আগের কোডের স্টাইলগুলো অক্ষত রাখা হলো */
         .cart-item { border-bottom: 1px solid #eee; padding: 5px 0; }
         .qty-input { width: 60px; display: inline-block; }
 
-        /* ছবির মতো মেমো ডিজাইন এলিমেন্ট */
+        /* মেমো হেডার */
         .memo-header {
             background: linear-gradient(to bottom, #dff9fb, #ffffff);
             text-align: center;
@@ -30,7 +31,6 @@
             position: relative;
         }
         
-        /* মেমো নম্বর বক্স ফিক্স */
         .memo-no-badge { 
             position: absolute; 
             left: 10px; 
@@ -46,10 +46,10 @@
             justify-content: center;
             height: 110px;
             font-size: 14px;
+            width: 28px;
         }
-        .memo-no-badge span { transform: rotate(0deg); } /* লেখা সোজা করার জন্য */
+        .memo-no-badge span { transform: rotate(180deg); writing-mode: vertical-rl; }
 
-        /* ক্যাশ মেমো বক্স ফিক্স */
         .cash-memo-badge { 
             position: absolute; 
             right: 10px; 
@@ -65,9 +65,10 @@
             justify-content: center;
             height: 110px;
             font-size: 18px;
+            width: 28px;
         }
         
-        .shop-name-red { color: #c0392b; font-size: 55px; font-weight: bold; margin: 0; }
+        .shop-name-red { color: #c0392b; font-size: 55px; font-weight: bold; margin: 0; line-height: 1; }
         .contact-blue { background: #000080; color: white; padding: 2px 10px; border-radius: 20px; font-size: 16px; }
         .address-purple { background-color: #4b0082; color: white; padding: 5px; font-size: 15px; font-weight: bold; margin-top: 5px; }
         
@@ -78,11 +79,24 @@
             padding: 10px;
             border-bottom: 1px solid #000;
             font-weight: bold;
+            font-size: 15px;
         }
 
         .memo-table { width: 100%; border-collapse: collapse; }
-        .memo-table th { background-color: #ec407a; color: white; border: 1px solid #000; padding: 8px; }
-        .memo-table td { border: 1px solid #000; padding: 5px; text-align: center; font-weight: bold; }
+        .memo-table th { 
+            background-color: #ec407a; 
+            color: white; 
+            border: 1px solid #000; 
+            padding: 8px; 
+            font-weight: bold;
+        }
+        .memo-table td { 
+            border: 1px solid #000; 
+            padding: 6px; 
+            text-align: center; 
+            font-weight: bold;
+            font-size: 14px;
+        }
         
         .col-pink { background-color: #f8bbd0; }
         .col-blue { background-color: #b3e5fc; }
@@ -91,15 +105,27 @@
         
         .watermark-text {
             position: absolute;
-            top: 55%; left: 50%;
+            top: 55%;
+            left: 50%;
             transform: translate(-50%, -50%) rotate(-25deg);
             font-size: 40px;
             color: rgba(192, 57, 43, 0.1);
             white-space: nowrap;
             z-index: 0;
             font-weight: bold;
+            pointer-events: none;
         }
-        .footer-banner { background-color: #e67e22; color: white; text-align: center; padding: 8px; margin: 15px; border-radius: 50px; font-weight: bold; }
+        
+        .footer-banner { 
+            background-color: #e67e22; 
+            color: white; 
+            text-align: center; 
+            padding: 8px; 
+            margin: 15px 10px; 
+            border-radius: 50px; 
+            font-weight: bold; 
+            font-size: 16px;
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -126,14 +152,18 @@
     </div>
 </div>
 
+<!-- ============================================= -->
+<!--          ছবির সাথে হুবহু মিল রাখা অংশ           -->
+<!-- ============================================= -->
 <div id="inv">
     <div class="memo-header">
         <div class="memo-no-badge"><span>মেমো নং- <span id="memoNoDisplay">1</span></span></div>
         <div class="cash-memo-badge">ক্যাশ মেমো</div>
+        
         <h1 class="shop-name-red">বানী স্টোর</h1>
         <p style="margin:0; font-weight:bold;">প্রোঃ মোঃ লতিব | <span class="contact-blue">০১৭৪০-৮৮১৮৪৩, ০১৭১৩-৭২৪০৯৩</span></p>
         <div style="font-size: 10px; padding: 5px 50px;">জুয়েলারী কাজের যাবতীয় যন্ত্রপাতি, ইলেকট্রিক মেশিন ও খুচরা-পাইকারী বিক্রেতা।</div>
-        <div class="address-purple">রিনা ভিলা হোল্ডিং-৫৬/১ মালোপাড়া, সাহেব বাজার, রাজশাহী।</div>
+        <div class="address-purple">রিনা ভিলা হোল্ডিং-৫৬/১ মালোপাড়া (ভুবনমোহন পার্কের পূর্ব পাশে), সাহেব বাজার, রাজশাহী।</div>
     </div>
 
     <div class="cust-info-grid">
@@ -143,7 +173,7 @@
         <div>মোবা- <span id="invCMobile"></span></div>
     </div>
 
-    <div style="position: relative; min-height: 400px;">
+    <div style="position: relative; min-height: 420px;">
         <div class="watermark-text">ধন্যবাদ আবার আসবেন</div>
         <table class="memo-table">
             <thead>
@@ -155,27 +185,26 @@
                     <th style="width: 120px;">টাকা</th>
                 </tr>
             </thead>
-            <tbody id="invItems">
-                </tbody>
+            <tbody id="invItems"></tbody>
             <tfoot>
                 <tr>
                     <td colspan="3" style="border:none;"></td>
-                    <td style="background-color: #d1d9ff; border: 1px solid #000;">মোট টাকা</td>
-                    <td id="invTotalCell" style="background-color: #ffccbc; border: 1px solid #000;"></td>
+                    <td style="background-color: #d1d9ff; border: 1px solid #000; font-weight:bold;">মোট টাকা</td>
+                    <td id="invTotalCell" style="background-color: #ffccbc; border: 1px solid #000; font-weight:bold;"></td>
                 </tr>
             </tfoot>
         </table>
     </div>
 
-    <div style="padding: 10px; font-weight: bold;">
+    <div style="padding: 10px; font-weight: bold; font-size: 15px;">
         <p>পেইড: <span id="invPaid"></span> | বাকি: <span id="invDue"></span></p>
     </div>
 
     <div class="footer-banner">{ যে কোন স্থানে মাল ডেলিভারী দেওয়া হয় }</div>
 
-    <div style="display: flex; justify-content: space-between; padding: 40px 30px 10px; font-weight: bold;">
-        <span style="border-top: 1px solid #000;">ক্রেতার স্বাক্ষর</span>
-        <span style="border-top: 1px solid #000;">বিক্রেতার স্বাক্ষর</span>
+    <div style="display: flex; justify-content: space-between; padding: 40px 30px 10px; font-weight: bold; font-size: 15px;">
+        <span style="border-top: 1px solid #000; padding-top: 5px;">ক্রেতার স্বাক্ষর</span>
+        <span style="border-top: 1px solid #000; padding-top: 5px;">বিক্রেতার স্বাক্ষর</span>
     </div>
 </div>
 
@@ -186,7 +215,6 @@
     let currentMemoNo = localStorage.getItem('lastMemoNo') ? parseInt(localStorage.getItem('lastMemoNo')) + 1 : 1;
 
     async function init() {
-        // মেমো নং আপডেট
         document.getElementById('memoNoDisplay').innerText = currentMemoNo;
         
         const res = await fetch('/api/products');
@@ -241,7 +269,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-2 cart-item">
                     <span>${i.name}</span>
                     <div>
-                        <input type="number" class="form-control form-control-sm qty-input me-2" value="${i.qty}" onchange="updateQty('${i._id}', this.value)">
+                        <input type="number" class="form-control form-control-sm qty-input me-2" value="\( {i.qty}" onchange="updateQty(' \){i._id}', this.value)">
                         <span>${i.price*i.qty}৳</span>
                     </div>
                 </div>`; 
@@ -251,7 +279,7 @@
 
     async function pay() {
         const total = Number(document.getElementById('total').innerText);
-        const paid = Number(document.getElementById('paid').value);
+        const paid = Number(document.getElementById('paid').value) || 0;
         const cName = document.getElementById('cName').value || "নগদ";
         const cMobile = document.getElementById('cMobile').value || "N/A";
         const cAddress = document.getElementById('cAddress').value || "রাজশাহী";
@@ -277,12 +305,19 @@
                 <td style="text-align:left; padding-left:10px;">${i.name}</td>
                 <td class="col-blue">${i.qty}</td>
                 <td class="col-green">${i.price}</td>
-                <td class="col-orange">${i.price*i.qty}</td>
+                <td class="col-orange">${i.price * i.qty}</td>
             </tr>`;
         });
 
-        for(let j=cart.length; j<12; j++) {
-            rows += `<tr><td class="col-pink">${j+1}</td><td></td><td class="col-blue"></td><td class="col-green"></td><td class="col-orange"></td></tr>`;
+        // ছবির মতো ১৮টা লাইন পর্যন্ত খালি রাখা
+        for(let j = cart.length; j < 18; j++) {
+            rows += `<tr>
+                <td class="col-pink">${j+1}</td>
+                <td></td>
+                <td class="col-blue"></td>
+                <td class="col-green"></td>
+                <td class="col-orange"></td>
+            </tr>`;
         }
 
         document.getElementById('invItems').innerHTML = rows;
@@ -296,14 +331,14 @@
         const opt = {
             margin:       0,
             filename:     `BaniStore_Memo_${currentMemoNo}.pdf`,
-            image:        { type: 'jpeg', quality: 1 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2.5, useCORS: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
         html2pdf().set(opt).from(element).save().then(() => {
-            // মেমো নম্বর সংরক্ষণ এবং আপডেট
             localStorage.setItem('lastMemoNo', currentMemoNo);
+            currentMemoNo++;  // পরের মেমোর জন্য বাড়ানো
             element.style.display = 'none';
             location.reload();
         });
