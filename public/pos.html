@@ -29,8 +29,43 @@
             border-bottom: 2px solid #8e24aa;
             position: relative;
         }
-        .memo-no-badge { position: absolute; left: 10px; top: 10px; background: #f1f50c; padding: 5px; border: 1px solid #000; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; }
-        .cash-memo-badge { position: absolute; right: 10px; top: 10px; background: #e67e22; color: white; padding: 10px 5px; font-weight: bold; writing-mode: vertical-rl; }
+        
+        /* মেমো নম্বর বক্স ফিক্স */
+        .memo-no-badge { 
+            position: absolute; 
+            left: 10px; 
+            top: 10px; 
+            background: #f1f50c; 
+            padding: 5px 2px; 
+            border: 1px solid #000; 
+            border-radius: 4px;
+            writing-mode: vertical-rl; 
+            font-weight: bold; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 110px;
+            font-size: 14px;
+        }
+        .memo-no-badge span { transform: rotate(0deg); } /* লেখা সোজা করার জন্য */
+
+        /* ক্যাশ মেমো বক্স ফিক্স */
+        .cash-memo-badge { 
+            position: absolute; 
+            right: 10px; 
+            top: 10px; 
+            background: #e67e22; 
+            color: white; 
+            padding: 5px; 
+            font-weight: bold; 
+            writing-mode: vertical-rl; 
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 110px;
+            font-size: 18px;
+        }
         
         .shop-name-red { color: #c0392b; font-size: 55px; font-weight: bold; margin: 0; }
         .contact-blue { background: #000080; color: white; padding: 2px 10px; border-radius: 20px; font-size: 16px; }
@@ -93,7 +128,7 @@
 
 <div id="inv">
     <div class="memo-header">
-        <div class="memo-no-badge">মেমো নং- <span id="memoNoDisplay">1</span></div>
+        <div class="memo-no-badge"><span>মেমো নং- <span id="memoNoDisplay">1</span></span></div>
         <div class="cash-memo-badge">ক্যাশ মেমো</div>
         <h1 class="shop-name-red">বানী স্টোর</h1>
         <p style="margin:0; font-weight:bold;">প্রোঃ মোঃ লতিব | <span class="contact-blue">০১৭৪০-৮৮১৮৪৩, ০১৭১৩-৭২৪০৯৩</span></p>
