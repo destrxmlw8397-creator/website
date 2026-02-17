@@ -7,16 +7,64 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .no-print { display: block; }
-        /* পিডিএফ এর জন্য লুকানো মেমো ফরম্যাট */
+        /* পিডিএফ এর জন্য লুকানো মেমো ফরম্যাট - ছবির হুবহু ডিজাইন */
         #inv { 
             display: none; 
-            padding: 30px; 
-            width: 400px; 
+            width: 800px; 
             background: white;
             font-family: 'Arial', sans-serif;
+            border: 2px solid #000;
+            position: relative;
         }
+        
+        /* আগের কোডের স্টাইলগুলো অক্ষত রাখা হলো */
         .cart-item { border-bottom: 1px solid #eee; padding: 5px 0; }
         .qty-input { width: 60px; display: inline-block; }
+
+        /* ছবির মতো মেমো ডিজাইন এলিমেন্ট */
+        .memo-header {
+            background: linear-gradient(to bottom, #dff9fb, #ffffff);
+            text-align: center;
+            padding: 10px;
+            border-bottom: 2px solid #8e24aa;
+            position: relative;
+        }
+        .memo-no-badge { position: absolute; left: 10px; top: 10px; background: #f1f50c; padding: 5px; border: 1px solid #000; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; }
+        .cash-memo-badge { position: absolute; right: 10px; top: 10px; background: #e67e22; color: white; padding: 10px 5px; font-weight: bold; writing-mode: vertical-rl; }
+        
+        .shop-name-red { color: #c0392b; font-size: 55px; font-weight: bold; margin: 0; }
+        .contact-blue { background: #000080; color: white; padding: 2px 10px; border-radius: 20px; font-size: 16px; }
+        .address-purple { background-color: #4b0082; color: white; padding: 5px; font-size: 15px; font-weight: bold; margin-top: 5px; }
+        
+        .cust-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background-color: #d1d9ff;
+            padding: 10px;
+            border-bottom: 1px solid #000;
+            font-weight: bold;
+        }
+
+        .memo-table { width: 100%; border-collapse: collapse; }
+        .memo-table th { background-color: #ec407a; color: white; border: 1px solid #000; padding: 8px; }
+        .memo-table td { border: 1px solid #000; padding: 5px; text-align: center; font-weight: bold; }
+        
+        .col-pink { background-color: #f8bbd0; }
+        .col-blue { background-color: #b3e5fc; }
+        .col-green { background-color: #c8e6c9; }
+        .col-orange { background-color: #ffccbc; }
+        
+        .watermark-text {
+            position: absolute;
+            top: 55%; left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            font-size: 40px;
+            color: rgba(192, 57, 43, 0.1);
+            white-space: nowrap;
+            z-index: 0;
+            font-weight: bold;
+        }
+        .footer-banner { background-color: #e67e22; color: white; text-align: center; padding: 8px; margin: 15px; border-radius: 50px; font-weight: bold; }
     </style>
 </head>
 <body class="bg-light">
@@ -42,33 +90,56 @@
 </div>
 
 <div id="inv">
-    <div style="text-align: center;">
-        <h2 style="margin: 0;">🚀 SuperShop ERP Pro</h2>
-        <p style="margin: 5px 0;">ক্যাশ মেমো</p>
+    <div class="memo-header">
+        <div class="memo-no-badge">মেমো নং- ৪00</div>
+        <div class="cash-memo-badge">ক্যাশ মেমো</div>
+        <h1 class="shop-name-red">বানী স্টোর</h1>
+        <p style="margin:0; font-weight:bold;">প্রোঃ মোঃ লতিব | <span class="contact-blue">০১৭৪০-৮৮১৮৪৩, ০১৭১৩-৭২৪০৯৩</span></p>
+        <div style="font-size: 10px; padding: 5px 50px;">জুয়েলারী কাজের যাবতীয় যন্ত্রপাতি, ইলেকট্রিক মেশিন ও খুচরা-পাইকারী বিক্রেতা।</div>
+        <div class="address-purple">রিনা ভিলা হোল্ডিং-৫৬/১ মালোপাড়া, সাহেব বাজার, রাজশাহী।</div>
     </div>
-    <hr>
-    <div style="margin-bottom: 15px;">
-        <strong>কাস্টমার:</strong> <span id="invCName"></span><br>
-        <strong>মোবাইল:</strong> <span id="invCMobile"></span><br>
-        <strong>তারিখ:</strong> <span id="invDate"></span>
+
+    <div class="cust-info-grid">
+        <div>নাম- <span id="invCName"></span></div>
+        <div>তারিখ- <span id="invDate"></span></div>
+        <div>ঠিকানা- <span>রাজশাহী</span></div>
+        <div>মোবা- <span id="invCMobile"></span></div>
     </div>
-    <table style="width: 100%; border-collapse: collapse;">
-        <thead>
-            <tr style="border-bottom: 2px solid #000;">
-                <th style="text-align: left; padding: 5px;">পণ্য</th>
-                <th style="text-align: center; padding: 5px;">পরিমাণ</th>
-                <th style="text-align: right; padding: 5px;">মূল্য</th>
-            </tr>
-        </thead>
-        <tbody id="invItems"></tbody>
-    </table>
-    <hr>
-    <div style="text-align: right;">
-        <h4 id="invTotalText" style="margin: 5px 0;"></h4>
-        <p style="margin: 0;">পেইড: <span id="invPaid"></span></p>
-        <p style="margin: 0; font-weight: bold;">বাকি: <span id="invDue"></span></p>
+
+    <div style="position: relative; min-height: 400px;">
+        <div class="watermark-text">ধন্যবাদ আবার আসবেন</div>
+        <table class="memo-table">
+            <thead>
+                <tr>
+                    <th style="width: 50px;">সংখ্যা</th>
+                    <th>বিবরণ</th>
+                    <th style="width: 80px;">পিচ</th>
+                    <th style="width: 100px;">দর</th>
+                    <th style="width: 120px;">টাকা</th>
+                </tr>
+            </thead>
+            <tbody id="invItems">
+                </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" style="border:none;"></td>
+                    <td style="background-color: #d1d9ff; border: 1px solid #000;">মোট টাকা</td>
+                    <td id="invTotalCell" style="background-color: #ffccbc; border: 1px solid #000;"></td>
+                </tr>
+            </tfoot>
+        </table>
     </div>
-    <p style="text-align: center; margin-top: 30px; font-size: 12px; border-top: 1px solid #eee; padding-top: 10px;">ধন্যবাদ, আবার আসবেন!</p>
+
+    <div style="padding: 10px; font-weight: bold;">
+        <p>পেইড: <span id="invPaid"></span> | বাকি: <span id="invDue"></span></p>
+    </div>
+
+    <div class="footer-banner">{ যে কোন স্থানে মাল ডেলিভারী দেওয়া হয় }</div>
+
+    <div style="display: flex; justify-content: space-between; padding: 40px 30px 10px; font-weight: bold;">
+        <span style="border-top: 1px solid #000;">ক্রেতার স্বাক্ষর</span>
+        <span style="border-top: 1px solid #000;">বিক্রেতার স্বাক্ষর</span>
+    </div>
 </div>
 
 <script>
@@ -143,40 +214,48 @@
 
         if(!cart.length) return alert("কার্ট খালি!");
 
-        // সার্ভারে ডাটা পাঠানো
         await fetch('/api/checkout', { 
             method:'POST', 
             headers:{'Content-Type':'application/json'}, 
             body:JSON.stringify({cart, customerName: cName, customerMobile: cMobile, totalAmount: total, paidAmount: paid}) 
         });
 
-        // পিডিএফ এর জন্য ডাটা ফিল করা
         document.getElementById('invCName').innerText = cName;
         document.getElementById('invCMobile').innerText = cMobile;
-        document.getElementById('invDate').innerText = new Date().toLocaleString('bn-BD');
+        document.getElementById('invDate').innerText = new Date().toLocaleDateString('bn-BD');
         
         let rows = '';
-        cart.forEach(i => {
-            rows += `<tr><td style="padding:5px;">${i.name}</td><td style="text-align:center;">${i.qty}</td><td style="text-align:right;">${i.price*i.qty}৳</td></tr>`;
+        cart.forEach((i, idx) => {
+            rows += `<tr>
+                <td class="col-pink">${idx+1}</td>
+                <td style="text-align:left; padding-left:10px;">${i.name}</td>
+                <td class="col-blue">${i.qty}</td>
+                <td class="col-green">${i.price}</td>
+                <td class="col-orange">${i.price*i.qty}</td>
+            </tr>`;
         });
+
+        // ফাকা রো যোগ করা ছবির মত বড় করতে
+        for(let j=cart.length; j<12; j++) {
+            rows += `<tr><td class="col-pink">${j+1}</td><td></td><td class="col-blue"></td><td class="col-green"></td><td class="col-orange"></td></tr>`;
+        }
+
         document.getElementById('invItems').innerHTML = rows;
-        document.getElementById('invTotalText').innerText = "Total: " + total + " ৳";
+        document.getElementById('invTotalCell').innerText = total + " ৳";
         document.getElementById('invPaid').innerText = paid + " ৳";
         document.getElementById('invDue').innerText = (total - paid) + " ৳";
 
-        // পিডিএফ জেনারেশন অপশন
         const element = document.getElementById('inv');
-        element.style.display = 'block'; // পিডিএফ বানানোর সময় সাময়িক দেখানো
+        element.style.display = 'block';
 
         const opt = {
-            margin:       5,
-            filename:     `Memo_${cName}.pdf`,
-            image:        { type: 'jpeg', quality: 0.7 },
-            html2canvas:  { scale: 1.5, useCORS: true },
-            jsPDF:        { unit: 'mm', format: [100, 180], orientation: 'portrait' }
+            margin:       0,
+            filename:     `BaniStore_${cName}.pdf`,
+            image:        { type: 'jpeg', quality: 1 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
 
-        // পিডিএফ সেভ এবং রিলোড
         html2pdf().set(opt).from(element).save().then(() => {
             element.style.display = 'none';
             location.reload();
