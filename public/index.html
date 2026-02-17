@@ -34,6 +34,10 @@
     <div class="container d-flex justify-content-between">
         <span class="navbar-brand fw-bold">🚀 SuperShop ERP Pro</span>
         <div>
+            <button class="btn btn-outline-light btn-sm me-2 dropdown-toggle" type="button" data-bs-toggle="dropdown">⚙️ সেটিংস</button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#passwordModal">🔒 পাসওয়ার্ড সেট করুন</a></li>
+            </ul>
             <button onclick="toggleDarkMode()" class="btn btn-outline-light btn-sm me-2">🌙 ডার্ক মোড</button>
             <button onclick="exportExcel()" class="btn btn-light btn-sm me-2">📊 এক্সেল রিপোর্ট</button>
             <button onclick="backupData()" class="btn btn-dark btn-sm me-2">💾 ব্যাকআপ</button>
@@ -94,7 +98,7 @@
                 <input type="number" id="cost" class="form-control mb-2" placeholder="কেনা দাম">
                 <input type="number" id="price" class="form-control mb-2" placeholder="বিক্রয় মূল্য">
                 <input type="number" id="stock" class="form-control mb-3" placeholder="স্টক পরিমাণ">
-                <button onclick="save()" class="btn btn-primary w-100 mb-2">ইনভেন্টরি আপডেট</button>
+                <button onclick="checkAuth(save)" class="btn btn-primary w-100 mb-2">ইনভেন্টরি আপডেট</button>
                 <div class="d-flex gap-2">
                     <button onclick="generateBarcode()" class="btn btn-outline-secondary w-50 btn-sm">বারকোড তৈরী</button>
                     <button onclick="document.getElementById('fileInput').click()" class="btn btn-outline-dark w-50 btn-sm">ডাটা ইমপোর্ট</button>
@@ -127,6 +131,18 @@
     </div>
 </div>
 
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5>পাসওয়ার্ড সেট করুন</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <input type="password" id="newPass" class="form-control mb-2" placeholder="নতুন পাসওয়ার্ড দিন">
+                <button onclick="updatePassword()" class="btn btn-primary w-100">সেভ করুন</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -137,7 +153,7 @@
                 <input type="number" id="editCost" class="form-control mb-2" placeholder="কেনা দাম">
                 <input type="number" id="editPrice" class="form-control mb-2" placeholder="বিক্রয় মূল্য">
                 <input type="number" id="editStock" class="form-control mb-2" placeholder="স্টক">
-                <button onclick="updateProduct()" class="btn btn-success w-100">সংরক্ষণ করুন</button>
+                <button onclick="checkAuth(updateProduct)" class="btn btn-success w-100">সংরক্ষণ করুন</button>
             </div>
         </div>
     </div>
@@ -188,6 +204,27 @@
     let currentChart = null;
     let categoryChart = null;
     let activityLogs = JSON.parse(localStorage.getItem('shopLogs')) || [];
+    let systemPass = localStorage.getItem('appPassword') || '1234';
+
+    // Password Protection Logic
+    function checkAuth(callback, ...args) {
+        let input = prompt("সিকিউরিটি পাসওয়ার্ড দিন:");
+        if (input === systemPass) {
+            callback(...args);
+        } else {
+            alert("ভুল পাসওয়ার্ড!");
+        }
+    }
+
+    function updatePassword() {
+        let pass = document.getElementById('newPass').value;
+        if(pass.length > 0) {
+            localStorage.setItem('appPassword', pass);
+            systemPass = pass;
+            alert("পাসওয়ার্ড সফলভাবে আপডেট হয়েছে।");
+            bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
+        }
+    }
 
     async function load() {
         const pRes = await fetch('/api/products');
@@ -209,7 +246,7 @@
                 <td><span class="badge ${stockClass}">${p.stock}</span></td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary" onclick="openEditModal('${p._id}', '${p.name}', ${p.costPrice}, ${p.price}, ${p.stock})">✏️</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('${p._id}', '${p.name}')">🗑️</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="checkAuth(deleteProduct, '${p._id}', '${p.name}')">🗑️</button>
                 </td>
             </tr>`;
         });
@@ -229,7 +266,6 @@
             tp += s.profit; 
             td += s.dueAmount; 
             
-            // Cat stats logic
             s.items.forEach(item => {
                 catStats[item.category || 'General'] = (catStats[item.category || 'General'] || 0) + item.qty;
             });
@@ -246,7 +282,6 @@
             }
         });
 
-        // Expenses calculations - Now from MongoDB API
         const eRes = await fetch('/api/expenses');
         const expensesFromDB = await eRes.json();
         let totalExp = expensesFromDB.reduce((a, b) => a + b.amount, 0);
@@ -259,7 +294,6 @@
         document.getElementById('tVal').innerText = val + '৳';
         document.getElementById('dueBody').innerHTML = dueHtml;
 
-        // Progress Goal (1M target)
         let percent = Math.min((ts / 1000000) * 100, 100).toFixed(1);
         document.getElementById('goalProgress').style.width = percent + '%';
         document.getElementById('goalProgress').innerText = percent + '%';
@@ -269,7 +303,6 @@
         renderLogs();
     }
 
-    // PDF Invoice Generator
     async function printInvoice(saleId) {
         const sRes = await fetch('/api/sales');
         const sales = await sRes.json();
@@ -296,25 +329,21 @@
         doc.save(`Invoice_${saleId}.pdf`);
     }
 
-    // Expense Logic - Fixed to save in MongoDB Atlas
     async function addExpense() {
         let title = document.getElementById('expTitle').value;
         let amount = Number(document.getElementById('expAmount').value);
         if(title && amount) {
             const expenseData = { title, amount, date: new Date() };
-            
             await fetch('/api/expenses', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(expenseData)
             });
-
             addLog(`Expense Added: ${title} (${amount}৳)`);
             location.reload();
         }
     }
 
-    // Backup & Import
     async function backupData() {
         const eRes = await fetch('/api/expenses');
         const expenses = await eRes.json();
@@ -329,22 +358,18 @@
     function importJSON(event) {
         const reader = new FileReader();
         reader.onload = async function(e) {
-            const data = JSON.parse(e.target.result);
-            // If data contains expenses, you might need a batch upload API to push to Atlas
             alert("Data Loaded from file. Local logs updated.");
             location.reload();
         };
         reader.readAsText(event.target.files[0]);
     }
 
-    // Barcode Generator
     function generateBarcode() {
         let code = document.getElementById('barcode').value || Math.floor(Math.random() * 1000000000);
         JsBarcode("#barcodeSVG", code, { format: "CODE128" });
         new bootstrap.Modal(document.getElementById('barcodeModal')).show();
     }
 
-    // Log Logic
     function addLog(action) {
         activityLogs.unshift(`${new Date().toLocaleString()}: ${action}`);
         if(activityLogs.length > 50) activityLogs.pop();
@@ -355,7 +380,6 @@
         document.getElementById('logContainer').innerHTML = activityLogs.map(log => `<div>${log}</div>`).join('');
     }
 
-    // Charts
     function renderCategoryChart(catStats) {
         const ctx = document.getElementById('categoryChart').getContext('2d');
         if(categoryChart) categoryChart.destroy();
@@ -368,7 +392,6 @@
         });
     }
 
-    // UI/UX Touches (Untouched mandatory original functions below)
     function openEditModal(id, name, cost, price, stock) {
         document.getElementById('editId').value = id;
         document.getElementById('editName').value = name;
