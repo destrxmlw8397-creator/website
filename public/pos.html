@@ -78,7 +78,9 @@
             <div class="card p-4 shadow">
                 <h4>কার্ট</h4>
                 <input type="text" id="cName" class="form-control mb-2" placeholder="কাস্টমারের নাম" autocomplete="off">
-                <input type="text" id="cMobile" class="form-control mb-3" placeholder="মোবাইল নম্বর" autocomplete="off">
+                <input type="text" id="cMobile" class="form-control mb-2" placeholder="মোবাইল নম্বর" autocomplete="off">
+                <input type="text" id="cAddress" class="form-control mb-3" placeholder="কাস্টমারের ঠিকানা" autocomplete="off">
+                
                 <div id="cart" class="my-3"></div>
                 <hr>
                 <h5>মোট: <span id="total">0</span> ৳</h5>
@@ -91,7 +93,7 @@
 
 <div id="inv">
     <div class="memo-header">
-        <div class="memo-no-badge">মেমো নং- ৪00</div>
+        <div class="memo-no-badge">মেমো নং- <span id="memoNoDisplay">1</span></div>
         <div class="cash-memo-badge">ক্যাশ মেমো</div>
         <h1 class="shop-name-red">বানী স্টোর</h1>
         <p style="margin:0; font-weight:bold;">প্রোঃ মোঃ লতিব | <span class="contact-blue">০১৭৪০-৮৮১৮৪৩, ০১৭১৩-৭২৪০৯৩</span></p>
@@ -102,7 +104,7 @@
     <div class="cust-info-grid">
         <div>নাম- <span id="invCName"></span></div>
         <div>তারিখ- <span id="invDate"></span></div>
-        <div>ঠিকানা- <span>রাজশাহী</span></div>
+        <div>ঠিকানা- <span id="invCAddress"></span></div>
         <div>মোবা- <span id="invCMobile"></span></div>
     </div>
 
@@ -145,7 +147,13 @@
 <script>
     let products = [], cart = [];
     
+    // মেমো নম্বর ম্যানেজমেন্ট
+    let currentMemoNo = localStorage.getItem('lastMemoNo') ? parseInt(localStorage.getItem('lastMemoNo')) + 1 : 1;
+
     async function init() {
+        // মেমো নং আপডেট
+        document.getElementById('memoNoDisplay').innerText = currentMemoNo;
+        
         const res = await fetch('/api/products');
         products = await res.json();
         render();
@@ -211,18 +219,21 @@
         const paid = Number(document.getElementById('paid').value);
         const cName = document.getElementById('cName').value || "নগদ";
         const cMobile = document.getElementById('cMobile').value || "N/A";
+        const cAddress = document.getElementById('cAddress').value || "রাজশাহী";
 
         if(!cart.length) return alert("কার্ট খালি!");
 
         await fetch('/api/checkout', { 
             method:'POST', 
             headers:{'Content-Type':'application/json'}, 
-            body:JSON.stringify({cart, customerName: cName, customerMobile: cMobile, totalAmount: total, paidAmount: paid}) 
+            body:JSON.stringify({cart, customerName: cName, customerMobile: cMobile, customerAddress: cAddress, totalAmount: total, paidAmount: paid, memoNo: currentMemoNo}) 
         });
 
         document.getElementById('invCName').innerText = cName;
         document.getElementById('invCMobile').innerText = cMobile;
+        document.getElementById('invCAddress').innerText = cAddress;
         document.getElementById('invDate').innerText = new Date().toLocaleDateString('bn-BD');
+        document.getElementById('memoNoDisplay').innerText = currentMemoNo;
         
         let rows = '';
         cart.forEach((i, idx) => {
@@ -235,7 +246,6 @@
             </tr>`;
         });
 
-        // ফাকা রো যোগ করা ছবির মত বড় করতে
         for(let j=cart.length; j<12; j++) {
             rows += `<tr><td class="col-pink">${j+1}</td><td></td><td class="col-blue"></td><td class="col-green"></td><td class="col-orange"></td></tr>`;
         }
@@ -250,13 +260,15 @@
 
         const opt = {
             margin:       0,
-            filename:     `BaniStore_${cName}.pdf`,
+            filename:     `BaniStore_Memo_${currentMemoNo}.pdf`,
             image:        { type: 'jpeg', quality: 1 },
             html2canvas:  { scale: 2, useCORS: true },
             jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
 
         html2pdf().set(opt).from(element).save().then(() => {
+            // মেমো নম্বর সংরক্ষণ এবং আপডেট
+            localStorage.setItem('lastMemoNo', currentMemoNo);
             element.style.display = 'none';
             location.reload();
         });
