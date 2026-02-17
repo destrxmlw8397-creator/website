@@ -134,10 +134,11 @@
 <div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header"><h5>পাসওয়ার্ড সেট করুন</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-header"><h5>পাসওয়ার্ড পরিবর্তন করুন</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
+                <input type="password" id="oldPass" class="form-control mb-2" placeholder="বর্তমান পাসওয়ার্ড">
                 <input type="password" id="newPass" class="form-control mb-2" placeholder="নতুন পাসওয়ার্ড দিন">
-                <button onclick="updatePassword()" class="btn btn-primary w-100">সেভ করুন</button>
+                <button onclick="updatePassword()" class="btn btn-primary w-100">আপডেট করুন</button>
             </div>
         </div>
     </div>
@@ -217,12 +218,22 @@
     }
 
     function updatePassword() {
-        let pass = document.getElementById('newPass').value;
-        if(pass.length > 0) {
-            localStorage.setItem('appPassword', pass);
-            systemPass = pass;
-            alert("পাসওয়ার্ড সফলভাবে আপডেট হয়েছে।");
-            bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
+        let oldP = document.getElementById('oldPass').value;
+        let newP = document.getElementById('newPass').value;
+        
+        if(oldP === systemPass) {
+            if(newP.length > 0) {
+                localStorage.setItem('appPassword', newP);
+                systemPass = newP;
+                alert("পাসওয়ার্ড সফলভাবে আপডেট হয়েছে।");
+                document.getElementById('oldPass').value = '';
+                document.getElementById('newPass').value = '';
+                bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
+            } else {
+                alert("নতুন পাসওয়ার্ডটি খালি হতে পারবে না।");
+            }
+        } else {
+            alert("বর্তমান পাসওয়ার্ডটি সঠিক নয়!");
         }
     }
 
