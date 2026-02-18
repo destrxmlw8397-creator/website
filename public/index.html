@@ -224,6 +224,7 @@
     let currentPage = 1;
     const rowsPerPage = 10;
     let allProducts = [];
+    let filteredProductsList = []; // New list for filtered search
 
     // Password Protection Logic
     function checkAuth(callback, ...args) {
@@ -258,6 +259,7 @@
     async function load() {
         const pRes = await fetch('/api/products');
         allProducts = await pRes.json();
+        filteredProductsList = [...allProducts]; // Sync filtered list
         renderProductTable();
 
         const sRes = await fetch('/api/sales');
@@ -311,13 +313,12 @@
     }
 
     function renderProductTable() {
-        let val = 0;
         let lowStockNames = [];
         document.getElementById('pBody').innerHTML = '';
         
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
-        const paginatedItems = allProducts.slice(start, end);
+        const paginatedItems = filteredProductsList.slice(start, end);
 
         paginatedItems.forEach(p => {
             if(p.stock < 5) lowStockNames.push(p.name);
@@ -338,9 +339,11 @@
             </tr>`;
         });
 
-        if(lowStockNames.length > 0) {
+        // Dynamic alert based on all products, not just filtered
+        let globalLowStock = allProducts.filter(p => p.stock < 5).map(p => p.name);
+        if(globalLowStock.length > 0) {
             document.getElementById('lowStockAlert').classList.remove('d-none');
-            document.getElementById('lowStockList').innerText = lowStockNames.join(', ');
+            document.getElementById('lowStockList').innerText = globalLowStock.join(', ');
         } else {
             document.getElementById('lowStockAlert').classList.add('d-none');
         }
@@ -349,7 +352,9 @@
     }
 
     function renderPagination() {
-        const pageCount = Math.ceil(allProducts.length / rowsPerPage);
+        const pageCount = Math.ceil(filteredProductsList.length / rowsPerPage);
+        if(pageCount <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
+        
         let html = `<button class="btn btn-sm btn-outline-primary" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>আগের</button>`;
         
         for (let i = 1; i <= pageCount; i++) {
@@ -511,11 +516,13 @@
 
     function filterProducts() {
         let input = document.getElementById('pSearch').value.toUpperCase();
-        let tr = document.getElementById('pTable').getElementsByTagName('tr');
-        for (let i = 1; i < tr.length; i++) {
-            let tdText = tr[i].textContent || tr[i].innerText;
-            tr[i].style.display = tdText.toUpperCase().indexOf(input) > -1 ? "" : "none";
-        }
+        // Global Search across all products
+        filteredProductsList = allProducts.filter(p => {
+            const dataStr = `${p.name} ${p.barcode} ${p.category} ${p.supplier}`.toUpperCase();
+            return dataStr.indexOf(input) > -1;
+        });
+        currentPage = 1; // Reset to first page of results
+        renderProductTable();
     }
 
     async function payDue(saleId, currentDue) {
