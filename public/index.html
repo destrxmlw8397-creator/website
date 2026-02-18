@@ -27,16 +27,6 @@
         /* New Styles for Advanced Features */
         .log-container { max-height: 200px; overflow-y: auto; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 10px; }
         .dark-mode .log-container { background: #1a1a1a; color: #aaa; }
-
-        /* টেবিল কলামগুলো আলাদা করার জন্য বিশেষ স্টাইল */
-        .table th, .table td { 
-            border: 1px solid #dee2e6; /* প্রতিটি সেলে বর্ডার দেওয়া হয়েছে */
-            padding: 12px; 
-            vertical-align: middle;
-        }
-        .dark-mode .table th, .dark-mode .table td {
-            border: 1px solid #444;
-        }
     </style>
 </head>
 <body>
@@ -131,14 +121,17 @@
                     </div>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered" id="pTable">
+                    <table class="table" id="pTable">
                         <thead>
-                            <tr class="table-light">
-                                <th style="width: 15%;">বারকোড</th>
-                                <th style="width: 35%;">নাম (ক্যাটাগরি/সাপ্লায়ার)</th>
-                                <th style="width: 20%;">কেনা/বেচা</th>
-                                <th style="width: 15%;">স্টক</th>
-                                <th style="width: 15%;">অ্যাকশন</th>
+                            <tr>
+                                <th>বারকোড</th>
+                                <th>নাম</th>
+                                <th>ক্যাটাগরি</th>
+                                <th>সাপ্লায়ার</th>
+                                <th>কেনা</th>
+                                <th>বেচা</th>
+                                <th>স্টক</th>
+                                <th>অ্যাকশন</th>
                             </tr>
                         </thead>
                         <tbody id="pBody"></tbody>
@@ -225,6 +218,7 @@
     let activityLogs = JSON.parse(localStorage.getItem('shopLogs')) || [];
     let systemPass = localStorage.getItem('appPassword') || '1234';
 
+    // Password Protection Logic
     function checkAuth(callback, ...args) {
         let input = prompt("সিকিউরিটি পাসওয়ার্ড দিন:");
         if (input === systemPass) {
@@ -267,10 +261,14 @@
             if(p.stock < 5) lowStockNames.push(p.name);
             let stockClass = p.stock < 5 ? 'badge-critical' : (p.stock < 10 ? 'badge-low' : 'bg-success');
             
+            // কলামগুলো আলাদা করে আপডেট করা হয়েছে
             document.getElementById('pBody').innerHTML += `<tr>
                 <td>${p.barcode || 'N/A'}</td>
-                <td>${p.name} <br><small class="text-muted">${p.category || 'N/A'} | Sup: ${p.supplier || 'N/A'}</small></td>
-                <td>${p.costPrice}/${p.price}</td>
+                <td>${p.name}</td>
+                <td>${p.category || 'N/A'}</td>
+                <td>${p.supplier || 'N/A'}</td>
+                <td>${p.costPrice}</td>
+                <td>${p.price}</td>
                 <td><span class="badge ${stockClass}">${p.stock}</span></td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary" onclick="openEditModal('${p._id}', '${p.name}', ${p.costPrice}, ${p.price}, ${p.stock})">✏️</button>
