@@ -16,13 +16,14 @@
         body.dark-mode { background: #1a1a1a; color: white; }
         .dark-mode .card, .dark-mode .modal-content, .dark-mode .chart-container { background: #2d2d2d; color: white; border: none; }
         .dark-mode .table { color: white; }
-        .dark-mode .form-control { background: #3d3d3d; border: 1px solid #555; color: white; }
+        .dark-mode .form-control, .dark-mode .form-select { background: #3d3d3d; border: 1px solid #555; color: white; }
         
         .stat-card { border-radius: 15px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; }
         .stat-card:hover { transform: translateY(-5px); }
         .chart-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .badge-low { background: #ffc107; color: #000; }
         .badge-critical { background: #dc3545; color: #fff; }
+        .badge-expiry { background: #6f42c1; color: #fff; }
         
         .log-container { max-height: 200px; overflow-y: auto; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 10px; }
         .dark-mode .log-container { background: #1a1a1a; color: #aaa; }
@@ -30,29 +31,39 @@
 
         .notification-btn { position: relative; border-radius: 50%; width: 35px; height: 35px; display: inline-flex; align-items: center; justify-content: center; }
         .notification-badge { position: absolute; top: -5px; right: -5px; font-size: 0.7rem; border-radius: 50%; }
+        
+        /* New Styles */
+        .admin-only { display: block; }
+        .staff-mode .admin-only { display: none !important; }
     </style>
 </head>
-<body>
-<nav class="navbar navbar-dark bg-primary p-3">
+<body class="admin-mode"> <nav class="navbar navbar-dark bg-primary p-3">
     <div class="container d-flex justify-content-between">
         <span class="navbar-brand fw-bold">🚀 Morsalin Supershop</span>
         <div class="d-flex align-items-center">
+            <select class="form-select form-select-sm me-2 w-auto" id="userRole" onchange="switchRole()">
+                <option value="admin">👑 অ্যাডমিন</option>
+                <option value="staff">🧑‍นักงาน ক্যাশিয়ার</option>
+            </select>
+
             <button class="btn btn-danger notification-btn me-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 🔔 <span class="badge bg-white text-danger notification-badge" id="notiCount">0</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-end p-3 shadow" style="min-width: 250px;" id="notiList">
-                <li><h6 class="dropdown-header">স্টক অ্যালার্ট</h6></li>
-                <li id="notiContent"><p class="text-muted text-center m-0">সব স্টক ঠিক আছে</p></li>
+                <li><h6 class="dropdown-header">সতর্কতা বক্স</h6></li>
+                <li id="notiContent"><p class="text-muted text-center m-0">সব ঠিক আছে</p></li>
             </ul>
 
-            <button class="btn btn-outline-light btn-sm me-2 dropdown-toggle" type="button" data-bs-toggle="dropdown">⚙️ সেটিংস</button>
+            <button class="btn btn-outline-light btn-sm me-2 dropdown-toggle admin-only" type="button" data-bs-toggle="dropdown">⚙️ সেটিংস</button>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#passwordModal">🔒 পাসওয়ার্ড সেট করুন</a></li>
                 <li><a class="dropdown-item text-danger" href="#" onclick="removePassword()">🔓 পাসওয়ার্ড সরিয়ে দিন</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#reportModal">📅 কাস্টম রিপোর্ট</a></li>
             </ul>
-            <button onclick="toggleDarkMode()" class="btn btn-outline-light btn-sm me-2">🌙 ডার্ক মোড</button>
-            <button onclick="exportExcel()" class="btn btn-light btn-sm me-2">📊 এক্সেল রিপোর্ট</button>
-            <button onclick="backupData()" class="btn btn-dark btn-sm me-2">💾 ব্যাকআপ</button>
+            <button onclick="toggleDarkMode()" class="btn btn-outline-light btn-sm me-2">🌙</button>
+            <button onclick="exportExcel()" class="btn btn-light btn-sm me-2 admin-only">📊 এক্সেল</button>
+            <button onclick="backupData()" class="btn btn-dark btn-sm me-2 admin-only">💾 ব্যাকআপ</button>
             <a href="pos.html" class="btn btn-warning btn-sm fw-bold">🛒 POS কাউন্টার</a>
         </div>
     </div>
@@ -60,10 +71,10 @@
 
 <div class="container mt-4">
     <div class="alert alert-danger d-none" id="lowStockAlert">
-        ⚠️ <strong>সতর্কতা:</strong> নিচের পণ্যগুলোর স্টক ফুরিয়ে আসছে! <span id="lowStockList"></span>
+        ⚠️ <strong>সতর্কতা:</strong> স্টক বা মেয়াদের সমস্যা পাওয়া গেছে! <span id="lowStockList"></span>
     </div>
 
-    <div class="row g-3 mb-4 text-center">
+    <div class="row g-3 mb-4 text-center admin-only">
         <div class="col-md-2 col-6"><div class="card stat-card p-3"><h6>মোট বিক্রি</h6><h3 id="tSales">0</h3></div></div>
         <div class="col-md-2 col-6"><div class="card stat-card p-3 text-success"><h6>মোট লাভ</h6><h3 id="tProfit">0</h3></div></div>
         <div class="col-md-2 col-6"><div class="card stat-card p-3 text-danger" data-bs-toggle="modal" data-bs-target="#expenseModal"><h6>অন্যান্য খরচ</h6><h3 id="tExp">0</h3></div></div>
@@ -72,7 +83,7 @@
         <div class="col-md-2 col-6"><div class="card stat-card p-3 text-primary"><h6>স্টক মূল্য</h6><h3 id="tVal">0</h3></div></div>
     </div>
 
-    <div class="row mb-4">
+    <div class="row mb-4 admin-only">
         <div class="col-md-8">
             <div class="chart-container">
                 <div class="d-flex justify-content-between">
@@ -100,17 +111,37 @@
     </div>
 
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-4 admin-only">
             <div class="card p-4 shadow-sm mb-4">
                 <h5>পণ্য যোগ করুন</h5>
                 <input type="text" id="barcode" class="form-control mb-2" placeholder="বারকোড (ঐচ্ছিক)">
                 <input type="text" id="name" class="form-control mb-2" placeholder="পণ্যের নাম">
-                <input type="text" id="category" class="form-control mb-2" placeholder="ক্যাটাগরি (চাল, ডাল ইত্যাদি)">
+                <div class="row g-2 mb-2">
+                    <div class="col-7"><input type="text" id="category" class="form-control" placeholder="ক্যাটাগরি"></div>
+                    <div class="col-5">
+                        <select id="unit" class="form-select">
+                            <option value="Pcs">Pcs</option>
+                            <option value="Kg">Kg</option>
+                            <option value="Ltr">Ltr</option>
+                            <option value="Pkt">Pkt</option>
+                            <option value="Dzn">Dzn</option>
+                        </select>
+                    </div>
+                </div>
                 <input type="text" id="supplier" class="form-control mb-2" placeholder="সরবরাহকারী (Supplier)">
                 <input type="number" id="cost" class="form-control mb-2" placeholder="কেনা দাম">
                 <input type="number" id="price" class="form-control mb-2" placeholder="বিক্রয় মূল্য">
                 <input type="number" id="stock" class="form-control mb-2" placeholder="স্টক পরিমাণ">
-                <input type="number" id="alertLimit" class="form-control mb-3" placeholder="সতর্কতা সীমা (যেমন: ৫)">
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="small text-muted">সতর্কতা সীমা</label>
+                        <input type="number" id="alertLimit" class="form-control" placeholder="যেমন: ৫">
+                    </div>
+                    <div class="col-6">
+                        <label class="small text-muted">মেয়াদ উত্তীর্ণ (Expiry)</label>
+                        <input type="date" id="expiryDate" class="form-control">
+                    </div>
+                </div>
                 <button onclick="checkAuth(save)" class="btn btn-primary w-100 mb-2">ইনভেন্টরি আপডেট</button>
                 <div class="d-flex gap-2">
                     <button onclick="generateBarcode()" class="btn btn-outline-secondary w-50 btn-sm">বারকোড তৈরী</button>
@@ -125,7 +156,7 @@
             </div>
         </div>
 
-        <div class="col-md-8">
+        <div class="col-md-8" id="productTableContainer">
             <div class="card p-4 shadow-sm mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5>ইনভেন্টরি ও সাপ্লায়ার লিস্ট</h5>
@@ -139,18 +170,34 @@
                             <tr>
                                 <th>বারকোড</th>
                                 <th>নাম</th>
-                                <th>ক্যাটাগরি</th>
+                                <th>ইউনিট</th>
                                 <th>সাপ্লায়ার</th>
-                                <th>কেনা</th>
+                                <th class="admin-only">কেনা</th>
                                 <th>বেচা</th>
                                 <th>স্টক</th>
-                                <th>অ্যাকশন</th>
+                                <th>মেয়াদ</th>
+                                <th class="admin-only">অ্যাকশন</th>
                             </tr>
                         </thead>
                         <tbody id="pBody"></tbody>
                     </table>
                 </div>
                 <div class="pagination-container" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header"><h5>আর্থিক রিপোর্ট জেনারেট</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <label>শুরুর তারিখ:</label>
+                <input type="date" id="startDate" class="form-control mb-2">
+                <label>শেষ তারিখ:</label>
+                <input type="date" id="endDate" class="form-control mb-3">
+                <button onclick="generateCustomReport()" class="btn btn-primary w-100">রিপোর্ট ডাউনলোড করুন</button>
             </div>
         </div>
     </div>
@@ -212,12 +259,12 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">বাকি তালিকা ও টাকা জমা</h5>
+        <h5 class="modal-title">বাকি তালিকা ও কাস্টমার লেজার</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <table class="table">
-            <thead><tr><th>কাস্টমার নাম</th><th>বাকি টাকা</th><th>অ্যাকশন</th></tr></thead>
+            <thead><tr><th>কাস্টমার নাম</th><th>তারিখ</th><th>বাকি টাকা</th><th>অ্যাকশন</th></tr></thead>
             <tbody id="dueBody"></tbody>
         </table>
       </div>
@@ -236,8 +283,26 @@
     const rowsPerPage = 10;
     let allProducts = [];
     let filteredProductsList = []; 
+    let allSales = []; // Global sales data for reports
 
-    // Modified Protection Logic to support "No Password" state
+    // 4. Employee Management Logic
+    function switchRole() {
+        const role = document.getElementById('userRole').value;
+        if(role === 'staff') {
+            document.body.classList.add('staff-mode');
+            document.getElementById('productTableContainer').className = "col-md-12";
+        } else {
+            let pass = prompt("অ্যাডমিন পাসওয়ার্ড দিন:");
+            if(pass === systemPass) {
+                document.body.classList.remove('staff-mode');
+                document.getElementById('productTableContainer').className = "col-md-8";
+            } else {
+                alert("ভুল পাসওয়ার্ড!");
+                document.getElementById('userRole').value = 'staff';
+            }
+        }
+    }
+
     function checkAuth(callback, ...args) {
         if (!systemPass || systemPass === "null") {
             callback(...args);
@@ -271,7 +336,6 @@
         }
     }
 
-    // New Function to Remove Password
     function removePassword() {
         if (!systemPass || systemPass === "null") {
             alert("কোনো পাসওয়ার্ড সেট করা নেই!");
@@ -294,12 +358,12 @@
         renderProductTable();
 
         const sRes = await fetch('/api/sales');
-        const sales = await sRes.json();
+        allSales = await sRes.json();
         let ts = 0, tp = 0, td = 0;
         let catStats = {};
         
         let dueHtml = '';
-        sales.forEach(s => { 
+        allSales.forEach(s => { 
             ts += s.totalAmount; 
             tp += s.profit; 
             td += s.dueAmount; 
@@ -311,10 +375,11 @@
             if(s.dueAmount > 0) {
                 dueHtml += `<tr>
                     <td>${s.customerName || 'Unknown'}</td>
+                    <td>${new Date(s.date).toLocaleDateString()}</td>
                     <td>${s.dueAmount}৳</td>
                     <td>
                         <button class="btn btn-sm btn-success" onclick="payDue('${s._id}', ${s.dueAmount})">টাকা জমা</button>
-                        <button class="btn btn-sm btn-secondary" onclick="printInvoice('${s._id}')">🖨️ ইনভয়েস</button>
+                        <button class="btn btn-sm btn-secondary" onclick="printInvoice('${s._id}')">🖨️</button>
                     </td>
                 </tr>`;
             }
@@ -338,7 +403,7 @@
         document.getElementById('goalProgress').style.width = percent + '%';
         document.getElementById('goalProgress').innerText = percent + '%';
 
-        renderGraph(sales);
+        renderGraph(allSales);
         renderCategoryChart(catStats);
         renderLogs();
     }
@@ -349,19 +414,32 @@
         const end = start + rowsPerPage;
         const paginatedItems = filteredProductsList.slice(start, end);
 
+        const today = new Date();
+
         paginatedItems.forEach(p => {
             let limit = p.alertLimit || 5;
             let stockClass = p.stock < limit ? 'badge-critical' : (p.stock < (limit + 5) ? 'badge-low' : 'bg-success');
             
+            // 3. Expiry Check
+            let expiryClass = "";
+            let expiryDateStr = p.expiryDate ? new Date(p.expiryDate).toLocaleDateString() : 'N/A';
+            if(p.expiryDate) {
+                let exp = new Date(p.expiryDate);
+                let diff = (exp - today) / (1000 * 60 * 60 * 24);
+                if(diff < 0) expiryClass = "text-danger fw-bold";
+                else if(diff < 15) expiryClass = "text-warning fw-bold";
+            }
+
             document.getElementById('pBody').innerHTML += `<tr>
                 <td>${p.barcode || 'N/A'}</td>
                 <td>${p.name}</td>
-                <td>${p.category || 'N/A'}</td>
+                <td><small>${p.unit || 'Pcs'}</small></td>
                 <td>${p.supplier || 'N/A'}</td>
-                <td>${p.costPrice}</td>
+                <td class="admin-only">${p.costPrice}</td>
                 <td>${p.price}</td>
                 <td><span class="badge ${stockClass}">${p.stock}</span></td>
-                <td>
+                <td class="${expiryClass}">${expiryDateStr}</td>
+                <td class="admin-only">
                     <button class="btn btn-sm btn-outline-primary" onclick="openEditModal('${p._id}', '${p.name}', ${p.costPrice}, ${p.price}, ${p.stock})">✏️</button>
                     <button class="btn btn-sm btn-outline-danger" onclick="checkAuth(deleteProduct, '${p._id}', '${p.name}')">🗑️</button>
                 </td>
@@ -372,23 +450,54 @@
         renderPagination();
     }
 
+    // Updated Notification to include Expiry
     function updateNotifications() {
         let lowStockProducts = allProducts.filter(p => p.stock < (p.alertLimit || 5));
+        let expiringSoon = allProducts.filter(p => {
+            if(!p.expiryDate) return false;
+            let diff = (new Date(p.expiryDate) - new Date()) / (1000 * 60 * 60 * 24);
+            return diff < 15;
+        });
+
         const notiCount = document.getElementById('notiCount');
         const notiContent = document.getElementById('notiContent');
-        notiCount.innerText = lowStockProducts.length;
-        if (lowStockProducts.length > 0) {
-            notiContent.innerHTML = lowStockProducts.map(p => `
-                <li><a class="dropdown-item py-2 border-bottom" href="#">
-                    <div class="d-flex justify-content-between">
-                        <strong>${p.name}</strong>
-                        <span class="text-danger">স্টক: ${p.stock}</span>
-                    </div>
-                </a></li>
-            `).join('');
-        } else {
-            notiContent.innerHTML = '<p class="text-muted text-center m-0 p-2">সব স্টক ঠিক আছে</p>';
-        }
+        notiCount.innerText = lowStockProducts.length + expiringSoon.length;
+
+        let html = '';
+        lowStockProducts.forEach(p => {
+            html += `<li><a class="dropdown-item py-1 border-bottom"><small>⚠️ ${p.name} স্টক কম (${p.stock})</small></a></li>`;
+        });
+        expiringSoon.forEach(p => {
+            html += `<li><a class="dropdown-item py-1 border-bottom text-danger"><small>⏰ ${p.name} মেয়াদ শেষ হচ্ছে!</small></a></li>`;
+        });
+        
+        notiContent.innerHTML = html || '<p class="text-muted text-center m-0 p-2">সব ঠিক আছে</p>';
+    }
+
+    // 1. Financial Report Generation
+    async function generateCustomReport() {
+        const start = new Date(document.getElementById('startDate').value);
+        const end = new Date(document.getElementById('endDate').value);
+        
+        if(!start || !end) { alert("তারিখ নির্বাচন করুন"); return; }
+
+        let filtered = allSales.filter(s => {
+            let d = new Date(s.date);
+            return d >= start && d <= end;
+        });
+
+        let totalS = filtered.reduce((a, b) => a + b.totalAmount, 0);
+        let totalP = filtered.reduce((a, b) => a + b.profit, 0);
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("Sales Report", 14, 15);
+        doc.text(`Period: ${start.toLocaleDateString()} to ${end.toLocaleDateString()}`, 14, 25);
+        doc.text(`Total Sales: ${totalS} Tk | Total Profit: ${totalP} Tk`, 14, 35);
+        
+        let rows = filtered.map(s => [new Date(s.date).toLocaleDateString(), s.customerName || 'N/A', s.totalAmount, s.profit]);
+        doc.autoTable({ startY: 45, head: [['Date', 'Customer', 'Amount', 'Profit']], body: rows });
+        doc.save("financial_report.pdf");
     }
 
     function renderPagination() {
@@ -412,9 +521,7 @@
     }
 
     async function printInvoice(saleId) {
-        const sRes = await fetch('/api/sales');
-        const sales = await sRes.json();
-        const sale = sales.find(s => s._id === saleId);
+        const sale = allSales.find(s => s._id === saleId);
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         doc.setFontSize(20);
@@ -452,7 +559,7 @@
     async function backupData() {
         const eRes = await fetch('/api/expenses');
         const expenses = await eRes.json();
-        const data = { products: [], sales: [], expenses, logs: activityLogs };
+        const data = { products: allProducts, sales: allSales, expenses, logs: activityLogs };
         const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -530,11 +637,13 @@
             barcode: document.getElementById('barcode').value,
             name: document.getElementById('name').value, 
             category: document.getElementById('category').value,
+            unit: document.getElementById('unit').value, // 5. Multi-unit
             supplier: document.getElementById('supplier').value,
             costPrice: Number(document.getElementById('cost').value),
             price: Number(document.getElementById('price').value), 
             stock: Number(document.getElementById('stock').value),
-            alertLimit: Number(document.getElementById('alertLimit').value) || 5
+            alertLimit: Number(document.getElementById('alertLimit').value) || 5,
+            expiryDate: document.getElementById('expiryDate').value // 3. Expiry
         };
         await fetch('/api/products', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
         addLog(`Added Product: ${payload.name}`);
