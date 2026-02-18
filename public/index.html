@@ -122,7 +122,15 @@
                 </div>
                 <div class="table-responsive">
                     <table class="table" id="pTable">
-                        <thead><tr><th>বারকোড</th><th>নাম (ক্যাটাগরি/সাপ্লায়ার)</th><th>কেনা/বেচা</th><th>স্টক</th><th>অ্যাকশন</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>বারকোড</th>
+                                <th>নাম (ক্যাটাগরি/সাপ্লায়ার)</th>
+                                <th>কেনা/বেচা</th>
+                                <th>স্টক</th>
+                                <th>অ্যাকশন</th>
+                            </tr>
+                        </thead>
                         <tbody id="pBody"></tbody>
                     </table>
                 </div>
@@ -252,12 +260,15 @@
             
             document.getElementById('pBody').innerHTML += `<tr>
                 <td>${p.barcode || 'N/A'}</td>
-                <td>${p.name} <br><small class="text-muted">${p.category || 'N/A'} | Sup: ${p.supplier || 'N/A'}</small></td>
-                <td>${p.costPrice}/${p.price}</td>
-                <td><span class="badge ${stockClass}">${p.stock}</span></td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary" onclick="openEditModal('${p._id}', '${p.name}', ${p.costPrice}, ${p.price}, ${p.stock})">✏️</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="checkAuth(deleteProduct, '${p._id}', '${p.name}')">🗑️</button>
+                    <div>${p.name}</div>
+                    <small class="text-muted">${p.category || 'N/A'} / ${p.supplier || 'N/A'}</small>
+                </td>
+                <td>\( {p.costPrice}/ \){p.price}</td>
+                <td><span class="badge \( {stockClass}"> \){p.stock}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="openEditModal('\( {p._id}', ' \){p.name}', ${p.costPrice}, ${p.price}, ${p.stock})">✏️</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="checkAuth(deleteProduct, '\( {p._id}', ' \){p.name}')">🗑️</button>
                 </td>
             </tr>`;
         });
@@ -350,7 +361,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(expenseData)
             });
-            addLog(`Expense Added: ${title} (${amount}৳)`);
+            addLog(`Expense Added: \( {title} ( \){amount}৳)`);
             location.reload();
         }
     }
