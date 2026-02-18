@@ -21,20 +21,31 @@
         .stat-card { border-radius: 15px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; }
         .stat-card:hover { transform: translateY(-5px); }
         .chart-container { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .badge-low { background: #ffc107; color: #000; } /* Yellow for < 10 */
-        .badge-critical { background: #dc3545; color: #fff; } /* Red for < 5 */
+        .badge-low { background: #ffc107; color: #000; }
+        .badge-critical { background: #dc3545; color: #fff; }
         
-        /* New Styles for Advanced Features */
         .log-container { max-height: 200px; overflow-y: auto; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 10px; }
         .dark-mode .log-container { background: #1a1a1a; color: #aaa; }
         .pagination-container { display: flex; justify-content: center; gap: 5px; margin-top: 15px; }
+
+        /* Notification Styling */
+        .notification-btn { position: relative; border-radius: 50%; width: 35px; height: 35px; display: inline-flex; align-items: center; justify-content: center; }
+        .notification-badge { position: absolute; top: -5px; right: -5px; font-size: 0.7rem; border-radius: 50%; }
     </style>
 </head>
 <body>
 <nav class="navbar navbar-dark bg-primary p-3">
     <div class="container d-flex justify-content-between">
         <span class="navbar-brand fw-bold">🚀 SuperShop ERP Pro</span>
-        <div>
+        <div class="d-flex align-items-center">
+            <button class="btn btn-danger notification-btn me-3" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                🔔 <span class="badge bg-white text-danger notification-badge" id="notiCount">0</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end p-3 shadow" style="min-width: 250px;" id="notiList">
+                <li><h6 class="dropdown-header">স্টক অ্যালার্ট</h6></li>
+                <li id="notiContent"><p class="text-muted text-center m-0">সব স্টক ঠিক আছে</p></li>
+            </ul>
+
             <button class="btn btn-outline-light btn-sm me-2 dropdown-toggle" type="button" data-bs-toggle="dropdown">⚙️ সেটিংস</button>
             <ul class="dropdown-menu">
                 <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#passwordModal">🔒 পাসওয়ার্ড সেট করুন</a></li>
@@ -49,7 +60,7 @@
 
 <div class="container mt-4">
     <div class="alert alert-danger d-none" id="lowStockAlert">
-        ⚠️ <strong>সতর্কতা:</strong> নিচের পণ্যগুলোর স্টক ফুরিয়ে আসছে (৫ এর নিচে)! <span id="lowStockList"></span>
+        ⚠️ <strong>সতর্কতা:</strong> নিচের পণ্যগুলোর স্টক ফুরিয়ে আসছে! <span id="lowStockList"></span>
     </div>
 
     <div class="row g-3 mb-4 text-center">
@@ -98,7 +109,8 @@
                 <input type="text" id="supplier" class="form-control mb-2" placeholder="সরবরাহকারী (Supplier)">
                 <input type="number" id="cost" class="form-control mb-2" placeholder="কেনা দাম">
                 <input type="number" id="price" class="form-control mb-2" placeholder="বিক্রয় মূল্য">
-                <input type="number" id="stock" class="form-control mb-3" placeholder="স্টক পরিমাণ">
+                <input type="number" id="stock" class="form-control mb-2" placeholder="স্টক পরিমাণ">
+                <input type="number" id="alertLimit" class="form-control mb-3" placeholder="সতর্কতা সীমা (যেমন: ৫)">
                 <button onclick="checkAuth(save)" class="btn btn-primary w-100 mb-2">ইনভেন্টরি আপডেট</button>
                 <div class="d-flex gap-2">
                     <button onclick="generateBarcode()" class="btn btn-outline-secondary w-50 btn-sm">বারকোড তৈরী</button>
@@ -224,7 +236,7 @@
     let currentPage = 1;
     const rowsPerPage = 10;
     let allProducts = [];
-    let filteredProductsList = []; // New list for filtered search
+    let filteredProductsList = []; 
 
     // Password Protection Logic
     function checkAuth(callback, ...args) {
@@ -259,7 +271,7 @@
     async function load() {
         const pRes = await fetch('/api/products');
         allProducts = await pRes.json();
-        filteredProductsList = [...allProducts]; // Sync filtered list
+        filteredProductsList = [...allProducts]; 
         renderProductTable();
 
         const sRes = await fetch('/api/sales');
@@ -313,7 +325,6 @@
     }
 
     function renderProductTable() {
-        let lowStockNames = [];
         document.getElementById('pBody').innerHTML = '';
         
         const start = (currentPage - 1) * rowsPerPage;
@@ -321,8 +332,8 @@
         const paginatedItems = filteredProductsList.slice(start, end);
 
         paginatedItems.forEach(p => {
-            if(p.stock < 5) lowStockNames.push(p.name);
-            let stockClass = p.stock < 5 ? 'badge-critical' : (p.stock < 10 ? 'badge-low' : 'bg-success');
+            let limit = p.alertLimit || 5;
+            let stockClass = p.stock < limit ? 'badge-critical' : (p.stock < (limit + 5) ? 'badge-low' : 'bg-success');
             
             document.getElementById('pBody').innerHTML += `<tr>
                 <td>${p.barcode || 'N/A'}</td>
@@ -339,16 +350,29 @@
             </tr>`;
         });
 
-        // Dynamic alert based on all products, not just filtered
-        let globalLowStock = allProducts.filter(p => p.stock < 5).map(p => p.name);
-        if(globalLowStock.length > 0) {
-            document.getElementById('lowStockAlert').classList.remove('d-none');
-            document.getElementById('lowStockList').innerText = globalLowStock.join(', ');
-        } else {
-            document.getElementById('lowStockAlert').classList.add('d-none');
-        }
-
+        updateNotifications();
         renderPagination();
+    }
+
+    function updateNotifications() {
+        let lowStockProducts = allProducts.filter(p => p.stock < (p.alertLimit || 5));
+        const notiCount = document.getElementById('notiCount');
+        const notiContent = document.getElementById('notiContent');
+        
+        notiCount.innerText = lowStockProducts.length;
+        
+        if (lowStockProducts.length > 0) {
+            notiContent.innerHTML = lowStockProducts.map(p => `
+                <li><a class="dropdown-item py-2 border-bottom" href="#">
+                    <div class="d-flex justify-content-between">
+                        <strong>${p.name}</strong>
+                        <span class="text-danger">স্টক: ${p.stock}</span>
+                    </div>
+                </a></li>
+            `).join('');
+        } else {
+            notiContent.innerHTML = '<p class="text-muted text-center m-0 p-2">সব স্টক ঠিক আছে</p>';
+        }
     }
 
     function renderPagination() {
@@ -499,7 +523,8 @@
             supplier: document.getElementById('supplier').value,
             costPrice: Number(document.getElementById('cost').value),
             price: Number(document.getElementById('price').value), 
-            stock: Number(document.getElementById('stock').value) 
+            stock: Number(document.getElementById('stock').value),
+            alertLimit: Number(document.getElementById('alertLimit').value) || 5
         };
         await fetch('/api/products', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
         addLog(`Added Product: ${payload.name}`);
@@ -516,12 +541,11 @@
 
     function filterProducts() {
         let input = document.getElementById('pSearch').value.toUpperCase();
-        // Global Search across all products
         filteredProductsList = allProducts.filter(p => {
             const dataStr = `${p.name} ${p.barcode} ${p.category} ${p.supplier}`.toUpperCase();
             return dataStr.indexOf(input) > -1;
         });
-        currentPage = 1; // Reset to first page of results
+        currentPage = 1; 
         renderProductTable();
     }
 
