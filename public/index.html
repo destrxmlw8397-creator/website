@@ -27,6 +27,7 @@
         /* New Styles for Advanced Features */
         .log-container { max-height: 200px; overflow-y: auto; font-size: 0.85rem; background: #f8f9fa; padding: 10px; border-radius: 10px; }
         .dark-mode .log-container { background: #1a1a1a; color: #aaa; }
+        .pagination-container { display: flex; justify-content: center; gap: 5px; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -137,6 +138,7 @@
                         <tbody id="pBody"></tbody>
                     </table>
                 </div>
+                <div class="pagination-container" id="pagination"></div>
             </div>
         </div>
     </div>
@@ -217,6 +219,11 @@
     let categoryChart = null;
     let activityLogs = JSON.parse(localStorage.getItem('shopLogs')) || [];
     let systemPass = localStorage.getItem('appPassword') || '1234';
+    
+    // Pagination Variables
+    let currentPage = 1;
+    const rowsPerPage = 10;
+    let allProducts = [];
 
     // Password Protection Logic
     function checkAuth(callback, ...args) {
@@ -250,41 +257,13 @@
 
     async function load() {
         const pRes = await fetch('/api/products');
-        const products = await pRes.json();
-        let val = 0;
-        let lowStockNames = [];
-        let catStats = {};
-        document.getElementById('pBody').innerHTML = '';
-        
-        products.forEach(p => {
-            val += (p.costPrice * p.stock);
-            if(p.stock < 5) lowStockNames.push(p.name);
-            let stockClass = p.stock < 5 ? 'badge-critical' : (p.stock < 10 ? 'badge-low' : 'bg-success');
-            
-            // কলামগুলো আলাদা করে আপডেট করা হয়েছে
-            document.getElementById('pBody').innerHTML += `<tr>
-                <td>${p.barcode || 'N/A'}</td>
-                <td>${p.name}</td>
-                <td>${p.category || 'N/A'}</td>
-                <td>${p.supplier || 'N/A'}</td>
-                <td>${p.costPrice}</td>
-                <td>${p.price}</td>
-                <td><span class="badge ${stockClass}">${p.stock}</span></td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary" onclick="openEditModal('${p._id}', '${p.name}', ${p.costPrice}, ${p.price}, ${p.stock})">✏️</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="checkAuth(deleteProduct, '${p._id}', '${p.name}')">🗑️</button>
-                </td>
-            </tr>`;
-        });
-
-        if(lowStockNames.length > 0) {
-            document.getElementById('lowStockAlert').classList.remove('d-none');
-            document.getElementById('lowStockList').innerText = lowStockNames.join(', ');
-        }
+        allProducts = await pRes.json();
+        renderProductTable();
 
         const sRes = await fetch('/api/sales');
         const sales = await sRes.json();
         let ts = 0, tp = 0, td = 0;
+        let catStats = {};
         
         let dueHtml = '';
         sales.forEach(s => { 
@@ -317,7 +296,9 @@
         document.getElementById('tExp').innerText = totalExp + '৳';
         document.getElementById('nProfit').innerText = (tp - totalExp) + '৳';
         document.getElementById('tDue').innerText = td + '৳';
-        document.getElementById('tVal').innerText = val + '৳';
+        
+        let stockVal = allProducts.reduce((acc, p) => acc + (p.costPrice * p.stock), 0);
+        document.getElementById('tVal').innerText = stockVal + '৳';
         document.getElementById('dueBody').innerHTML = dueHtml;
 
         let percent = Math.min((ts / 1000000) * 100, 100).toFixed(1);
@@ -327,6 +308,65 @@
         renderGraph(sales);
         renderCategoryChart(catStats);
         renderLogs();
+    }
+
+    function renderProductTable() {
+        let val = 0;
+        let lowStockNames = [];
+        document.getElementById('pBody').innerHTML = '';
+        
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const paginatedItems = allProducts.slice(start, end);
+
+        paginatedItems.forEach(p => {
+            if(p.stock < 5) lowStockNames.push(p.name);
+            let stockClass = p.stock < 5 ? 'badge-critical' : (p.stock < 10 ? 'badge-low' : 'bg-success');
+            
+            document.getElementById('pBody').innerHTML += `<tr>
+                <td>${p.barcode || 'N/A'}</td>
+                <td>${p.name}</td>
+                <td>${p.category || 'N/A'}</td>
+                <td>${p.supplier || 'N/A'}</td>
+                <td>${p.costPrice}</td>
+                <td>${p.price}</td>
+                <td><span class="badge ${stockClass}">${p.stock}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="openEditModal('${p._id}', '${p.name}', ${p.costPrice}, ${p.price}, ${p.stock})">✏️</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="checkAuth(deleteProduct, '${p._id}', '${p.name}')">🗑️</button>
+                </td>
+            </tr>`;
+        });
+
+        if(lowStockNames.length > 0) {
+            document.getElementById('lowStockAlert').classList.remove('d-none');
+            document.getElementById('lowStockList').innerText = lowStockNames.join(', ');
+        } else {
+            document.getElementById('lowStockAlert').classList.add('d-none');
+        }
+
+        renderPagination();
+    }
+
+    function renderPagination() {
+        const pageCount = Math.ceil(allProducts.length / rowsPerPage);
+        let html = `<button class="btn btn-sm btn-outline-primary" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>আগের</button>`;
+        
+        for (let i = 1; i <= pageCount; i++) {
+            if (i === 1 || i === pageCount || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                html += `<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-outline-primary'}" onclick="changePage(${i})">${i}</button>`;
+            } else if (i === currentPage - 2 || i === currentPage + 2) {
+                html += `<span>...</span>`;
+            }
+        }
+
+        html += `<button class="btn btn-sm btn-outline-primary" onclick="changePage(${currentPage + 1})" ${currentPage === pageCount ? 'disabled' : ''}>পরের</button>`;
+        document.getElementById('pagination').innerHTML = html;
+    }
+
+    function changePage(page) {
+        currentPage = page;
+        renderProductTable();
     }
 
     async function printInvoice(saleId) {
