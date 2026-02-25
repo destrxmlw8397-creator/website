@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
+        /* আগের সব স্টাইল + হোল্ড কার্টের স্টাইল */
         * {
             margin: 0;
             padding: 0;
@@ -20,7 +21,6 @@
             padding: 20px;
         }
 
-        /* POS Container */
         .pos-container {
             background: white;
             border-radius: 30px;
@@ -340,6 +340,37 @@
             100% { box-shadow: 0 0 0 0 rgba(67, 233, 123, 0); }
         }
 
+        /* ========== হোল্ড কার্ট স্টাইল ========== */
+        .held-carts-section {
+            border-top: 2px dashed #667eea;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .held-cart-item {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 3px solid #667eea;
+        }
+
+        .held-cart-item:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 4px 8px rgba(102,126,234,0.2);
+        }
+
+        .held-cart-item .btn-group {
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .held-cart-item:hover .btn-group {
+            opacity: 1;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .pos-container {
@@ -360,7 +391,7 @@
 <body>
     <div class="pos-container">
         <div class="row g-0 h-100">
-            <!-- Products Panel -->
+            <!-- Products Panel (বাম পাশে) -->
             <div class="col-md-7 products-panel">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
@@ -393,7 +424,7 @@
                 </div>
             </div>
 
-            <!-- Cart Panel -->
+            <!-- Cart Panel (ডান পাশে) -->
             <div class="col-md-5 cart-panel">
                 <div class="cart-header">
                     <h4 class="mb-3">
@@ -415,13 +446,28 @@
                     <!-- Cart items will be loaded here -->
                 </div>
 
+                <!-- ========== হোল্ড কার্ট সেকশন ========== -->
+                <div class="held-carts-section">
+                    <button class="btn btn-info w-100" type="button" data-bs-toggle="collapse" data-bs-target="#heldCartsPanel">
+                        <i class="bi bi-pause-circle"></i> হোল্ড করা কার্ট দেখুন (<span id="heldCartCount">0</span>)
+                    </button>
+                    
+                    <div class="collapse mt-3" id="heldCartsPanel">
+                        <div class="card card-body bg-light" id="heldCartsList">
+                            <!-- হোল্ড করা কার্টগুলো এখানে দেখাবে -->
+                            <p class="text-muted text-center">কোনো কার্ট হোল্ড করা নেই</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- কার্ট ফুটার (পেমেন্ট সেকশন) -->
                 <div class="cart-footer">
                     <div class="d-flex justify-content-between mb-2">
                         <span>সর্বমোট:</span>
                         <span class="fs-4 fw-bold" id="subtotal">0</span>
                     </div>
                     
-                    <div class="d-flex justify-content-between mb-2 text-warning" id="discountRow" style="display: none !important;">
+                    <div class="d-flex justify-content-between mb-2 text-warning" id="discountRow" style="display: none;">
                         <span>ডিসকাউন্ট:</span>
                         <span class="fs-5" id="discountAmount">0</span>
                     </div>
@@ -508,21 +554,20 @@
         </div>
     </div>
 
-    <!-- Memo Template -->
+    <!-- Memo Template (PDF এর জন্য) -->
     <div id="memoTemplate" style="display: none;">
-        <!-- Your existing memo design here -->
+        <!-- আপনার আগের মেমো ডিজাইন এখানে থাকবে -->
     </div>
 
     <script>
-        // State Management
+        // ========== গ্লোবাল ভেরিয়েবল ==========
         let products = [];
         let cart = [];
         let currentMemoNo = localStorage.getItem('lastMemoNo') ? parseInt(localStorage.getItem('lastMemoNo')) + 1 : 1;
         let currentDiscount = 0;
         let paymentMethod = 'cash';
-        let heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
 
-        // Toast Function
+        // ========== টোস্ট নোটিফিকেশন ==========
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
             toast.className = `toast-notification toast-${type}`;
@@ -532,15 +577,14 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        // Initialize
+        // ========== ডাটা লোড ==========
         async function init() {
             await loadProducts();
             loadCategories();
             setupKeyboardShortcuts();
-            checkHeldCarts();
+            displayHeldCarts(); // হোল্ড করা কার্ট দেখান
         }
 
-        // Load Products
         async function loadProducts() {
             try {
                 const res = await fetch('/api/products');
@@ -551,26 +595,7 @@
             }
         }
 
-        // Load Categories
-        function loadCategories() {
-            const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-            const tabs = document.getElementById('categoryTabs');
-            
-            categories.forEach(cat => {
-                tabs.innerHTML += `<div class="category-tab" onclick="filterCategory('${cat}')">${cat}</div>`;
-            });
-        }
-
-        // Filter by Category
-        function filterCategory(category) {
-            document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            const filtered = category ? products.filter(p => p.category === category) : products;
-            renderProducts(filtered);
-        }
-
-        // Render Products
+        // ========== প্রোডাক্ট রেন্ডার ==========
         function renderProducts(productList = products) {
             const list = document.getElementById('productList');
             list.innerHTML = '';
@@ -595,11 +620,28 @@
             });
         }
 
-        // Handle Search
+        // ========== ক্যাটাগরি লোড ==========
+        function loadCategories() {
+            const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+            const tabs = document.getElementById('categoryTabs');
+            
+            categories.forEach(cat => {
+                tabs.innerHTML += `<div class="category-tab" onclick="filterCategory('${cat}')">${cat}</div>`;
+            });
+        }
+
+        function filterCategory(category) {
+            document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const filtered = category ? products.filter(p => p.category === category) : products;
+            renderProducts(filtered);
+        }
+
+        // ========== সার্চ হ্যান্ডেল ==========
         function handleSearch() {
             const searchTerm = document.getElementById('search').value.toLowerCase();
             
-            // Check for barcode scan
             const barcodeMatch = products.find(p => p.barcode === searchTerm);
             if (barcodeMatch && searchTerm !== '') {
                 addToCart(barcodeMatch._id);
@@ -609,7 +651,6 @@
                 return;
             }
             
-            // Filter by name
             const filtered = products.filter(p => 
                 p.name.toLowerCase().includes(searchTerm) ||
                 (p.category && p.category.toLowerCase().includes(searchTerm))
@@ -618,7 +659,7 @@
             renderProducts(filtered);
         }
 
-        // Add to Cart
+        // ========== কার্ট ফাংশন ==========
         function addToCart(productId) {
             const product = products.find(p => p._id === productId);
             
@@ -643,7 +684,6 @@
             showToast(`${product.name} কার্টে যোগ করা হয়েছে`, 'success');
         }
 
-        // Update Cart
         function updateCart() {
             const cartDiv = document.getElementById('cartItems');
             const cartCount = document.getElementById('cartCount');
@@ -686,7 +726,6 @@
             updateTotal(subtotal);
         }
 
-        // Update Quantity
         function updateQuantity(productId, newQty) {
             const item = cart.find(i => i._id === productId);
             const product = products.find(p => p._id === productId);
@@ -705,14 +744,12 @@
             updateCart();
         }
 
-        // Remove from Cart
         function removeFromCart(productId) {
             cart = cart.filter(i => i._id !== productId);
             updateCart();
             showToast('পণ্য সরানো হয়েছে', 'info');
         }
 
-        // Clear Cart
         function clearCart() {
             if (cart.length === 0) return;
             
@@ -723,7 +760,7 @@
             }
         }
 
-        // Apply Discount
+        // ========== ডিসকাউন্ট ফাংশন ==========
         function applyDiscount() {
             let discount = prompt('ডিসকাউন্ট পরিমাণ (%):', '0');
             discount = parseFloat(discount);
@@ -736,7 +773,6 @@
             }
         }
 
-        // Update Total with Discount
         function updateTotal(subtotal) {
             const discountAmount = (subtotal * currentDiscount) / 100;
             const total = subtotal - discountAmount;
@@ -747,7 +783,7 @@
             calculateChange();
         }
 
-        // Calculate Change
+        // ========== পেমেন্ট ফাংশন ==========
         function calculateChange() {
             const total = parseFloat(document.getElementById('total').innerText) || 0;
             const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
@@ -756,7 +792,6 @@
             document.getElementById('changeAmount').value = change >= 0 ? change.toFixed(2) : '০.০০';
         }
 
-        // Set Payment Method
         function setPaymentMethod(method) {
             paymentMethod = method;
             
@@ -767,7 +802,6 @@
             document.getElementById('cardFields').style.display = method === 'card' ? 'block' : 'none';
         }
 
-        // Process Payment
         async function processPayment() {
             if (cart.length === 0) {
                 showToast('কার্ট খালি!', 'error');
@@ -787,7 +821,6 @@
             }
             
             try {
-                // Save sale
                 await fetch('/api/checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -804,16 +837,13 @@
                     })
                 });
                 
-                // Generate PDF
-                await generatePDF(customerName, customerMobile, customerAddress, total, paid);
-                
-                // Update stock locally
+                // স্টক আপডেট
                 cart.forEach(item => {
                     const product = products.find(p => p._id === item._id);
                     if (product) product.stock -= item.qty;
                 });
                 
-                // Reset cart
+                // কার্ট রিসেট
                 cart = [];
                 currentDiscount = 0;
                 currentMemoNo++;
@@ -828,38 +858,126 @@
             }
         }
 
-        // Generate PDF (Your existing PDF generation code here)
-        async function generatePDF(customerName, customerMobile, customerAddress, total, paid) {
-            // Use your existing PDF generation code
-        }
-
-        // Hold Cart
+        // ========== হোল্ড কার্ট ফাংশন ==========
         function holdCart() {
-            if (cart.length === 0) return;
+            if (cart.length === 0) {
+                showToast('কার্ট খালি!', 'error');
+                return;
+            }
             
             const holdId = Date.now();
+            const heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
+            
             heldCarts.push({
                 id: holdId,
                 cart: [...cart],
                 customerName: document.getElementById('customerName').value,
                 customerMobile: document.getElementById('customerMobile').value,
-                time: new Date().toLocaleString()
+                time: new Date().toLocaleString('bn-BD')
             });
             
             localStorage.setItem('heldCarts', JSON.stringify(heldCarts));
-            clearCart();
+            
+            // কার্ট খালি করুন
+            cart = [];
+            updateCart();
+            
+            // হোল্ড লিস্ট আপডেট
+            displayHeldCarts();
             
             showToast('কার্ট হোল্ড করা হয়েছে', 'success');
         }
 
-        // Check Held Carts
-        function checkHeldCarts() {
-            if (heldCarts.length > 0) {
-                showToast(`${heldCarts.length} টি হোল্ড করা কার্ট আছে`, 'info');
+        // হোল্ড করা কার্ট দেখান
+        function displayHeldCarts() {
+            const heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
+            const container = document.getElementById('heldCartsList');
+            const countSpan = document.getElementById('heldCartCount');
+            
+            countSpan.innerText = heldCarts.length;
+            
+            if (heldCarts.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">কোনো কার্ট হোল্ড করা নেই</p>';
+                return;
+            }
+            
+            let html = '';
+            heldCarts.forEach((cart, index) => {
+                const total = cart.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                
+                html += `
+                    <div class="held-cart-item">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>${cart.customerName || 'নাম নেই'}</strong>
+                                <br>
+                                <small class="text-muted">
+                                    আইটেম: ${cart.cart.length} | 
+                                    মোট: ${total}৳
+                                </small>
+                                <br>
+                                <small class="text-info">⏱️ ${cart.time}</small>
+                            </div>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-success" onclick="loadHeldCart(${index})" title="লোড করুন">
+                                    <i class="bi bi-play-fill"></i>
+                                </button>
+                                <button class="btn btn-danger" onclick="deleteHeldCart(${index})" title="ডিলিট">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-1 small">
+                            <span class="badge bg-primary">${cart.cart.map(i => i.name).join(', ').substring(0, 30)}...</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // হোল্ড করা কার্ট লোড করুন
+        function loadHeldCart(index) {
+            const heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
+            const heldCart = heldCarts[index];
+            
+            if (!heldCart) return;
+            
+            if (cart.length > 0) {
+                if (!confirm('বর্তমান কার্ট খালি হয়ে যাবে। কি লোড করবেন?')) {
+                    return;
+                }
+            }
+            
+            cart = [...heldCart.cart];
+            
+            document.getElementById('customerName').value = heldCart.customerName || '';
+            document.getElementById('customerMobile').value = heldCart.customerMobile || '';
+            
+            updateCart();
+            
+            heldCarts.splice(index, 1);
+            localStorage.setItem('heldCarts', JSON.stringify(heldCarts));
+            
+            displayHeldCarts();
+            
+            showToast('হোল্ড করা কার্ট লোড করা হয়েছে', 'success');
+        }
+
+        // হোল্ড কার্ট ডিলিট করুন
+        function deleteHeldCart(index) {
+            if (confirm('এই হোল্ড করা কার্ট কি ডিলিট করবেন?')) {
+                const heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
+                heldCarts.splice(index, 1);
+                localStorage.setItem('heldCarts', JSON.stringify(heldCarts));
+                
+                displayHeldCarts();
+                showToast('কার্ট ডিলিট করা হয়েছে', 'success');
             }
         }
 
-        // Check Customer History
+        // ========== কাস্টমার হিস্ট্রি ==========
         async function checkCustomerHistory() {
             const mobile = document.getElementById('customerMobile').value;
             if (mobile.length === 11) {
@@ -876,7 +994,6 @@
             }
         }
 
-        // Show Customer History
         function showHistory(history) {
             const panel = document.getElementById('customerHistory');
             const content = document.getElementById('historyContent');
@@ -894,39 +1011,33 @@
             panel.classList.add('open');
         }
 
-        // Close History
         function closeHistory() {
             document.getElementById('customerHistory').classList.remove('open');
         }
 
-        // Keyboard Shortcuts
+        // ========== কীবোর্ড শর্টকাট ==========
         function setupKeyboardShortcuts() {
             document.addEventListener('keydown', (e) => {
-                // F1 - Calculator
                 if (e.key === 'F1') {
                     e.preventDefault();
                     document.getElementById('calculator').style.display = 'block';
                 }
                 
-                // F2 - Payment
                 if (e.key === 'F2') {
                     e.preventDefault();
                     processPayment();
                 }
                 
-                // F3 - Clear Cart
                 if (e.key === 'F3') {
                     e.preventDefault();
                     clearCart();
                 }
                 
-                // F4 - Hold Cart
                 if (e.key === 'F4') {
                     e.preventDefault();
                     holdCart();
                 }
                 
-                // Ctrl + F - Focus Search
                 if (e.ctrlKey && e.key === 'f') {
                     e.preventDefault();
                     document.getElementById('search').focus();
@@ -934,7 +1045,7 @@
             });
         }
 
-        // Calculator Functions
+        // ========== ক্যালকুলেটর ==========
         let calcExpression = '';
         
         function calcInput(value) {
@@ -957,7 +1068,26 @@
             }
         }
 
-        // Initialize on load
+        // ========== অটো ক্লিনআপ (পুরনো হোল্ড কার্ট ডিলিট) ==========
+        function cleanOldHeldCarts() {
+            const heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
+            const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+            
+            const filtered = heldCarts.filter(cart => {
+                const cartTime = new Date(cart.time.split(' ').join(' ')).getTime();
+                return cartTime > oneDayAgo;
+            });
+            
+            if (filtered.length !== heldCarts.length) {
+                localStorage.setItem('heldCarts', JSON.stringify(filtered));
+                displayHeldCarts();
+            }
+        }
+
+        // প্রতি ৬ ঘন্টা পর পুরনো হোল্ড কার্ট ক্লিন করুন
+        setInterval(cleanOldHeldCarts, 6 * 60 * 60 * 1000);
+
+        // ইনিশিয়ালাইজ
         window.onload = init;
     </script>
 </body>
