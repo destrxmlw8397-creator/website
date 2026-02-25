@@ -206,7 +206,7 @@
             flex: 1;
             overflow-y: auto;
             padding: 12px 0;
-            max-height: 400px;
+            max-height: 350px;
         }
 
         .cart-item {
@@ -224,6 +224,61 @@
         }
 
         .cart-item .btn-group { margin-top: 8px; }
+
+        /* Held Carts Section */
+        .held-carts-section {
+            border-top: 2px dashed #667eea;
+            padding-top: 12px;
+            margin: 8px 0;
+        }
+
+        .held-carts-section .btn-info {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .held-carts-section .btn-info:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(102,126,234,0.3);
+        }
+
+        #heldCartsList {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-top: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .held-cart-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid #667eea;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+
+        .held-cart-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .held-cart-item small {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
 
         .cart-footer {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -430,6 +485,18 @@
 
             <div class="cart-items" id="cartItems"></div>
 
+            <!-- Held Carts Section (New) -->
+            <div class="held-carts-section">
+                <button class="btn btn-info" type="button" onclick="toggleHeldCarts()">
+                    <i class="bi bi-pause-circle"></i> 
+                    হোল্ড করা কার্ট (<span id="heldCartCount">0</span>)
+                </button>
+                
+                <div id="heldCartsList" style="display: none;">
+                    <p class="text-muted text-center p-3">📭 কোনো কার্ট হোল্ড করা নেই</p>
+                </div>
+            </div>
+
             <div class="cart-footer">
                 <div class="d-flex justify-content-between mb-2">
                     <span>সাবটোটাল:</span>
@@ -571,11 +638,18 @@
             products = [
                 { _id: '1', name: 'বাসমতি চাল (৫কেজি)', category: 'চাল', price: 650, costPrice: 600, stock: 25, barcode: '123456' },
                 { _id: '2', name: 'মুসুর ডাল (১কেজি)', category: 'ডাল', price: 140, costPrice: 120, stock: 18, barcode: '123457' },
-                { _id: '3', name: 'সয়াবিন তেল (৫লি)', category: 'তেল', price: 850, costPrice: 800, stock: 10, barcode: '123458' }
+                { _id: '3', name: 'সয়াবিন তেল (৫লি)', category: 'তেল', price: 850, costPrice: 800, stock: 10, barcode: '123458' },
+                { _id: '4', name: 'আকিজ নুন (১কেজি)', category: 'মশলা', price: 45, costPrice: 35, stock: 50, barcode: '123459' },
+                { _id: '5', name: 'চিনি (১কেজি)', category: 'চিনি', price: 130, costPrice: 110, stock: 8, barcode: '123460' },
+                { _id: '6', name: 'ফ্রেশ ডিম (১২পিস)', category: 'দুগ্ধ', price: 140, costPrice: 120, stock: 30, barcode: '123461' },
+                { _id: '7', name: 'টিফিন বিস্কুট', category: 'বিস্কুট', price: 25, costPrice: 20, stock: 100, barcode: '123462' },
+                { _id: '8', name: 'ফ্রুটিকা জুস', category: 'পানীয়', price: 70, costPrice: 60, stock: 45, barcode: '123463' }
             ];
             renderProducts();
             loadCategories();
         }
+        // হোল্ড করা কার্ট দেখানো
+        displayHeldCarts();
     }
 
     // ==================== RENDER PRODUCTS ====================
@@ -780,6 +854,7 @@
         }
         
         const heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
+        
         heldCarts.push({
             id: Date.now(),
             cart: [...cart],
@@ -787,11 +862,119 @@
             customerMobile: document.getElementById('customerMobile').value || 'N/A',
             time: new Date().toLocaleString('bn-BD')
         });
+        
         localStorage.setItem('heldCarts', JSON.stringify(heldCarts));
         
+        // Clear cart
         cart = [];
+        currentDiscount = 0;
+        document.getElementById('discountRow').style.display = 'none';
+        document.getElementById('paidAmount').value = '';
         updateCart();
+        
+        // Update display
+        displayHeldCarts();
+        
         showToast('⏸️ কার্ট হোল্ড করা হয়েছে', 'success');
+    }
+
+    // ==================== DISPLAY HELD CARTS ====================
+    function displayHeldCarts() {
+        const heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
+        const container = document.getElementById('heldCartsList');
+        const countSpan = document.getElementById('heldCartCount');
+        
+        countSpan.innerText = heldCarts.length;
+        
+        if (heldCarts.length === 0) {
+            container.innerHTML = '<p class="text-muted text-center p-3">📭 কোনো কার্ট হোল্ড করা নেই</p>';
+            return;
+        }
+        
+        let html = '';
+        heldCarts.forEach((cart, index) => {
+            const total = cart.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            
+            html += `
+                <div class="held-cart-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>👤 ${cart.customerName}</strong>
+                            <br>
+                            <small class="text-muted">
+                                📦 ${cart.cart.length} আইটেম | 💰 ${total}৳
+                            </small>
+                            <br>
+                            <small class="text-info">⏱️ ${cart.time}</small>
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-success" onclick="loadHeldCart(${index})" title="লোড করুন">
+                                <i class="bi bi-play-fill"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteHeldCart(${index})" title="ডিলিট">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    }
+
+    // ==================== LOAD HELD CART ====================
+    function loadHeldCart(index) {
+        const heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
+        const heldCart = heldCarts[index];
+        
+        if (!heldCart) return;
+        
+        if (cart.length > 0) {
+            if (!confirm('⚠️ বর্তমান কার্ট খালি হয়ে যাবে। কি লোড করবেন?')) {
+                return;
+            }
+        }
+        
+        cart = [...heldCart.cart];
+        
+        document.getElementById('customerName').value = heldCart.customerName || '';
+        document.getElementById('customerMobile').value = heldCart.customerMobile || '';
+        
+        updateCart();
+        
+        // Remove from held carts
+        heldCarts.splice(index, 1);
+        localStorage.setItem('heldCarts', JSON.stringify(heldCarts));
+        
+        displayHeldCarts();
+        showToast('✅ হোল্ড করা কার্ট লোড করা হয়েছে', 'success');
+        
+        // Close held carts list
+        document.getElementById('heldCartsList').style.display = 'none';
+    }
+
+    // ==================== DELETE HELD CART ====================
+    function deleteHeldCart(index) {
+        if (confirm('🗑️ এই হোল্ড করা কার্ট কি ডিলিট করবেন?')) {
+            const heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
+            heldCarts.splice(index, 1);
+            localStorage.setItem('heldCarts', JSON.stringify(heldCarts));
+            
+            displayHeldCarts();
+            showToast('🗑️ কার্ট ডিলিট করা হয়েছে', 'success');
+        }
+    }
+
+    // ==================== TOGGLE HELD CARTS VISIBILITY ====================
+    function toggleHeldCarts() {
+        const heldList = document.getElementById('heldCartsList');
+        if (heldList.style.display === 'none') {
+            heldList.style.display = 'block';
+            displayHeldCarts();
+        } else {
+            heldList.style.display = 'none';
+        }
     }
 
     // ==================== PROCESS PAYMENT ====================
@@ -903,10 +1086,28 @@
         });
     }
 
+    // ==================== CLEAN OLD HELD CARTS (24 ঘন্টা পুরনো) ====================
+    function cleanOldHeldCarts() {
+        const heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
+        const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+        
+        const filtered = heldCarts.filter(cart => {
+            const cartTime = new Date(cart.time.split(' ').join(' ')).getTime();
+            return cartTime > oneDayAgo;
+        });
+        
+        if (filtered.length !== heldCarts.length) {
+            localStorage.setItem('heldCarts', JSON.stringify(filtered));
+            displayHeldCarts();
+        }
+    }
+
     // Initialize on load
     window.onload = () => {
         document.getElementById('memoNoDisplay').innerText = currentMemoNo;
         loadProducts();
+        // Auto-clean old carts every hour
+        setInterval(cleanOldHeldCarts, 60 * 60 * 1000);
     };
 </script>
 </body>
