@@ -278,7 +278,7 @@
             color: #333;
         }
 
-        /* Notification Badge */
+        /* Notification Button */
         .notification-btn {
             position: relative;
             background: rgba(255, 255, 255, 0.2);
@@ -304,6 +304,13 @@
             padding: 3px 8px;
             font-size: 0.7rem;
             animation: pulse 2s infinite;
+        }
+
+        /* Fix for dropdown positioning */
+        .dropdown-menu-end {
+            right: 0 !important;
+            left: auto !important;
+            transform: translateX(0) !important;
         }
 
         @keyframes pulse {
@@ -549,7 +556,7 @@
                         <i class="bi bi-bell"></i>
                         <span class="notification-badge" id="notiCount">0</span>
                     </button>
-                    <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 350px; max-height: 400px; overflow-y: auto;" id="notiList">
+                    <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 350px; max-height: 400px; overflow-y: auto; right: 0; left: auto;" id="notiList">
                         <h6 class="dropdown-header d-flex justify-content-between align-items-center sticky-top bg-white" style="top:0; z-index:1;">
                             <span><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>স্টক অ্যালার্ট</span>
                             <span class="badge bg-danger" id="notiHeaderCount">0</span>
@@ -565,7 +572,7 @@
                     <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <i class="bi bi-gear"></i> সেটিংস
                     </button>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#passwordModal">
                             <i class="bi bi-lock"></i> পাসওয়ার্ড সেট করুন
                         </a></li>
@@ -589,7 +596,7 @@
                     <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <i class="bi bi-download"></i> এক্সপোর্ট
                     </button>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="#" onclick="exportExcel()">
                             <i class="bi bi-file-excel"></i> এক্সেল রিপোর্ট
                         </a></li>
