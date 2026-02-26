@@ -1526,22 +1526,26 @@
             notiHeaderCount.innerText = lowStockProducts.length;
             
             if (lowStockProducts.length > 0) {
-                notiContent.innerHTML = lowStockProducts.map(p => `
-                    <div class="dropdown-item py-3 border-bottom">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>${p.name}</strong>
-                                <br>
-                                <small class="text-muted">স্টক: ${p.stock} (সীমা: ${p.alertLimit || 5})</small>
-                            </div>
-                            <div>
-                                <button class="btn btn-sm btn-link text-primary" onclick="checkAuth(restockProduct, '${p._id}')">
-                                    <i class="bi bi-plus-circle"></i>
-                                </button>
+                let notiHtml = '';
+                lowStockProducts.forEach(p => {
+                    notiHtml += `
+                        <div class="dropdown-item py-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${p.name}</strong>
+                                    <br>
+                                    <small class="text-muted">স্টক: ${p.stock} (সীমা: ${p.alertLimit || 5})</small>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-link text-primary" onclick="checkAuth(restockProduct, '${p._id}')">
+                                        <i class="bi bi-plus-circle"></i> যোগ করুন
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                });
+                notiContent.innerHTML = notiHtml;
             } else {
                 notiContent.innerHTML = '<p class="text-muted text-center m-0 p-4">✅ সব স্টক ঠিক আছে</p>';
             }
