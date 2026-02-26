@@ -306,11 +306,20 @@
             animation: pulse 2s infinite;
         }
 
-        /* Fix for dropdown positioning */
+        /* Fix for dropdown positioning - right auto left auto */
         .dropdown-menu-end {
-            right: 0 !important;
+            right: auto !important;
             left: auto !important;
             transform: translateX(0) !important;
+        }
+        
+        @media (max-width: 576px) {
+            .dropdown-menu {
+                max-width: 90vw !important;
+                min-width: 280px !important;
+                right: auto !important;
+                left: auto !important;
+            }
         }
 
         @keyframes pulse {
@@ -607,7 +616,7 @@
                         <i class="bi bi-bell"></i>
                         <span class="notification-badge" id="notiCount">0</span>
                     </button>
-                    <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 350px; max-height: 400px; overflow-y: auto; right: 0; left: auto;" id="notiList">
+                    <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 350px; max-height: 400px; overflow-y: auto;" id="notiList">
                         <h6 class="dropdown-header d-flex justify-content-between align-items-center sticky-top bg-white" style="top:0; z-index:1;">
                             <span><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>স্টক অ্যালার্ট</span>
                             <span class="badge bg-danger" id="notiHeaderCount">0</span>
