@@ -550,23 +550,6 @@
                 <small class="fs-6 ms-2 opacity-75">v2.0 প্রো</small>
             </span>
             <div class="d-flex align-items-center gap-2">
-                <!-- Notifications -->
-                <div class="dropdown">
-                    <button class="notification-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="notificationDropdown">
-                        <i class="bi bi-bell"></i>
-                        <span class="notification-badge" id="notiCount">0</span>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 350px; max-height: 400px; overflow-y: auto; right: 0; left: auto;" id="notiList">
-                        <h6 class="dropdown-header d-flex justify-content-between align-items-center sticky-top bg-white" style="top:0; z-index:1;">
-                            <span><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>স্টক অ্যালার্ট</span>
-                            <span class="badge bg-danger" id="notiHeaderCount">0</span>
-                        </h6>
-                        <div id="notiContent" class="mt-2">
-                            <p class="text-muted text-center m-0 p-4">✅ সব স্টক ঠিক আছে</p>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Settings Dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
@@ -617,6 +600,23 @@
                 <a href="pos.html" class="btn btn-warning btn-sm fw-bold">
                     <i class="bi bi-cart"></i> POS কাউন্টার
                 </a>
+
+                <!-- Notifications -->
+                <div class="dropdown">
+                    <button class="notification-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="notificationDropdown">
+                        <i class="bi bi-bell"></i>
+                        <span class="notification-badge" id="notiCount">0</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 350px; max-height: 400px; overflow-y: auto; right: 0; left: auto;" id="notiList">
+                        <h6 class="dropdown-header d-flex justify-content-between align-items-center sticky-top bg-white" style="top:0; z-index:1;">
+                            <span><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>স্টক অ্যালার্ট</span>
+                            <span class="badge bg-danger" id="notiHeaderCount">0</span>
+                        </h6>
+                        <div id="notiContent" class="mt-2">
+                            <p class="text-muted text-center m-0 p-4">✅ সব স্টক ঠিক আছে</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
