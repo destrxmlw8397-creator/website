@@ -161,6 +161,46 @@
             box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1);
         }
 
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .minimize-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            color: #667eea;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .minimize-btn:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: scale(1.1);
+        }
+
+        .minimize-btn i {
+            transition: transform 0.3s ease;
+        }
+
+        .chart-content {
+            transition: all 0.3s ease;
+        }
+
+        .chart-content.collapsed {
+            display: none;
+        }
+
         /* Table Container */
         .table-container {
             background: white;
@@ -733,50 +773,64 @@
             </div>
         </div>
 
-        <!-- Charts Row -->
+        <!-- Charts Row with Minimize Buttons -->
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
                 <div class="chart-container">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="chart-header" onclick="toggleChart('salesChartContainer')">
                         <h5 class="mb-0">
                             <i class="bi bi-graph-up me-2"></i>
                             বিক্রয় ও লাভ বিশ্লেষণ
                         </h5>
-                        <div class="d-flex gap-2">
-                            <select class="form-select form-select-sm" id="chartFilter" onchange="load()" style="width: 150px;">
-                                <option value="7">গত ৭ দিন</option>
-                                <option value="15">গত ১৫ দিন</option>
-                                <option value="30">গত ৩০ দিন</option>
-                                <option value="90">গত ৩ মাস</option>
-                            </select>
-                            <button class="btn btn-sm btn-outline-primary" onclick="refreshChart()">
-                                <i class="bi bi-arrow-repeat"></i>
-                            </button>
-                        </div>
+                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleChart('salesChartContainer')">
+                            <i class="bi bi-dash-lg" id="salesChartMinimizeIcon"></i>
+                        </button>
                     </div>
-                    <canvas id="salesChart" height="100"></canvas>
+                    <div id="salesChartContainer" class="chart-content">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="d-flex gap-2">
+                                <select class="form-select form-select-sm" id="chartFilter" onchange="load()" style="width: 150px;">
+                                    <option value="7">গত ৭ দিন</option>
+                                    <option value="15">গত ১৫ দিন</option>
+                                    <option value="30">গত ৩০ দিন</option>
+                                    <option value="90">গত ৩ মাস</option>
+                                </select>
+                                <button class="btn btn-sm btn-outline-primary" onclick="refreshChart()">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <canvas id="salesChart" height="100"></canvas>
+                    </div>
                 </div>
             </div>
             <div class="col-lg-4">
                 <div class="chart-container">
-                    <h5 class="mb-4">
-                        <i class="bi bi-pie-chart me-2"></i>
-                        ক্যাটাগরি ভিত্তিক সেলস
-                    </h5>
-                    <canvas id="categoryChart"></canvas>
-                    <div class="mt-4">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <small>মাসিক লক্ষ্যমাত্রা</small>
-                            <small class="text-primary" id="targetAmount">১০ লক্ষ ৳</small>
-                        </div>
-                        <div class="progress" style="height: 25px;">
-                            <div id="goalProgress" class="progress-bar" role="progressbar" style="width: 0%;">
-                                0%
+                    <div class="chart-header" onclick="toggleChart('categoryChartContainer')">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pie-chart me-2"></i>
+                            ক্যাটাগরি ভিত্তিক সেলস
+                        </h5>
+                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleChart('categoryChartContainer')">
+                            <i class="bi bi-dash-lg" id="categoryChartMinimizeIcon"></i>
+                        </button>
+                    </div>
+                    <div id="categoryChartContainer" class="chart-content">
+                        <canvas id="categoryChart"></canvas>
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small>মাসিক লক্ষ্যমাত্রা</small>
+                                <small class="text-primary" id="targetAmount">১০ লক্ষ ৳</small>
                             </div>
-                        </div>
-                        <div class="d-flex justify-content-between mt-2">
-                            <small>অর্জিত</small>
-                            <small id="achievedAmount">০ ৳</small>
+                            <div class="progress" style="height: 25px;">
+                                <div id="goalProgress" class="progress-bar" role="progressbar" style="width: 0%;">
+                                    0%
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2">
+                                <small>অর্জিত</small>
+                                <small id="achievedAmount">০ ৳</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1215,6 +1269,10 @@
         let allProducts = [];
         let filteredProductsList = [];
 
+        // Chart minimize state
+        let salesChartMinimized = false;
+        let categoryChartMinimized = false;
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             load();
@@ -1222,6 +1280,37 @@
             updateLogCount();
             setMinExpiryDate();
         });
+
+        // Chart minimize function
+        function toggleChart(chartId) {
+            const container = document.getElementById(chartId);
+            const icon = document.getElementById(chartId === 'salesChartContainer' ? 'salesChartMinimizeIcon' : 'categoryChartMinimizeIcon');
+            
+            if (container.classList.contains('collapsed')) {
+                container.classList.remove('collapsed');
+                icon.classList.remove('bi-plus-lg');
+                icon.classList.add('bi-dash-lg');
+                if (chartId === 'salesChartContainer') salesChartMinimized = false;
+                else categoryChartMinimized = false;
+                
+                // Refresh chart when expanding
+                if (chartId === 'salesChartContainer' && currentChart) {
+                    currentChart.resize();
+                } else if (chartId === 'categoryChartContainer' && categoryChart) {
+                    categoryChart.resize();
+                }
+            } else {
+                container.classList.add('collapsed');
+                icon.classList.remove('bi-dash-lg');
+                icon.classList.add('bi-plus-lg');
+                if (chartId === 'salesChartContainer') salesChartMinimized = true;
+                else categoryChartMinimized = true;
+            }
+            
+            // Save state to localStorage
+            localStorage.setItem('salesChartMinimized', salesChartMinimized);
+            localStorage.setItem('categoryChartMinimized', categoryChartMinimized);
+        }
 
         function setMinExpiryDate() {
             const today = new Date().toISOString().split('T')[0];
@@ -1259,6 +1348,22 @@
 
             // Check expiry every hour
             setInterval(checkExpiryProducts, 3600000);
+            
+            // Restore chart minimize states
+            salesChartMinimized = localStorage.getItem('salesChartMinimized') === 'true';
+            categoryChartMinimized = localStorage.getItem('categoryChartMinimized') === 'true';
+            
+            // Apply saved states
+            if (salesChartMinimized) {
+                document.getElementById('salesChartContainer').classList.add('collapsed');
+                document.getElementById('salesChartMinimizeIcon').classList.remove('bi-dash-lg');
+                document.getElementById('salesChartMinimizeIcon').classList.add('bi-plus-lg');
+            }
+            if (categoryChartMinimized) {
+                document.getElementById('categoryChartContainer').classList.add('collapsed');
+                document.getElementById('categoryChartMinimizeIcon').classList.remove('bi-dash-lg');
+                document.getElementById('categoryChartMinimizeIcon').classList.add('bi-plus-lg');
+            }
         }
 
         function autoSave() {
@@ -1476,6 +1581,8 @@
         }
 
         function updateCategoryChart(sales) {
+            if (categoryChartMinimized) return;
+            
             let catStats = {};
             sales.forEach(s => {
                 s.items.forEach(item => {
@@ -1515,6 +1622,8 @@
         }
 
         function renderGraph(sales) {
+            if (salesChartMinimized) return;
+            
             const ctx = document.getElementById('salesChart').getContext('2d');
             const limit = parseInt(document.getElementById('chartFilter').value);
             
