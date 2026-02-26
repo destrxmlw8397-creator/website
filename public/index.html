@@ -545,17 +545,17 @@
             <div class="d-flex align-items-center gap-2">
                 <!-- Notifications -->
                 <div class="dropdown">
-                    <button class="notification-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <button class="notification-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="notificationDropdown">
                         <i class="bi bi-bell"></i>
                         <span class="notification-badge" id="notiCount">0</span>
                     </button>
-                    <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 320px;" id="notiList">
-                        <h6 class="dropdown-header d-flex justify-content-between align-items-center">
-                            স্টক অ্যালার্ট
+                    <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 350px; max-height: 400px; overflow-y: auto;" id="notiList">
+                        <h6 class="dropdown-header d-flex justify-content-between align-items-center sticky-top bg-white" style="top:0; z-index:1;">
+                            <span><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>স্টক অ্যালার্ট</span>
                             <span class="badge bg-danger" id="notiHeaderCount">0</span>
                         </h6>
                         <div id="notiContent" class="mt-2">
-                            <p class="text-muted text-center m-0 p-3">সব স্টক ঠিক আছে</p>
+                            <p class="text-muted text-center m-0 p-4">✅ সব স্টক ঠিক আছে</p>
                         </div>
                     </div>
                 </div>
@@ -1532,12 +1532,15 @@
                         <div class="dropdown-item py-3 border-bottom">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <strong>${p.name}</strong>
+                                    <strong class="text-danger">${p.name}</strong>
                                     <br>
-                                    <small class="text-muted">স্টক: ${p.stock} (সীমা: ${p.alertLimit || 5})</small>
+                                    <small class="text-muted">
+                                        <span class="badge bg-danger me-1">স্টক: ${p.stock}</span>
+                                        <span class="badge bg-warning text-dark">সীমা: ${p.alertLimit || 5}</span>
+                                    </small>
                                 </div>
                                 <div>
-                                    <button class="btn btn-sm btn-link text-primary" onclick="checkAuth(restockProduct, '${p._id}')">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="checkAuth(restockProduct, '${p._id}')" title="স্টক যোগ করুন">
                                         <i class="bi bi-plus-circle"></i> যোগ করুন
                                     </button>
                                 </div>
@@ -1547,14 +1550,14 @@
                 });
                 notiContent.innerHTML = notiHtml;
             } else {
-                notiContent.innerHTML = '<p class="text-muted text-center m-0 p-4">✅ সব স্টক ঠিক আছে</p>';
+                notiContent.innerHTML = '<div class="text-center p-4"><i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i><p class="text-muted mt-2">✅ সব স্টক ঠিক আছে</p></div>';
             }
 
             // Update low stock alert banner
             if (lowStockProducts.length > 0) {
                 const alert = document.getElementById('lowStockAlert');
                 alert.classList.remove('d-none');
-                document.getElementById('lowStockList').innerText = lowStockProducts.map(p => p.name).join(', ');
+                document.getElementById('lowStockList').innerHTML = lowStockProducts.map(p => `<span class="badge bg-danger me-1">${p.name} (${p.stock})</span>`).join('');
             } else {
                 document.getElementById('lowStockAlert').classList.add('d-none');
             }
