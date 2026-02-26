@@ -210,6 +210,14 @@
             transition: all 0.3s ease;
         }
 
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
         .table {
             margin-bottom: 0;
         }
@@ -777,12 +785,12 @@
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
                 <div class="chart-container">
-                    <div class="chart-header" onclick="toggleChart('salesChartContainer')">
+                    <div class="chart-header" onclick="toggleSection('salesChartContainer', 'salesChartMinimizeIcon')">
                         <h5 class="mb-0">
                             <i class="bi bi-graph-up me-2"></i>
                             বিক্রয় ও লাভ বিশ্লেষণ
                         </h5>
-                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleChart('salesChartContainer')">
+                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('salesChartContainer', 'salesChartMinimizeIcon')">
                             <i class="bi bi-dash-lg" id="salesChartMinimizeIcon"></i>
                         </button>
                     </div>
@@ -806,12 +814,12 @@
             </div>
             <div class="col-lg-4">
                 <div class="chart-container">
-                    <div class="chart-header" onclick="toggleChart('categoryChartContainer')">
+                    <div class="chart-header" onclick="toggleSection('categoryChartContainer', 'categoryChartMinimizeIcon')">
                         <h5 class="mb-0">
                             <i class="bi bi-pie-chart me-2"></i>
                             ক্যাটাগরি ভিত্তিক সেলস
                         </h5>
-                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleChart('categoryChartContainer')">
+                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('categoryChartContainer', 'categoryChartMinimizeIcon')">
                             <i class="bi bi-dash-lg" id="categoryChartMinimizeIcon"></i>
                         </button>
                     </div>
@@ -841,100 +849,113 @@
         <div class="row g-4">
             <!-- Left Column -->
             <div class="col-lg-4">
-                <!-- Add Product Card -->
+                <!-- Add Product Card with Minimize Button -->
                 <div class="table-container mb-4">
-                    <h5 class="mb-4">
-                        <i class="bi bi-plus-circle me-2"></i>
-                        পণ্য যোগ করুন
-                    </h5>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">বারকোড</label>
-                        <div class="input-group">
-                            <input type="text" id="barcode" class="form-control" placeholder="বারকোড (ঐচ্ছিক)">
-                            <button class="btn btn-outline-secondary" type="button" onclick="generateBarcode()">
-                                <i class="bi bi-upc-scan"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">পণ্যের নাম <span class="text-danger">*</span></label>
-                        <input type="text" id="name" class="form-control" placeholder="পণ্যের নাম">
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <label class="form-label">ক্যাটাগরি</label>
-                            <input type="text" id="category" class="form-control" placeholder="যেমন: চাল">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">সরবরাহকারী</label>
-                            <input type="text" id="supplier" class="form-control" placeholder="Supplier নাম">
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <label class="form-label">কেনা দাম <span class="text-danger">*</span></label>
-                            <input type="number" id="cost" class="form-control" placeholder="০.০০">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">বিক্রয় মূল্য <span class="text-danger">*</span></label>
-                            <input type="number" id="price" class="form-control" placeholder="০.০০">
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <label class="form-label">স্টক পরিমাণ <span class="text-danger">*</span></label>
-                            <input type="number" id="stock" class="form-control" placeholder="০">
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label">সতর্কতা সীমা</label>
-                            <input type="number" id="alertLimit" class="form-control" placeholder="যেমন: ৫" value="5">
-                        </div>
-                    </div>
-
-                    <!-- New Expiry Date Field -->
-                    <div class="mb-3">
-                        <label class="form-label">মেয়াদোত্তীর্ণ তারিখ <span class="text-muted">(ঐচ্ছিক)</span></label>
-                        <input type="date" id="expiryDate" class="form-control" min="">
-                        <small class="text-muted">পচনশীল পণ্যের জন্য মেয়াদ দিন</small>
-                    </div>
-
-                    <div class="d-grid gap-2">
-                        <button onclick="saveWithAuth()" class="btn btn-primary">
-                            <i class="bi bi-save me-2"></i>
-                            ইনভেন্টরি আপডেট
+                    <div class="table-header" onclick="toggleSection('addProductContainer', 'addProductMinimizeIcon')">
+                        <h5 class="mb-0">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            পণ্য যোগ করুন
+                        </h5>
+                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('addProductContainer', 'addProductMinimizeIcon')">
+                            <i class="bi bi-dash-lg" id="addProductMinimizeIcon"></i>
                         </button>
-                        <div class="d-flex gap-2">
-                            <button onclick="document.getElementById('fileInput').click()" class="btn btn-outline-dark w-50">
-                                <i class="bi bi-upload me-2"></i>
-                                ইমপোর্ট
+                    </div>
+                    <div id="addProductContainer" class="chart-content">
+                        <div class="mb-3">
+                            <label class="form-label">বারকোড</label>
+                            <div class="input-group">
+                                <input type="text" id="barcode" class="form-control" placeholder="বারকোড (ঐচ্ছিক)">
+                                <button class="btn btn-outline-secondary" type="button" onclick="generateBarcode()">
+                                    <i class="bi bi-upc-scan"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">পণ্যের নাম <span class="text-danger">*</span></label>
+                            <input type="text" id="name" class="form-control" placeholder="পণ্যের নাম">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">ক্যাটাগরি</label>
+                                <input type="text" id="category" class="form-control" placeholder="যেমন: চাল">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">সরবরাহকারী</label>
+                                <input type="text" id="supplier" class="form-control" placeholder="Supplier নাম">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">কেনা দাম <span class="text-danger">*</span></label>
+                                <input type="number" id="cost" class="form-control" placeholder="০.০০">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">বিক্রয় মূল্য <span class="text-danger">*</span></label>
+                                <input type="number" id="price" class="form-control" placeholder="০.০০">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label">স্টক পরিমাণ <span class="text-danger">*</span></label>
+                                <input type="number" id="stock" class="form-control" placeholder="০">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">সতর্কতা সীমা</label>
+                                <input type="number" id="alertLimit" class="form-control" placeholder="যেমন: ৫" value="5">
+                            </div>
+                        </div>
+
+                        <!-- New Expiry Date Field -->
+                        <div class="mb-3">
+                            <label class="form-label">মেয়াদোত্তীর্ণ তারিখ <span class="text-muted">(ঐচ্ছিক)</span></label>
+                            <input type="date" id="expiryDate" class="form-control" min="">
+                            <small class="text-muted">পচনশীল পণ্যের জন্য মেয়াদ দিন</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button onclick="saveWithAuth()" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i>
+                                ইনভেন্টরি আপডেট
                             </button>
-                            <button onclick="exportTemplate()" class="btn btn-outline-info w-50">
-                                <i class="bi bi-file-earmark-spreadsheet me-2"></i>
-                                টেমপ্লেট
-                            </button>
-                            <input type="file" id="fileInput" class="d-none" onchange="importJSON(event)" accept=".json,.xlsx,.csv">
+                            <div class="d-flex gap-2">
+                                <button onclick="document.getElementById('fileInput').click()" class="btn btn-outline-dark w-50">
+                                    <i class="bi bi-upload me-2"></i>
+                                    ইমপোর্ট
+                                </button>
+                                <button onclick="exportTemplate()" class="btn btn-outline-info w-50">
+                                    <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+                                    টেমপ্লেট
+                                </button>
+                                <input type="file" id="fileInput" class="d-none" onchange="importJSON(event)" accept=".json,.xlsx,.csv">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Activity Log Card -->
+                <!-- Activity Log Card with Minimize Button -->
                 <div class="table-container">
-                    <h5 class="mb-3">
-                        <i class="bi bi-clock-history me-2"></i>
-                        অ্যাক্টিভিটি লগ
-                        <small class="text-muted fs-6 ms-2" id="logCount">(০)</small>
-                    </h5>
-                    <div id="logContainer" class="log-container"></div>
-                    <div class="mt-3">
-                        <button onclick="clearLogsWithAuth()" class="btn btn-sm btn-outline-danger w-100">
-                            <i class="bi bi-trash me-2"></i>
-                            লগ মুছে ফেলুন
+                    <div class="table-header" onclick="toggleSection('logContainer', 'logMinimizeIcon')">
+                        <h5 class="mb-0">
+                            <i class="bi bi-clock-history me-2"></i>
+                            অ্যাক্টিভিটি লগ
+                            <small class="text-muted fs-6 ms-2" id="logCount">(০)</small>
+                        </h5>
+                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('logContainer', 'logMinimizeIcon')">
+                            <i class="bi bi-dash-lg" id="logMinimizeIcon"></i>
                         </button>
+                    </div>
+                    <div id="logContainerWrapper" class="chart-content">
+                        <div id="logContainer" class="log-container"></div>
+                        <div class="mt-3">
+                            <button onclick="clearLogsWithAuth()" class="btn btn-sm btn-outline-danger w-100">
+                                <i class="bi bi-trash me-2"></i>
+                                লগ মুছে ফেলুন
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1269,9 +1290,11 @@
         let allProducts = [];
         let filteredProductsList = [];
 
-        // Chart minimize state
+        // Section minimize states
         let salesChartMinimized = false;
         let categoryChartMinimized = false;
+        let addProductMinimized = false;
+        let logMinimized = false;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -1281,35 +1304,45 @@
             setMinExpiryDate();
         });
 
-        // Chart minimize function
-        function toggleChart(chartId) {
-            const container = document.getElementById(chartId);
-            const icon = document.getElementById(chartId === 'salesChartContainer' ? 'salesChartMinimizeIcon' : 'categoryChartMinimizeIcon');
+        // Section minimize function (updated to work with any section)
+        function toggleSection(sectionId, iconId) {
+            const container = document.getElementById(sectionId);
+            const icon = document.getElementById(iconId);
             
             if (container.classList.contains('collapsed')) {
                 container.classList.remove('collapsed');
                 icon.classList.remove('bi-plus-lg');
                 icon.classList.add('bi-dash-lg');
-                if (chartId === 'salesChartContainer') salesChartMinimized = false;
-                else categoryChartMinimized = false;
                 
-                // Refresh chart when expanding
-                if (chartId === 'salesChartContainer' && currentChart) {
+                // Update state
+                if (sectionId === 'salesChartContainer') salesChartMinimized = false;
+                else if (sectionId === 'categoryChartContainer') categoryChartMinimized = false;
+                else if (sectionId === 'addProductContainer') addProductMinimized = false;
+                else if (sectionId === 'logContainerWrapper') logMinimized = false;
+                
+                // Refresh charts when expanding
+                if (sectionId === 'salesChartContainer' && currentChart) {
                     currentChart.resize();
-                } else if (chartId === 'categoryChartContainer' && categoryChart) {
+                } else if (sectionId === 'categoryChartContainer' && categoryChart) {
                     categoryChart.resize();
                 }
             } else {
                 container.classList.add('collapsed');
                 icon.classList.remove('bi-dash-lg');
                 icon.classList.add('bi-plus-lg');
-                if (chartId === 'salesChartContainer') salesChartMinimized = true;
-                else categoryChartMinimized = true;
+                
+                // Update state
+                if (sectionId === 'salesChartContainer') salesChartMinimized = true;
+                else if (sectionId === 'categoryChartContainer') categoryChartMinimized = true;
+                else if (sectionId === 'addProductContainer') addProductMinimized = true;
+                else if (sectionId === 'logContainerWrapper') logMinimized = true;
             }
             
-            // Save state to localStorage
+            // Save states to localStorage
             localStorage.setItem('salesChartMinimized', salesChartMinimized);
             localStorage.setItem('categoryChartMinimized', categoryChartMinimized);
+            localStorage.setItem('addProductMinimized', addProductMinimized);
+            localStorage.setItem('logMinimized', logMinimized);
         }
 
         function setMinExpiryDate() {
@@ -1349,9 +1382,11 @@
             // Check expiry every hour
             setInterval(checkExpiryProducts, 3600000);
             
-            // Restore chart minimize states
+            // Restore section minimize states
             salesChartMinimized = localStorage.getItem('salesChartMinimized') === 'true';
             categoryChartMinimized = localStorage.getItem('categoryChartMinimized') === 'true';
+            addProductMinimized = localStorage.getItem('addProductMinimized') === 'true';
+            logMinimized = localStorage.getItem('logMinimized') === 'true';
             
             // Apply saved states
             if (salesChartMinimized) {
@@ -1363,6 +1398,16 @@
                 document.getElementById('categoryChartContainer').classList.add('collapsed');
                 document.getElementById('categoryChartMinimizeIcon').classList.remove('bi-dash-lg');
                 document.getElementById('categoryChartMinimizeIcon').classList.add('bi-plus-lg');
+            }
+            if (addProductMinimized) {
+                document.getElementById('addProductContainer').classList.add('collapsed');
+                document.getElementById('addProductMinimizeIcon').classList.remove('bi-dash-lg');
+                document.getElementById('addProductMinimizeIcon').classList.add('bi-plus-lg');
+            }
+            if (logMinimized) {
+                document.getElementById('logContainerWrapper').classList.add('collapsed');
+                document.getElementById('logMinimizeIcon').classList.remove('bi-dash-lg');
+                document.getElementById('logMinimizeIcon').classList.add('bi-plus-lg');
             }
         }
 
@@ -2370,13 +2415,17 @@
         }
 
         function renderLogs() {
+            if (logMinimized) return;
+            
             const container = document.getElementById('logContainer');
-            container.innerHTML = activityLogs.map(log => `
-                <div class="d-flex justify-content-between align-items-start">
-                    <span>${log.action}</span>
-                    <small class="text-muted ms-2">${log.time}</small>
-                </div>
-            `).join('');
+            if (container) {
+                container.innerHTML = activityLogs.map(log => `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span>${log.action}</span>
+                        <small class="text-muted ms-2">${log.time}</small>
+                    </div>
+                `).join('');
+            }
             
             updateLogCount();
         }
