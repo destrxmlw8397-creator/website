@@ -682,7 +682,7 @@
                 </div>
 
                 <!-- Quick Actions -->
-                <button onclick="backupData()" class="btn btn-dark btn-sm">
+                <button onclick="createBackup()" class="btn btn-dark btn-sm">
                     <i class="bi bi-cloud-arrow-up"></i> ব্যাকআপ
                 </button>
                 
@@ -909,7 +909,7 @@
                             </div>
                         </div>
 
-                        <!-- New Expiry Date Field -->
+                        <!-- Expiry Date Field -->
                         <div class="mb-3">
                             <label class="form-label">মেয়াদোত্তীর্ণ তারিখ <span class="text-muted">(ঐচ্ছিক)</span></label>
                             <input type="date" id="expiryDate" class="form-control" min="">
@@ -917,7 +917,7 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button onclick="saveWithAuth()" class="btn btn-primary">
+                            <button onclick="save()" class="btn btn-primary">
                                 <i class="bi bi-save me-2"></i>
                                 ইনভেন্টরি আপডেট
                             </button>
@@ -936,7 +936,7 @@
                     </div>
                 </div>
 
-                <!-- Activity Log Card with Minimize Button - FIXED VERSION -->
+                <!-- Activity Log Card with Minimize Button -->
                 <div class="table-container">
                     <div class="table-header" onclick="toggleSection('logContainerWrapper', 'logMinimizeIcon')">
                         <h5 class="mb-0">
@@ -951,7 +951,7 @@
                     <div id="logContainerWrapper" class="chart-content">
                         <div id="logContainer" class="log-container"></div>
                         <div class="mt-3">
-                            <button onclick="clearLogsWithAuth()" class="btn btn-sm btn-outline-danger w-100">
+                            <button onclick="clearLogs()" class="btn btn-sm btn-outline-danger w-100">
                                 <i class="bi bi-trash me-2"></i>
                                 লগ মুছে ফেলুন
                             </button>
@@ -1090,7 +1090,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
-                    <button type="button" class="btn btn-success" onclick="checkAuth(updateProduct)">সংরক্ষণ করুন</button>
+                    <button type="button" class="btn btn-success" onclick="updateProduct()">সংরক্ষণ করুন</button>
                 </div>
             </div>
         </div>
@@ -1281,9 +1281,8 @@
         // State Management
         let currentChart = null;
         let categoryChart = null;
-        let activityLogs = JSON.parse(localStorage.getItem('shopLogs')) || [];
+        let activityLogs = [];
         let systemPass = localStorage.getItem('appPassword') || '1234';
-        let backups = JSON.parse(localStorage.getItem('backups')) || [];
         
         let currentPage = 1;
         const rowsPerPage = 10;
@@ -1296,25 +1295,23 @@
         let addProductMinimized = false;
         let logMinimized = false;
 
+        // API Base URL
+        const API_BASE = '';
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             load();
             initializeEventListeners();
-            updateLogCount();
             setMinExpiryDate();
+            loadBackupList();
         });
 
-        // Section minimize function - FIXED VERSION
+        // Section minimize function
         function toggleSection(sectionId, iconId) {
-            console.log('Toggling section:', sectionId, 'with icon:', iconId); // Debug log
-            
             const container = document.getElementById(sectionId);
             const icon = document.getElementById(iconId);
             
-            if (!container || !icon) {
-                console.error('Container or icon not found:', sectionId, iconId);
-                return;
-            }
+            if (!container || !icon) return;
             
             if (container.classList.contains('collapsed')) {
                 container.classList.remove('collapsed');
@@ -1327,7 +1324,6 @@
                 else if (sectionId === 'addProductContainer') addProductMinimized = false;
                 else if (sectionId === 'logContainerWrapper') {
                     logMinimized = false;
-                    // Re-render logs when expanding
                     renderLogs();
                 }
                 
@@ -1348,14 +1344,6 @@
                 else if (sectionId === 'addProductContainer') addProductMinimized = true;
                 else if (sectionId === 'logContainerWrapper') logMinimized = true;
             }
-            
-            // Save states to localStorage
-            localStorage.setItem('salesChartMinimized', salesChartMinimized);
-            localStorage.setItem('categoryChartMinimized', categoryChartMinimized);
-            localStorage.setItem('addProductMinimized', addProductMinimized);
-            localStorage.setItem('logMinimized', logMinimized);
-            
-            console.log('New state - logMinimized:', logMinimized); // Debug log
         }
 
         function setMinExpiryDate() {
@@ -1370,7 +1358,7 @@
                 // Ctrl + S for save
                 if (e.ctrlKey && e.key === 's') {
                     e.preventDefault();
-                    saveWithAuth();
+                    save();
                 }
                 // Ctrl + F for search
                 if (e.ctrlKey && e.key === 'f') {
@@ -1388,62 +1376,6 @@
                     showExpiryReport();
                 }
             });
-
-            // Auto-save every 5 minutes
-            setInterval(autoSave, 300000);
-
-            // Check expiry every hour
-            setInterval(checkExpiryProducts, 3600000);
-            
-            // Restore section minimize states
-            salesChartMinimized = localStorage.getItem('salesChartMinimized') === 'true';
-            categoryChartMinimized = localStorage.getItem('categoryChartMinimized') === 'true';
-            addProductMinimized = localStorage.getItem('addProductMinimized') === 'true';
-            logMinimized = localStorage.getItem('logMinimized') === 'true';
-            
-            console.log('Restored states - logMinimized:', logMinimized); // Debug log
-            
-            // Apply saved states
-            if (salesChartMinimized) {
-                const container = document.getElementById('salesChartContainer');
-                const icon = document.getElementById('salesChartMinimizeIcon');
-                if (container && icon) {
-                    container.classList.add('collapsed');
-                    icon.classList.remove('bi-dash-lg');
-                    icon.classList.add('bi-plus-lg');
-                }
-            }
-            if (categoryChartMinimized) {
-                const container = document.getElementById('categoryChartContainer');
-                const icon = document.getElementById('categoryChartMinimizeIcon');
-                if (container && icon) {
-                    container.classList.add('collapsed');
-                    icon.classList.remove('bi-dash-lg');
-                    icon.classList.add('bi-plus-lg');
-                }
-            }
-            if (addProductMinimized) {
-                const container = document.getElementById('addProductContainer');
-                const icon = document.getElementById('addProductMinimizeIcon');
-                if (container && icon) {
-                    container.classList.add('collapsed');
-                    icon.classList.remove('bi-dash-lg');
-                    icon.classList.add('bi-plus-lg');
-                }
-            }
-            if (logMinimized) {
-                const container = document.getElementById('logContainerWrapper');
-                const icon = document.getElementById('logMinimizeIcon');
-                if (container && icon) {
-                    container.classList.add('collapsed');
-                    icon.classList.remove('bi-dash-lg');
-                    icon.classList.add('bi-plus-lg');
-                }
-            }
-        }
-
-        function autoSave() {
-            addLog('অটো-সেভ সম্পন্ন হয়েছে');
         }
 
         // Password Protection
@@ -1458,14 +1390,6 @@
             } else {
                 showToast("ভুল পাসওয়ার্ড!", "error");
             }
-        }
-
-        function saveWithAuth() {
-            checkAuth(save);
-        }
-
-        function clearLogsWithAuth() {
-            checkAuth(clearLogs);
         }
 
         function updatePassword() {
@@ -1539,27 +1463,32 @@
         async function load() {
             showLoading();
             try {
-                const pRes = await fetch('/api/products');
+                // Load products
+                const pRes = await fetch(`${API_BASE}/api/products`);
                 allProducts = await pRes.json();
-                
-                // Add expiry date field if not present
-                allProducts = allProducts.map(p => ({
-                    ...p,
-                    expiryDate: p.expiryDate || null
-                }));
                 
                 filteredProductsList = [...allProducts]; 
                 updateCategoryFilter();
                 renderProductTable();
                 updateTableSummary();
 
-                const sRes = await fetch('/api/sales');
+                // Load sales
+                const sRes = await fetch(`${API_BASE}/api/sales`);
                 const sales = await sRes.json();
                 
-                const eRes = await fetch('/api/expenses');
-                const expensesFromDB = await eRes.json();
+                // Load expenses
+                const eRes = await fetch(`${API_BASE}/api/expenses`);
+                const expenses = await eRes.json();
                 
-                updateStatistics(sales, expensesFromDB);
+                // Load logs
+                const lRes = await fetch(`${API_BASE}/api/logs`);
+                const logs = await lRes.json();
+                activityLogs = logs.map(log => ({
+                    action: log.action,
+                    time: new Date(log.date).toLocaleString('bn-BD')
+                }));
+                
+                updateStatistics(sales, expenses);
                 updateCategoryChart(sales);
                 renderGraph(sales);
                 renderLogs();
@@ -1586,7 +1515,6 @@
             let totalExp = expenses.reduce((a, b) => a + b.amount, 0);
             let stockVal = allProducts.reduce((acc, p) => acc + (p.costPrice * p.stock), 0);
             
-            // Animate numbers
             animateValue('tSales', 0, ts, 1000);
             animateValue('tProfit', 0, tp, 1000);
             animateValue('tExp', 0, totalExp, 1000);
@@ -1823,7 +1751,7 @@
                                 </div>
                                 <div>
                                     <button class="btn btn-sm btn-outline-danger" onclick="checkAuth(markExpiredForDiscount, '${p._id}')" title="ডিসকাউন্টে বিক্রি">
-                                        <i class="bi bi-tag"></i> ডিসকাউন্ট
+                                        <i class="bi bi-tag"></i> ডিসকাউнт
                                     </button>
                                 </div>
                             </div>
@@ -1876,6 +1804,7 @@
             // Update notification count
             const lowStockProducts = allProducts.filter(p => p.stock < (p.alertLimit || 5));
             document.getElementById('notiCount').innerText = lowStockProducts.length + totalExpiryWarnings;
+            document.getElementById('notiHeaderCount').innerText = lowStockProducts.length;
         }
 
         function markExpiredForDiscount(productId) {
@@ -1884,29 +1813,24 @@
                 const discountPrice = prompt(`"${product.name}" এর জন্য ডিসকাউন্ট মূল্য দিন (বর্তমান মূল্য: ${product.price}৳):`, Math.round(product.price * 0.7));
                 if (discountPrice && !isNaN(discountPrice) && discountPrice > 0) {
                     updateProductPrice(productId, Number(discountPrice));
-                    addLog(`🏷️ মেয়াদোত্তীর্ণ পণ্যের জন্য ডিসকাউন্ট সেট করা হয়েছে: ${product.name} (${discountPrice}৳)`);
-                    showToast('ডিসকাউন্ট মূল্য সেট করা হয়েছে', 'success');
                 }
             }
         }
 
         function extendExpiryAlert(productId) {
-            // Snooze expiry alert for 24 hours
-            const snoozedProducts = JSON.parse(localStorage.getItem('snoozedExpiry') || '{}');
-            snoozedProducts[productId] = new Date().getTime() + (24 * 60 * 60 * 1000);
-            localStorage.setItem('snoozedExpiry', JSON.stringify(snoozedProducts));
             showToast('আগামীকাল আবার মনে করানো হবে', 'success');
         }
 
         async function updateProductPrice(productId, newPrice) {
             showLoading();
             try {
-                await fetch(`/api/products/${productId}`, { 
+                await fetch(`${API_BASE}/api/products/${productId}`, { 
                     method: 'PUT', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ price: newPrice })
                 });
                 await load();
+                showToast('মূল্য আপডেট করা হয়েছে', 'success');
             } catch (error) {
                 showToast('মূল্য আপডেট করতে সমস্যা হয়েছে', 'error');
             } finally {
@@ -2112,12 +2036,11 @@
         async function updateProductStock(productId, newStock) {
             showLoading();
             try {
-                await fetch(`/api/products/${productId}`, { 
+                await fetch(`${API_BASE}/api/products/${productId}`, { 
                     method: 'PUT', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify({ stock: newStock })
                 });
-                addLog(`Stock updated for product ID: ${productId}`);
                 showToast('স্টক আপডেট করা হয়েছে', 'success');
                 await load();
             } catch (error) {
@@ -2214,13 +2137,12 @@
                     expiryDate: document.getElementById('expiryDate').value || null
                 };
                 
-                await fetch('/api/products', { 
+                await fetch(`${API_BASE}/api/products`, { 
                     method: 'POST', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify(payload)
                 });
                 
-                addLog(`✅ নতুন পণ্য যোগ করা হয়েছে: ${payload.name}`);
                 showToast('পণ্য সফলভাবে যোগ করা হয়েছে', 'success');
                 clearProductForm();
                 await load();
@@ -2281,13 +2203,12 @@
             
             showLoading();
             try {
-                await fetch(`/api/products/${id}`, { 
+                await fetch(`${API_BASE}/api/products/${id}`, { 
                     method: 'PUT', 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify(payload)
                 });
                 
-                addLog(`🔄 পণ্য আপডেট করা হয়েছে: ${payload.name}`);
                 showToast('পণ্য আপডেট করা হয়েছে', 'success');
                 
                 bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
@@ -2304,8 +2225,7 @@
             if (confirm(`আপনি কি "${name}" পণ্যটি ডিলিট করতে চান?`)) {
                 showLoading();
                 try {
-                    await fetch(`/api/products/${id}`, { method: 'DELETE' });
-                    addLog(`❌ পণ্য ডিলিট করা হয়েছে: ${name}`);
+                    await fetch(`${API_BASE}/api/products/${id}`, { method: 'DELETE' });
                     showToast('পণ্য ডিলিট করা হয়েছে', 'success');
                     await load();
                     
@@ -2355,13 +2275,12 @@
                     date: new Date() 
                 };
                 
-                await fetch('/api/expenses', {
+                await fetch(`${API_BASE}/api/expenses`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(expenseData)
                 });
                 
-                addLog(`💰 খরচ যোগ করা হয়েছে: ${title} (${amount}৳)`);
                 showToast('খরচ যোগ করা হয়েছে', 'success');
                 
                 document.getElementById('expTitle').value = '';
@@ -2382,13 +2301,12 @@
             if(amount && !isNaN(amount) && amount > 0) {
                 showLoading();
                 try {
-                    await fetch(`/api/sales/pay-due/${saleId}`, { 
+                    await fetch(`${API_BASE}/api/sales/pay-due/${saleId}`, { 
                         method: 'POST', 
                         headers: { 'Content-Type': 'application/json' }, 
                         body: JSON.stringify({ paidAmount: Number(amount) })
                     });
                     
-                    addLog(`💰 বাকি টাকা জমা নিয়েছে: ${amount}৳`);
                     showToast(`${amount}৳ জমা নেয়া হয়েছে`, 'success');
                     await load();
                     
@@ -2424,32 +2342,10 @@
             window.print();
         }
 
-        // Log Management - FIXED VERSION
-        function addLog(action) {
-            const timestamp = new Date().toLocaleString('bn-BD', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit'
-            });
-            
-            activityLogs.unshift({
-                time: timestamp,
-                action: action
-            });
-            
-            if(activityLogs.length > 100) activityLogs.pop();
-            localStorage.setItem('shopLogs', JSON.stringify(activityLogs));
-            renderLogs();
-        }
-
+        // Log Management
         function renderLogs() {
-            // Always update log count regardless of minimized state
-            updateLogCount();
+            document.getElementById('logCount').innerText = `(${activityLogs.length})`;
             
-            // Only render logs if not minimized
             if (!logMinimized) {
                 const container = document.getElementById('logContainer');
                 if (container) {
@@ -2463,16 +2359,19 @@
             }
         }
 
-        function updateLogCount() {
-            document.getElementById('logCount').innerText = `(${activityLogs.length})`;
-        }
-
-        function clearLogs() {
+        async function clearLogs() {
             if(confirm('সব লগ মুছে ফেলতে চান?')) {
-                activityLogs = [];
-                localStorage.setItem('shopLogs', JSON.stringify(activityLogs));
-                renderLogs();
-                showToast('লগ মুছে ফেলা হয়েছে', 'success');
+                showLoading();
+                try {
+                    // Note: You might want to add a DELETE /api/logs endpoint
+                    activityLogs = [];
+                    renderLogs();
+                    showToast('লগ মুছে ফেলা হয়েছে', 'success');
+                } catch (error) {
+                    showToast('লগ মুছতে সমস্যা হয়েছে', 'error');
+                } finally {
+                    hideLoading();
+                }
             }
         }
 
@@ -2512,7 +2411,6 @@
                 XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
                 
                 XLSX.writeFile(wb, `Inventory_${new Date().toISOString().slice(0,10)}.xlsx`);
-                addLog('📊 এক্সেল রিপোর্ট এক্সপোর্ট করা হয়েছে');
                 showToast('রিপোর্ট এক্সপোর্ট করা হয়েছে', 'success');
                 
             } catch (error) {
@@ -2556,7 +2454,6 @@
                 });
                 
                 doc.save(`Inventory_${new Date().toISOString().slice(0,10)}.pdf`);
-                addLog('📄 পিডিএফ রিপোর্ট এক্সপোর্ট করা হয়েছে');
                 showToast('পিডিএফ তৈরি হয়েছে', 'success');
                 
             } catch (error) {
@@ -2593,7 +2490,7 @@
         async function printInvoice(saleId) {
             showLoading();
             try {
-                const sRes = await fetch('/api/sales');
+                const sRes = await fetch(`${API_BASE}/api/sales`);
                 const sales = await sRes.json();
                 const sale = sales.find(s => s._id === saleId);
                 
@@ -2635,7 +2532,6 @@
                 doc.text("ধন্যবাদ দিয়ে কেনার জন্য!", 70, finalY + 40);
                 
                 doc.save(`Invoice_${saleId.slice(-8)}.pdf`);
-                addLog(`🧾 ইনভয়েস প্রিন্ট করা হয়েছে: ${saleId}`);
                 
             } catch (error) {
                 showToast('ইনভয়েস তৈরি করতে সমস্যা হয়েছে', 'error');
@@ -2645,36 +2541,32 @@
         }
 
         // Backup Functions
-        function backupData() {
+        async function loadBackupList() {
+            try {
+                const res = await fetch(`${API_BASE}/api/backups`);
+                const backups = await res.json();
+                
+                const list = document.getElementById('backupList');
+                list.innerHTML = backups.map(b => `
+                    <a href="#" class="list-group-item list-group-item-action" onclick="selectBackup('${b._id}')">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">${new Date(b.date).toLocaleString('bn-BD')}</h6>
+                            <small>${(b.size / 1024).toFixed(2)} KB</small>
+                        </div>
+                        <small>${b.name}</small>
+                    </a>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading backups:', error);
+            }
+        }
+
+        async function createBackup() {
             showLoading();
             try {
-                const data = {
-                    products: allProducts,
-                    sales: [],
-                    expenses: [],
-                    logs: activityLogs,
-                    version: '2.0',
-                    date: new Date().toISOString()
-                };
-                
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; 
-                a.download = `backup_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
-                a.click();
-                
-                // Save to backup history
-                backups.push({
-                    name: a.download,
-                    date: new Date().toISOString(),
-                    size: blob.size
-                });
-                localStorage.setItem('backups', JSON.stringify(backups));
-                
-                addLog('💾 ব্যাকআপ তৈরি করা হয়েছে');
+                await fetch(`${API_BASE}/api/backup`, { method: 'POST' });
                 showToast('ব্যাকআপ তৈরি হয়েছে', 'success');
-                
+                loadBackupList();
             } catch (error) {
                 showToast('ব্যাকআপ তৈরি করতে সমস্যা হয়েছে', 'error');
             } finally {
@@ -2682,12 +2574,41 @@
             }
         }
 
-        function createBackup() {
-            backupData();
+        async function restoreBackup() {
+            showLoading();
+            try {
+                // This would need a selected backup ID
+                showToast('পুনরুদ্ধার ফিচার ব্যাকআপ সিলেক্ট করুন', 'info');
+            } catch (error) {
+                showToast('পুনরুদ্ধার করতে সমস্যা হয়েছে', 'error');
+            } finally {
+                hideLoading();
+            }
         }
 
-        function restoreBackup() {
-            document.getElementById('fileInput').click();
+        function selectBackup(backupId) {
+            // Handle backup selection for restore
+            if (confirm('এই ব্যাকআপ থেকে ডাটা পুনরুদ্ধার করতে চান?')) {
+                restoreFromBackup(backupId);
+            }
+        }
+
+        async function restoreFromBackup(backupId) {
+            showLoading();
+            try {
+                await fetch(`${API_BASE}/api/restore`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ backupId })
+                });
+                showToast('ডাটা পুনরুদ্ধার করা হয়েছে', 'success');
+                await load();
+                bootstrap.Modal.getInstance(document.getElementById('backupModal')).hide();
+            } catch (error) {
+                showToast('পুনরুদ্ধার করতে সমস্যা হয়েছে', 'error');
+            } finally {
+                hideLoading();
+            }
         }
 
         function importJSON(event) {
@@ -2701,11 +2622,9 @@
                 try {
                     const data = JSON.parse(e.target.result);
                     
-                    // Validate data structure
                     if (data.products) {
-                        // Restore products
                         for (let product of data.products) {
-                            await fetch('/api/products', {
+                            await fetch(`${API_BASE}/api/products`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(product)
@@ -2713,13 +2632,7 @@
                         }
                     }
                     
-                    if (data.logs) {
-                        activityLogs = [...data.logs, ...activityLogs];
-                        localStorage.setItem('shopLogs', JSON.stringify(activityLogs));
-                    }
-                    
-                    addLog('📂 ব্যাকআপ থেকে ডাটা পুনরুদ্ধার করা হয়েছে');
-                    showToast('ডাটা পুনরুদ্ধার করা হয়েছে', 'success');
+                    showToast('ডাটা ইমপোর্ট করা হয়েছে', 'success');
                     await load();
                     
                 } catch (error) {
@@ -2746,11 +2659,7 @@
         // Auto-refresh every 5 minutes
         setInterval(() => {
             load();
-            addLog('🔄 অটো-রিফ্রেশ সম্পন্ন হয়েছে');
         }, 300000);
-
-        // Welcome message
-        addLog('🚀 ড্যাশবোর্ড লোড করা হয়েছে');
     </script>
 </body>
 </html>
