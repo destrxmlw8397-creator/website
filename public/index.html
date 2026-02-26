@@ -780,7 +780,7 @@
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button onclick="checkAuth(save)" class="btn btn-primary">
+                        <button onclick="saveWithAuth()" class="btn btn-primary">
                             <i class="bi bi-save me-2"></i>
                             ইনভেন্টরি আপডেট
                         </button>
@@ -807,7 +807,7 @@
                     </h5>
                     <div id="logContainer" class="log-container"></div>
                     <div class="mt-3">
-                        <button onclick="clearLogs()" class="btn btn-sm btn-outline-danger w-100">
+                        <button onclick="clearLogsWithAuth()" class="btn btn-sm btn-outline-danger w-100">
                             <i class="bi bi-trash me-2"></i>
                             লগ মুছে ফেলুন
                         </button>
@@ -1114,7 +1114,7 @@
                 // Ctrl + S for save
                 if (e.ctrlKey && e.key === 's') {
                     e.preventDefault();
-                    checkAuth(save);
+                    saveWithAuth();
                 }
                 // Ctrl + F for search
                 if (e.ctrlKey && e.key === 'f') {
@@ -1148,6 +1148,14 @@
             } else {
                 showToast("ভুল পাসওয়ার্ড!", "error");
             }
+        }
+
+        function saveWithAuth() {
+            checkAuth(save);
+        }
+
+        function clearLogsWithAuth() {
+            checkAuth(clearLogs);
         }
 
         function updatePassword() {
@@ -1524,11 +1532,10 @@
                             <div>
                                 <strong>${p.name}</strong>
                                 <br>
-                                <small class="text-muted">সতর্কতা সীমা: ${p.alertLimit || 5}</small>
+                                <small class="text-muted">স্টক: ${p.stock} (সীমা: ${p.alertLimit || 5})</small>
                             </div>
                             <div>
-                                <span class="badge bg-danger">স্টক: ${p.stock}</span>
-                                <button class="btn btn-sm btn-link" onclick="restockProduct('${p._id}')">
+                                <button class="btn btn-sm btn-link text-primary" onclick="checkAuth(restockProduct, '${p._id}')">
                                     <i class="bi bi-plus-circle"></i>
                                 </button>
                             </div>
@@ -1544,12 +1551,14 @@
                 const alert = document.getElementById('lowStockAlert');
                 alert.classList.remove('d-none');
                 document.getElementById('lowStockList').innerText = lowStockProducts.map(p => p.name).join(', ');
+            } else {
+                document.getElementById('lowStockAlert').classList.add('d-none');
             }
         }
 
         function restockProduct(productId) {
             let qty = prompt("কত Quantity যোগ করতে চান?");
-            if(qty && !isNaN(qty)) {
+            if(qty && !isNaN(qty) && parseInt(qty) > 0) {
                 const product = allProducts.find(p => p._id === productId);
                 if(product) {
                     updateProductStock(productId, product.stock + parseInt(qty));
@@ -1558,13 +1567,21 @@
         }
 
         async function updateProductStock(productId, newStock) {
-            await fetch(`/api/products/${productId}`, { 
-                method: 'PUT', 
-                headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ stock: newStock })
-            });
-            addLog(`Stock updated for product ID: ${productId}`);
-            load();
+            showLoading();
+            try {
+                await fetch(`/api/products/${productId}`, { 
+                    method: 'PUT', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ stock: newStock })
+                });
+                addLog(`Stock updated for product ID: ${productId}`);
+                showToast('স্টক আপডেট করা হয়েছে', 'success');
+                await load();
+            } catch (error) {
+                showToast('স্টক আপডেট করতে সমস্যা হয়েছে', 'error');
+            } finally {
+                hideLoading();
+            }
         }
 
         function renderPagination() {
