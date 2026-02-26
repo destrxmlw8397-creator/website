@@ -16,7 +16,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // --- ১. স্কিমা ডেফিনিশন ---
 
-// প্রোডাক্ট স্কিমা
+// প্রোডাক্ট স্কিমা (Expiry Date যোগ করা হয়েছে)
 const ProductSchema = new mongoose.Schema({
     name: { type: String, required: true },
     barcode: { type: String, default: "" }, 
@@ -25,9 +25,10 @@ const ProductSchema = new mongoose.Schema({
     costPrice: { type: Number, default: 0 }, 
     price: { type: Number, required: true },
     stock: { type: Number, required: true },
+    alertLimit: { type: Number, default: 5 },
+    expiryDate: { type: Date, default: null },
     date: { type: Date, default: Date.now }
 }, { strict: false }); 
-const Product = mongoose.model('Product', ProductSchema);
 
 // সেলস স্কিমা
 const SaleSchema = new mongoose.Schema({
@@ -40,28 +41,46 @@ const SaleSchema = new mongoose.Schema({
     profit: Number,
     date: { type: Date, default: Date.now }
 });
-const Sale = mongoose.model('Sale', SaleSchema);
 
 // এক্সপেন্স স্কিমা
 const ExpenseSchema = new mongoose.Schema({
     title: { type: String, required: true },
     amount: { type: Number, required: true },
+    category: { type: String, default: "অন্যান্য" },
     date: { type: Date, default: Date.now }
 });
-const Expense = mongoose.model('Expense', ExpenseSchema);
 
 // অ্যাক্টিভিটি লগ স্কিমা
 const LogSchema = new mongoose.Schema({
     action: String,
     date: { type: Date, default: Date.now }
 });
+
+// ব্যাকআপ স্কিমা (ব্যাকআপ হিস্টোরির জন্য)
+const BackupSchema = new mongoose.Schema({
+    name: String,
+    data: Object,
+    size: Number,
+    date: { type: Date, default: Date.now }
+});
+
+const Product = mongoose.model('Product', ProductSchema);
+const Sale = mongoose.model('Sale', SaleSchema);
+const Expense = mongoose.model('Expense', ExpenseSchema);
 const Log = mongoose.model('Log', LogSchema);
+const Backup = mongoose.model('Backup', BackupSchema);
 
 // --- সাহায্যকারী ফাংশন: লগ সেভ করা ---
 async function createLog(msg) {
     try {
         const newLog = new Log({ action: msg });
         await newLog.save();
+        // লগ ১০০ এর বেশি রাখার দরকার নেই
+        const logCount = await Log.countDocuments();
+        if (logCount > 100) {
+            const oldestLog = await Log.findOne().sort({ date: 1 });
+            if (oldestLog) await Log.deleteOne({ _id: oldestLog._id });
+        }
     } catch (e) { console.log("Log Error:", e); }
 }
 
@@ -80,7 +99,7 @@ app.post('/api/products', async (req, res) => {
     try {
         const newProduct = new Product(req.body);
         await newProduct.save();
-        await createLog(`পণ্য যোগ করা হয়েছে: ${newProduct.name}`);
+        await createLog(`✅ নতুন পণ্য যোগ করা হয়েছে: ${newProduct.name}`);
         res.status(201).json(newProduct);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -89,7 +108,7 @@ app.post('/api/products', async (req, res) => {
 app.put('/api/products/:id', async (req, res) => {
     try {
         const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        await createLog(`পণ্য আপডেট করা হয়েছে: ${updatedProduct.name}`);
+        await createLog(`🔄 পণ্য আপডেট করা হয়েছে: ${updatedProduct.name}`);
         res.json(updatedProduct);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -99,7 +118,7 @@ app.delete('/api/products/:id', async (req, res) => {
     try {
         const p = await Product.findById(req.params.id);
         if(p) {
-            await createLog(`পণ্য ডিলিট করা হয়েছে: ${p.name}`);
+            await createLog(`❌ পণ্য ডিলিট করা হয়েছে: ${p.name}`);
             await Product.findByIdAndDelete(req.params.id);
             res.json({ message: "Deleted" });
         } else {
@@ -128,7 +147,7 @@ app.post('/api/expenses', async (req, res) => {
     try {
         const newExpense = new Expense(req.body);
         await newExpense.save();
-        await createLog(`খরচ এন্ট্রি: ${newExpense.title} - ${newExpense.amount}৳`);
+        await createLog(`💰 খরচ এন্ট্রি: ${newExpense.title} - ${newExpense.amount}৳`);
         res.status(201).json(newExpense);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -150,7 +169,7 @@ app.post('/api/sales/pay-due/:id', async (req, res) => {
             sale.paidAmount += Number(paidAmount);
             sale.dueAmount -= Number(paidAmount);
             await sale.save();
-            await createLog(`বাকি জমা: কাস্টমার ${sale.customerName}, পরিমাণ ${paidAmount}৳`);
+            await createLog(`💰 বাকি জমা: কাস্টমার ${sale.customerName}, পরিমাণ ${paidAmount}৳`);
             res.json({ success: true });
         } else {
             res.status(404).json({ error: "Sale record not found" });
@@ -181,8 +200,77 @@ app.post('/api/checkout', async (req, res) => {
             totalAmount, paidAmount, dueAmount, profit
         });
         await newSale.save();
-        await createLog(`বিক্রি সম্পন্ন: কাস্টমার ${customerName}, মোট ${totalAmount}৳`);
+        await createLog(`🛒 বিক্রি সম্পন্ন: কাস্টমার ${customerName}, মোট ${totalAmount}৳`);
         res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ব্যাকআপ তৈরি
+app.post('/api/backup', async (req, res) => {
+    try {
+        const products = await Product.find();
+        const sales = await Sale.find();
+        const expenses = await Expense.find();
+        const logs = await Log.find();
+        
+        const backupData = {
+            products,
+            sales,
+            expenses,
+            logs,
+            version: '2.0',
+            date: new Date()
+        };
+        
+        const backup = new Backup({
+            name: `backup_${new Date().toISOString()}`,
+            data: backupData,
+            size: JSON.stringify(backupData).length
+        });
+        
+        await backup.save();
+        await createLog('💾 ব্যাকআপ তৈরি করা হয়েছে');
+        res.json({ success: true, backup });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ব্যাকআপ পুনরুদ্ধার
+app.post('/api/restore', async (req, res) => {
+    try {
+        const { backupId } = req.body;
+        const backup = await Backup.findById(backupId);
+        
+        if (!backup) {
+            return res.status(404).json({ error: 'Backup not found' });
+        }
+        
+        // ডাটা পুনরুদ্ধার
+        await Product.deleteMany({});
+        await Sale.deleteMany({});
+        await Expense.deleteMany({});
+        await Log.deleteMany({});
+        
+        await Product.insertMany(backup.data.products);
+        await Sale.insertMany(backup.data.sales);
+        await Expense.insertMany(backup.data.expenses);
+        await Log.insertMany(backup.data.logs);
+        
+        await createLog('📂 ব্যাকআপ থেকে ডাটা পুনরুদ্ধার করা হয়েছে');
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ব্যাকআপ লিস্ট
+app.get('/api/backups', async (req, res) => {
+    try {
+        const backups = await Backup.find().sort({ date: -1 }).limit(20);
+        res.json(backups);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -210,9 +298,28 @@ app.get('/api/stats', async (req, res) => {
             });
         });
 
+        // Expiry statistics
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const expiredProducts = products.filter(p => p.expiryDate && new Date(p.expiryDate) < today);
+        const expiringSoonProducts = products.filter(p => {
+            if (!p.expiryDate) return false;
+            const expiry = new Date(p.expiryDate);
+            const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+            return diffDays > 0 && diffDays <= 7;
+        });
+
         res.json({ 
-            stockValue, totalSales, grossProfit, 
-            totalDue, totalExpense, netProfit, categoryStats 
+            stockValue, 
+            totalSales, 
+            grossProfit, 
+            totalDue, 
+            totalExpense, 
+            netProfit, 
+            categoryStats,
+            expiredCount: expiredProducts.length,
+            expiringCount: expiringSoonProducts.length
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
