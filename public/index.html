@@ -198,7 +198,7 @@
         }
 
         .chart-content.collapsed {
-            display: none;
+            display: none !important;
         }
 
         /* Table Container */
@@ -936,15 +936,15 @@
                     </div>
                 </div>
 
-                <!-- Activity Log Card with Minimize Button -->
+                <!-- Activity Log Card with Minimize Button - FIXED VERSION -->
                 <div class="table-container">
-                    <div class="table-header" onclick="toggleSection('logContainer', 'logMinimizeIcon')">
+                    <div class="table-header" onclick="toggleSection('logContainerWrapper', 'logMinimizeIcon')">
                         <h5 class="mb-0">
                             <i class="bi bi-clock-history me-2"></i>
                             অ্যাক্টিভিটি লগ
                             <small class="text-muted fs-6 ms-2" id="logCount">(০)</small>
                         </h5>
-                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('logContainer', 'logMinimizeIcon')">
+                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('logContainerWrapper', 'logMinimizeIcon')">
                             <i class="bi bi-dash-lg" id="logMinimizeIcon"></i>
                         </button>
                     </div>
@@ -1304,10 +1304,17 @@
             setMinExpiryDate();
         });
 
-        // Section minimize function (updated to work with any section)
+        // Section minimize function - FIXED VERSION
         function toggleSection(sectionId, iconId) {
+            console.log('Toggling section:', sectionId, 'with icon:', iconId); // Debug log
+            
             const container = document.getElementById(sectionId);
             const icon = document.getElementById(iconId);
+            
+            if (!container || !icon) {
+                console.error('Container or icon not found:', sectionId, iconId);
+                return;
+            }
             
             if (container.classList.contains('collapsed')) {
                 container.classList.remove('collapsed');
@@ -1318,13 +1325,17 @@
                 if (sectionId === 'salesChartContainer') salesChartMinimized = false;
                 else if (sectionId === 'categoryChartContainer') categoryChartMinimized = false;
                 else if (sectionId === 'addProductContainer') addProductMinimized = false;
-                else if (sectionId === 'logContainerWrapper') logMinimized = false;
+                else if (sectionId === 'logContainerWrapper') {
+                    logMinimized = false;
+                    // Re-render logs when expanding
+                    renderLogs();
+                }
                 
                 // Refresh charts when expanding
                 if (sectionId === 'salesChartContainer' && currentChart) {
-                    currentChart.resize();
+                    setTimeout(() => currentChart.resize(), 100);
                 } else if (sectionId === 'categoryChartContainer' && categoryChart) {
-                    categoryChart.resize();
+                    setTimeout(() => categoryChart.resize(), 100);
                 }
             } else {
                 container.classList.add('collapsed');
@@ -1343,6 +1354,8 @@
             localStorage.setItem('categoryChartMinimized', categoryChartMinimized);
             localStorage.setItem('addProductMinimized', addProductMinimized);
             localStorage.setItem('logMinimized', logMinimized);
+            
+            console.log('New state - logMinimized:', logMinimized); // Debug log
         }
 
         function setMinExpiryDate() {
@@ -1388,26 +1401,44 @@
             addProductMinimized = localStorage.getItem('addProductMinimized') === 'true';
             logMinimized = localStorage.getItem('logMinimized') === 'true';
             
+            console.log('Restored states - logMinimized:', logMinimized); // Debug log
+            
             // Apply saved states
             if (salesChartMinimized) {
-                document.getElementById('salesChartContainer').classList.add('collapsed');
-                document.getElementById('salesChartMinimizeIcon').classList.remove('bi-dash-lg');
-                document.getElementById('salesChartMinimizeIcon').classList.add('bi-plus-lg');
+                const container = document.getElementById('salesChartContainer');
+                const icon = document.getElementById('salesChartMinimizeIcon');
+                if (container && icon) {
+                    container.classList.add('collapsed');
+                    icon.classList.remove('bi-dash-lg');
+                    icon.classList.add('bi-plus-lg');
+                }
             }
             if (categoryChartMinimized) {
-                document.getElementById('categoryChartContainer').classList.add('collapsed');
-                document.getElementById('categoryChartMinimizeIcon').classList.remove('bi-dash-lg');
-                document.getElementById('categoryChartMinimizeIcon').classList.add('bi-plus-lg');
+                const container = document.getElementById('categoryChartContainer');
+                const icon = document.getElementById('categoryChartMinimizeIcon');
+                if (container && icon) {
+                    container.classList.add('collapsed');
+                    icon.classList.remove('bi-dash-lg');
+                    icon.classList.add('bi-plus-lg');
+                }
             }
             if (addProductMinimized) {
-                document.getElementById('addProductContainer').classList.add('collapsed');
-                document.getElementById('addProductMinimizeIcon').classList.remove('bi-dash-lg');
-                document.getElementById('addProductMinimizeIcon').classList.add('bi-plus-lg');
+                const container = document.getElementById('addProductContainer');
+                const icon = document.getElementById('addProductMinimizeIcon');
+                if (container && icon) {
+                    container.classList.add('collapsed');
+                    icon.classList.remove('bi-dash-lg');
+                    icon.classList.add('bi-plus-lg');
+                }
             }
             if (logMinimized) {
-                document.getElementById('logContainerWrapper').classList.add('collapsed');
-                document.getElementById('logMinimizeIcon').classList.remove('bi-dash-lg');
-                document.getElementById('logMinimizeIcon').classList.add('bi-plus-lg');
+                const container = document.getElementById('logContainerWrapper');
+                const icon = document.getElementById('logMinimizeIcon');
+                if (container && icon) {
+                    container.classList.add('collapsed');
+                    icon.classList.remove('bi-dash-lg');
+                    icon.classList.add('bi-plus-lg');
+                }
             }
         }
 
@@ -2393,7 +2424,7 @@
             window.print();
         }
 
-        // Log Management
+        // Log Management - FIXED VERSION
         function addLog(action) {
             const timestamp = new Date().toLocaleString('bn-BD', {
                 year: 'numeric',
@@ -2415,19 +2446,21 @@
         }
 
         function renderLogs() {
-            if (logMinimized) return;
-            
-            const container = document.getElementById('logContainer');
-            if (container) {
-                container.innerHTML = activityLogs.map(log => `
-                    <div class="d-flex justify-content-between align-items-start">
-                        <span>${log.action}</span>
-                        <small class="text-muted ms-2">${log.time}</small>
-                    </div>
-                `).join('');
-            }
-            
+            // Always update log count regardless of minimized state
             updateLogCount();
+            
+            // Only render logs if not minimized
+            if (!logMinimized) {
+                const container = document.getElementById('logContainer');
+                if (container) {
+                    container.innerHTML = activityLogs.map(log => `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <span>${log.action}</span>
+                            <small class="text-muted ms-2">${log.time}</small>
+                        </div>
+                    `).join('');
+                }
+            }
         }
 
         function updateLogCount() {
