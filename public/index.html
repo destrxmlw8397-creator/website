@@ -780,7 +780,7 @@
             </div>
         </div>
 
-        <!-- Charts Row with Minimize Buttons -->
+        <!-- Charts Row with Minimize Buttons - এখন ডিফল্ট মিনিমাইজড -->
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
                 <div class="chart-container">
@@ -790,10 +790,10 @@
                             বিক্রয় ও লাভ বিশ্লেষণ
                         </h5>
                         <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('salesChartContainer', 'salesChartMinimizeIcon')">
-                            <i class="bi bi-dash-lg" id="salesChartMinimizeIcon"></i>
+                            <i class="bi bi-plus-lg" id="salesChartMinimizeIcon"></i> <!-- ডিফল্ট প্লাস আইকন -->
                         </button>
                     </div>
-                    <div id="salesChartContainer" class="chart-content">
+                    <div id="salesChartContainer" class="chart-content collapsed"> <!-- ডিফল্ট collapsed -->
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div class="d-flex gap-2">
                                 <select class="form-select form-select-sm" id="chartFilter" onchange="load()" style="width: 150px;">
@@ -819,10 +819,10 @@
                             ক্যাটাগরি ভিত্তিক সেলস
                         </h5>
                         <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('categoryChartContainer', 'categoryChartMinimizeIcon')">
-                            <i class="bi bi-dash-lg" id="categoryChartMinimizeIcon"></i>
+                            <i class="bi bi-plus-lg" id="categoryChartMinimizeIcon"></i> <!-- ডিফল্ট প্লাস আইকন -->
                         </button>
                     </div>
-                    <div id="categoryChartContainer" class="chart-content">
+                    <div id="categoryChartContainer" class="chart-content collapsed"> <!-- ডিফল্ট collapsed -->
                         <canvas id="categoryChart"></canvas>
                         <div class="mt-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -848,7 +848,7 @@
         <div class="row g-4">
             <!-- Left Column -->
             <div class="col-lg-4">
-                <!-- Add Product Card with Minimize Button -->
+                <!-- Add Product Card with Minimize Button - ডিফল্ট মিনিমাইজড -->
                 <div class="table-container mb-4">
                     <div class="table-header" onclick="toggleSection('addProductContainer', 'addProductMinimizeIcon')">
                         <h5 class="mb-0">
@@ -856,10 +856,10 @@
                             পণ্য যোগ করুন
                         </h5>
                         <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('addProductContainer', 'addProductMinimizeIcon')">
-                            <i class="bi bi-dash-lg" id="addProductMinimizeIcon"></i>
+                            <i class="bi bi-plus-lg" id="addProductMinimizeIcon"></i> <!-- ডিফল্ট প্লাস আইকন -->
                         </button>
                     </div>
-                    <div id="addProductContainer" class="chart-content">
+                    <div id="addProductContainer" class="chart-content collapsed"> <!-- ডিফল্ট collapsed -->
                         <div class="mb-3">
                             <label class="form-label">বারকোড</label>
                             <div class="input-group">
@@ -935,7 +935,7 @@
                     </div>
                 </div>
 
-                <!-- Activity Log Card with Minimize Button -->
+                <!-- Activity Log Card with Minimize Button - ডিফল্ট মিনিমাইজড -->
                 <div class="table-container">
                     <div class="table-header" onclick="toggleSection('logContainerWrapper', 'logMinimizeIcon')">
                         <h5 class="mb-0">
@@ -944,10 +944,10 @@
                             <small class="text-muted fs-6 ms-2" id="logCount">(০)</small>
                         </h5>
                         <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('logContainerWrapper', 'logMinimizeIcon')">
-                            <i class="bi bi-dash-lg" id="logMinimizeIcon"></i>
+                            <i class="bi bi-plus-lg" id="logMinimizeIcon"></i> <!-- ডিফল্ট প্লাস আইকন -->
                         </button>
                     </div>
-                    <div id="logContainerWrapper" class="chart-content">
+                    <div id="logContainerWrapper" class="chart-content collapsed"> <!-- ডিফল্ট collapsed -->
                         <div id="logContainer" class="log-container"></div>
                         <div class="mt-3">
                             <button onclick="checkAuth(clearLogs)" class="btn btn-sm btn-outline-danger w-100">
@@ -959,7 +959,7 @@
                 </div>
             </div>
 
-            <!-- Right Column -->
+            <!-- Right Column (Inventory Table - সবসময় খোলা) -->
             <div class="col-lg-8">
                 <div class="table-container">
                     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -1287,22 +1287,40 @@
         let allProducts = [];
         let filteredProductsList = [];
 
-        // Section minimize states
-        let salesChartMinimized = false;
-        let categoryChartMinimized = false;
-        let addProductMinimized = false;
-        let logMinimized = false;
+        // Section minimize states - ডিফল্ট true (মিনিমাইজড)
+        let salesChartMinimized = true;
+        let categoryChartMinimized = true;
+        let addProductMinimized = true;
+        let logMinimized = true;
 
         // API Base URL
         const API_BASE = '';
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
+            // সেকশনগুলো ডিফল্ট মিনিমাইজড
+            initializeMinimizedSections();
+            
             load();
             initializeEventListeners();
             setMinExpiryDate();
             loadBackupList();
         });
+
+        // ডিফল্ট মিনিমাইজড সেকশন সেটআপ
+        function initializeMinimizedSections() {
+            // আইকন আপডেট
+            document.getElementById('salesChartMinimizeIcon').className = 'bi bi-plus-lg';
+            document.getElementById('categoryChartMinimizeIcon').className = 'bi bi-plus-lg';
+            document.getElementById('addProductMinimizeIcon').className = 'bi bi-plus-lg';
+            document.getElementById('logMinimizeIcon').className = 'bi bi-plus-lg';
+            
+            // স্টেট আপডেট
+            salesChartMinimized = true;
+            categoryChartMinimized = true;
+            addProductMinimized = true;
+            logMinimized = true;
+        }
 
         // Section minimize function
         function toggleSection(sectionId, iconId) {
@@ -1316,18 +1334,25 @@
                 icon.classList.remove('bi-plus-lg');
                 icon.classList.add('bi-dash-lg');
                 
-                if (sectionId === 'salesChartContainer') salesChartMinimized = false;
-                else if (sectionId === 'categoryChartContainer') categoryChartMinimized = false;
-                else if (sectionId === 'addProductContainer') addProductMinimized = false;
+                if (sectionId === 'salesChartContainer') {
+                    salesChartMinimized = false;
+                    // চার্ট রিফ্রেশ
+                    if (currentChart) {
+                        setTimeout(() => currentChart.resize(), 100);
+                    }
+                }
+                else if (sectionId === 'categoryChartContainer') {
+                    categoryChartMinimized = false;
+                    if (categoryChart) {
+                        setTimeout(() => categoryChart.resize(), 100);
+                    }
+                }
+                else if (sectionId === 'addProductContainer') {
+                    addProductMinimized = false;
+                }
                 else if (sectionId === 'logContainerWrapper') {
                     logMinimized = false;
                     renderLogs();
-                }
-                
-                if (sectionId === 'salesChartContainer' && currentChart) {
-                    setTimeout(() => currentChart.resize(), 100);
-                } else if (sectionId === 'categoryChartContainer' && categoryChart) {
-                    setTimeout(() => categoryChart.resize(), 100);
                 }
             } else {
                 container.classList.add('collapsed');
@@ -1526,8 +1551,16 @@
                 }));
                 
                 updateStatistics(sales, expenses);
-                updateCategoryChart(sales);
-                renderGraph(sales);
+                
+                // শুধুমাত্র যদি আনমিনিমাইজড থাকে তাহলে চার্ট আপডেট
+                if (!categoryChartMinimized) {
+                    updateCategoryChart(sales);
+                }
+                
+                if (!salesChartMinimized) {
+                    renderGraph(sales);
+                }
+                
                 renderLogs();
                 checkLowStock();
                 checkExpiryProducts();
