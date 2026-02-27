@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>🛍️ সুপারশপ POS প্রো - সার্ভার সাইড হোল্ড কার্ট</title>
+    <title>🛍️ সুপারশপ POS প্রো - বারকোড স্ক্যানার সহ</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -13,6 +13,9 @@
     
     <!-- html2pdf -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- ZXing Library for Barcode Scanning -->
+    <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -45,10 +48,18 @@
             max-height: calc(100vh - 20px);
         }
 
-        /* Search Box */
-        .search-box {
+        /* Search Box with Scanner Icon */
+        .search-container {
             position: relative;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
         }
 
         .search-box i {
@@ -63,6 +74,7 @@
 
         .search-box input {
             padding-left: 50px;
+            padding-right: 15px;
             border-radius: 50px;
             border: 2px solid #e2e8f0;
             height: 55px;
@@ -88,6 +100,154 @@
             0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
             70% { box-shadow: 0 0 0 12px rgba(16,185,129,0); }
             100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+        }
+
+        /* Scanner Button */
+        .scanner-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+            flex-shrink: 0;
+        }
+
+        .scanner-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 25px rgba(102,126,234,0.6);
+        }
+
+        .scanner-btn:active {
+            transform: scale(0.95);
+        }
+
+        .scanner-btn.scanning {
+            background: linear-gradient(135deg, #10b981, #059669);
+            animation: rotate 1s infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Scanner Modal */
+        .scanner-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .scanner-modal.active {
+            display: flex;
+        }
+
+        .scanner-container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        .scanner-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .scanner-header h5 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .scanner-header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+
+        #scannerView {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            position: relative;
+        }
+
+        #scannerView video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 3px solid rgba(102,126,234,0.5);
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        .scanner-result {
+            padding: 15px;
+            text-align: center;
+            background: #f8fafc;
+            font-weight: 600;
+        }
+
+        .manual-input {
+            padding: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .manual-input .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .manual-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+
+        .manual-input button {
+            padding: 12px 25px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            white-space: nowrap;
         }
 
         /* Category Tabs */
@@ -520,10 +680,15 @@
                 </div>
             </div>
 
-            <!-- Search Box -->
-            <div class="search-box">
-                <i class="bi bi-search"></i>
-                <input type="text" id="search" placeholder="🔍 বারকোড স্ক্যান / নাম লিখুন..." autofocus>
+            <!-- Search Box with Scanner Icon -->
+            <div class="search-container">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="search" placeholder="🔍 বারকোড / নাম লিখুন..." autofocus>
+                </div>
+                <button class="scanner-btn" id="scannerBtn" onclick="openScanner()">
+                    <i class="bi bi-upc-scan"></i>
+                </button>
             </div>
 
             <!-- Category Tabs -->
@@ -624,6 +789,29 @@
     </div>
 </div>
 
+<!-- Scanner Modal -->
+<div class="scanner-modal" id="scannerModal">
+    <div class="scanner-container">
+        <div class="scanner-header">
+            <h5><i class="bi bi-upc-scan me-2"></i>বারকোড স্ক্যানার</h5>
+            <button onclick="closeScanner()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div id="scannerView" style="position: relative;">
+            <video id="scannerVideo"></video>
+            <div class="scanner-overlay"></div>
+        </div>
+        <div class="scanner-result" id="scannerResult">
+            স্ক্যান করা বারকোড দেখাবে...
+        </div>
+        <div class="manual-input">
+            <div class="input-group">
+                <input type="text" id="manualBarcode" placeholder="ম্যানুয়ালি বারকোড দিন">
+                <button onclick="processManualBarcode()">যোগ করুন</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Hidden Invoice Template -->
 <div id="inv">
     <div class="memo-header">
@@ -688,7 +876,11 @@
     let currentDiscount = 0;
     let paymentMethod = 'cash';
     let isOffline = false;
-    let currentHoldCartId = null; // ট্র্যাক করার জন্য যে এই কার্ট কোন হোল্ড কার্ট থেকে এসেছে
+    let currentHoldCartId = null;
+    
+    // Scanner Variables
+    let codeReader = null;
+    let isScanning = false;
 
     // ==================== TOAST NOTIFICATION ====================
     function showToast(message, type = 'info') {
@@ -744,14 +936,12 @@
             console.error('Error loading products:', error);
             showToast('❌ সার্ভার সংযোগ ব্যর্থ!', 'warning');
             
-            // লোকাল ক্যাশে থেকে লোড
             const cachedProducts = localStorage.getItem('cachedProducts');
             if (cachedProducts) {
                 products = JSON.parse(cachedProducts);
                 renderProducts();
                 loadCategories();
             } else {
-                // ডেমো ডাটা
                 products = [
                     { _id: '1', name: 'বাসমতি চাল (৫কেজি)', category: 'চাল', price: 650, costPrice: 600, stock: 25, barcode: '123456' },
                     { _id: '2', name: 'মুসুর ডাল (১কেজি)', category: 'ডাল', price: 140, costPrice: 120, stock: 18, barcode: '123457' },
@@ -779,7 +969,7 @@
         
         list.innerHTML = '';
         
-        productList.slice(0, 50).forEach(p => { // ম্যাক্সিমাম ৫০ পণ্য দেখাবে
+        productList.slice(0, 50).forEach(p => {
             const stockClass = p.stock > 20 ? 'stock-high' : p.stock > 10 ? 'stock-medium' : 'stock-low';
             const disabled = p.stock <= 0 ? 'disabled' : '';
             const profit = Math.round(p.price - (p.costPrice || 0));
@@ -853,6 +1043,124 @@
             (p.barcode && p.barcode.toLowerCase().includes(searchTerm))
         );
         renderProducts(filtered);
+    });
+
+    // ==================== SCANNER FUNCTIONS ====================
+    
+    // Open Scanner Modal
+    async function openScanner() {
+        const modal = document.getElementById('scannerModal');
+        modal.classList.add('active');
+        
+        // Initialize scanner
+        try {
+            await startScanner();
+        } catch (error) {
+            showToast('❌ ক্যামেরা চালু করতে সমস্যা', 'error');
+            console.error('Scanner error:', error);
+        }
+    }
+
+    // Close Scanner Modal
+    function closeScanner() {
+        const modal = document.getElementById('scannerModal');
+        modal.classList.remove('active');
+        stopScanner();
+        document.getElementById('manualBarcode').value = '';
+        document.getElementById('scannerResult').innerHTML = 'স্ক্যান করা বারকোড দেখাবে...';
+    }
+
+    // Start Barcode Scanner
+    async function startScanner() {
+        if (isScanning) return;
+        
+        const videoElement = document.getElementById('scannerVideo');
+        const scannerBtn = document.getElementById('scannerBtn');
+        
+        try {
+            codeReader = new ZXing.BrowserMultiFormatReader();
+            isScanning = true;
+            scannerBtn.classList.add('scanning');
+            
+            const videoInputDevices = await codeReader.listVideoInputDevices();
+            const selectedDeviceId = videoInputDevices[0].deviceId;
+            
+            await codeReader.decodeFromVideoDevice(selectedDeviceId, videoElement, (result, error) => {
+                if (result) {
+                    // Successfully scanned
+                    const barcode = result.text;
+                    document.getElementById('scannerResult').innerHTML = `
+                        <span class="text-success"><i class="bi bi-check-circle-fill"></i> পাওয়া গেছে: ${barcode}</span>
+                    `;
+                    
+                    // Add to cart
+                    addProductByBarcode(barcode);
+                    
+                    // Stop scanner after successful scan
+                    setTimeout(() => {
+                        stopScanner();
+                        closeScanner();
+                    }, 500);
+                }
+                
+                if (error && !(error instanceof ZXing.NotFoundException)) {
+                    console.error('Scan error:', error);
+                }
+            });
+            
+        } catch (error) {
+            console.error('Failed to start scanner:', error);
+            showToast('❌ ক্যামেরা চালু করতে সমস্যা', 'error');
+            stopScanner();
+        }
+    }
+
+    // Stop Barcode Scanner
+    function stopScanner() {
+        if (codeReader) {
+            codeReader.reset();
+            codeReader = null;
+        }
+        isScanning = false;
+        document.getElementById('scannerBtn').classList.remove('scanning');
+    }
+
+    // Add product by barcode
+    function addProductByBarcode(barcode) {
+        const product = products.find(p => p.barcode && p.barcode === barcode);
+        
+        if (product) {
+            addToCart(product._id);
+            showToast(`✅ বারকোড স্ক্যান: ${product.name}`, 'success');
+            
+            // Visual feedback on search box
+            const searchBox = document.getElementById('search');
+            searchBox.value = barcode;
+            searchBox.classList.add('scanner-active');
+            setTimeout(() => {
+                searchBox.value = '';
+                searchBox.classList.remove('scanner-active');
+            }, 1000);
+        } else {
+            showToast(`❌ বারকোড ${barcode} এর পণ্য পাওয়া যায়নি`, 'error');
+            document.getElementById('manualBarcode').value = barcode;
+        }
+    }
+
+    // Process manual barcode input
+    function processManualBarcode() {
+        const barcode = document.getElementById('manualBarcode').value.trim();
+        if (barcode) {
+            addProductByBarcode(barcode);
+            document.getElementById('manualBarcode').value = '';
+        }
+    }
+
+    // Handle Enter key in manual barcode input
+    document.getElementById('manualBarcode').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            processManualBarcode();
+        }
     });
 
     // ==================== ADD TO CART ====================
@@ -1027,7 +1335,6 @@
 
     // ==================== হোল্ড কার্ট ফাংশন (সার্ভার সাইড) ====================
 
-    // কার্ট হোল্ড করুন
     async function holdCart() {
         if (cart.length === 0) {
             showToast('❌ কার্ট খালি!', 'error');
@@ -1072,7 +1379,6 @@
             
             const data = await response.json();
             
-            // কার্ট ক্লিয়ার করুন
             cart = [];
             currentDiscount = 0;
             currentHoldCartId = null;
@@ -1083,7 +1389,6 @@
             document.getElementById('customerAddress').value = '';
             updateCart();
             
-            // হোল্ড কার্ট লিস্ট রিফ্রেশ করুন
             await loadHeldCarts();
             
             showToast('⏸️ কার্ট হোল্ড করা হয়েছে', 'success');
@@ -1094,7 +1399,6 @@
         }
     }
 
-    // হোল্ড কার্ট লোড করুন (লিস্ট)
     async function loadHeldCarts() {
         if (!navigator.onLine) return;
         
@@ -1110,7 +1414,6 @@
         }
     }
 
-    // হোল্ড কার্ট ডিসপ্লে করুন
     function displayHeldCarts(carts) {
         const container = document.getElementById('heldCartsList');
         const countSpan = document.getElementById('heldCartCount');
@@ -1158,7 +1461,6 @@
         container.innerHTML = html;
     }
 
-    // হোল্ড কার্ট লোড করুন (কার্টে আনুন)
     async function loadHeldCart(cartId) {
         if (!navigator.onLine) {
             showToast('❌ লোড করতে অনলাইন needed!', 'error');
@@ -1182,7 +1484,6 @@
             
             const data = await response.json();
             
-            // কার্ট লোড করুন
             cart = data.cart;
             currentDiscount = data.discount || 0;
             currentHoldCartId = cartId;
@@ -1206,7 +1507,6 @@
         }
     }
 
-    // হোল্ড কার্ট ডিলিট করুন
     async function deleteHeldCart(cartId, showConfirm = true) {
         if (!navigator.onLine) {
             showToast('❌ ডিলিট করতে অনলাইন needed!', 'error');
@@ -1235,7 +1535,6 @@
         }
     }
 
-    // টগল হোল্ড কার্ট লিস্ট
     function toggleHeldCarts() {
         const heldList = document.getElementById('heldCartsList');
         if (heldList.style.display === 'none') {
@@ -1295,7 +1594,7 @@
                     paidAmount: paid,
                     discount: currentDiscount,
                     paymentMethod,
-                    holdCartId: currentHoldCartId // হোল্ড কার্ট আইডি পাঠান
+                    holdCartId: currentHoldCartId
                 })
             });
             
@@ -1306,7 +1605,6 @@
             
             const result = await response.json();
             
-            // লোকাল স্টক আপডেট
             cart.forEach(item => {
                 const product = products.find(p => p._id === item._id);
                 if (product) {
@@ -1316,17 +1614,13 @@
             
             localStorage.setItem('cachedProducts', JSON.stringify(products));
             
-            // মেমো নাম্বার আপডেট
             localStorage.setItem('lastMemoNo', currentMemoNo);
             currentMemoNo++;
             
-            // PDF জেনারেট করুন
             generatePDF(customerName, customerMobile, customerAddress, total, paid);
             
-            // হোল্ড কার্ট লিস্ট রিফ্রেশ করুন
             await loadHeldCarts();
             
-            // কার্ট ক্লিয়ার করুন
             cart = [];
             currentDiscount = 0;
             currentHoldCartId = null;
@@ -1403,7 +1697,6 @@
 
     // ==================== অটো রিফ্রেশ ====================
 
-    // প্রতি ৩০ সেকেন্ডে হোল্ড কার্ট রিফ্রেশ
     setInterval(() => {
         if (navigator.onLine && document.getElementById('heldCartsList').style.display === 'block') {
             loadHeldCarts();
