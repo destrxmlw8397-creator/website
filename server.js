@@ -17,7 +17,7 @@ mongoose.connect(process.env.MONGO_URI)
 
 // ==================== স্কিমা ডেফিনিশন ====================
 
-// ইউজার স্কিমা (পাসওয়ার্ড ম্যানেজমেন্ট)
+// ইউজার স্কিমা
 const UserSchema = new mongoose.Schema({
     password: { type: String, required: true },
     updatedAt: { type: Date, default: Date.now }
@@ -58,7 +58,7 @@ const SaleSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now }
 });
 
-// হোল্ড কার্ট স্কিমা (নতুন)
+// হোল্ড কার্ট স্কিমা
 const HoldCartSchema = new mongoose.Schema({
     cart: [{
         _id: String,
@@ -78,7 +78,7 @@ const HoldCartSchema = new mongoose.Schema({
     totalAmount: { type: Number, default: 0 },
     itemsCount: { type: Number, default: 0 },
     holdDate: { type: Date, default: Date.now },
-    expiresAt: { type: Date, default: () => new Date(+new Date() + 24*60*60*1000) } // 24 ঘন্টা
+    expiresAt: { type: Date, default: () => new Date(+new Date() + 24*60*60*1000) }
 });
 
 // এক্সপেন্স স্কিমা
@@ -137,7 +137,9 @@ async function createLog(msg) {
             const oldestLog = await Log.findOne().sort({ date: 1 });
             if (oldestLog) await Log.deleteOne({ _id: oldestLog._id });
         }
-    } catch (e) { console.log("Log Error:", e); }
+    } catch (e) { 
+        console.log("Log Error:", e); 
+    }
 }
 
 async function verifyPassword(inputPassword) {
@@ -153,9 +155,122 @@ async function verifyPassword(inputPassword) {
 
 initializeUser();
 
+// ==================== অথেনটিকেশন রুটস ====================
+
+app.post('/api/verify-password', async (req, res) => {
+    try {
+        const { password } = req.body;
+        const isValid = await verifyPassword(password);
+        res.json({ valid: isValid });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/update-password', async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        
+        const isValid = await verifyPassword(oldPassword);
+        if (!isValid) {
+            return res.status(401).json({ error: 'বর্তমান পাসওয়ার্ড সঠিক নয়' });
+        }
+        
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const user = await User.findOne();
+        user.password = hashedPassword;
+        user.updatedAt = new Date();
+        await user.save();
+        
+        await createLog('🔐 পাসওয়ার্ড পরিবর্তন');
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/reset-password', async (req, res) => {
+    try {
+        const { currentPassword } = req.body;
+        
+        const isValid = await verifyPassword(currentPassword);
+        if (!isValid) {
+            return res.status(401).json({ error: 'বর্তমান পাসওয়ার্ড সঠিক নয়' });
+        }
+        
+        const hashedPassword = await bcrypt.hash('1234', 10);
+        const user = await User.findOne();
+        user.password = hashedPassword;
+        user.updatedAt = new Date();
+        await user.save();
+        
+        await createLog('🔄 পাসওয়ার্ড রিসেট');
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ==================== লগ রুটস ====================
+
+app.get('/api/logs', async (req, res) => {
+    try {
+        const logs = await Log.find().sort({ date: -1 }).limit(200);
+        res.json(logs);
+    } catch (err) { 
+        res.status(500).json({ error: err.message }); 
+    }
+});
+
+app.delete('/api/logs', async (req, res) => {
+    try {
+        const { password } = req.body;
+        
+        const isValid = await verifyPassword(password);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+        
+        const result = await Log.deleteMany({});
+        await createLog(`🧹 ${result.deletedCount} টি লগ মুছে ফেলা হয়েছে`);
+        
+        res.json({ 
+            success: true, 
+            deletedCount: result.deletedCount,
+            message: 'সব লগ মুছে ফেলা হয়েছে' 
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/logs/cleanup', async (req, res) => {
+    try {
+        const { password, days } = req.body;
+        
+        const isValid = await verifyPassword(password);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+        
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - (days || 30));
+        
+        const result = await Log.deleteMany({ date: { $lt: cutoffDate } });
+        
+        await createLog(`🧹 ${result.deletedCount} টি পুরাতন লগ ডিলিট`);
+        
+        res.json({ 
+            success: true, 
+            deletedCount: result.deletedCount 
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ==================== হোল্ড কার্ট রুটস ====================
 
-// সব হোল্ড কার্ট দেখুন
 app.get('/api/hold-carts', async (req, res) => {
     try {
         const carts = await HoldCart.find().sort({ holdDate: -1 });
@@ -165,7 +280,6 @@ app.get('/api/hold-carts', async (req, res) => {
     }
 });
 
-// অ্যাক্টিভ হোল্ড কার্ট দেখুন (যেগুলো এক্সপায়ার হয়নি)
 app.get('/api/hold-carts/active', async (req, res) => {
     try {
         const now = new Date();
@@ -178,20 +292,6 @@ app.get('/api/hold-carts/active', async (req, res) => {
     }
 });
 
-// নির্দিষ্ট হোল্ড কার্ট দেখুন
-app.get('/api/hold-carts/:id', async (req, res) => {
-    try {
-        const cart = await HoldCart.findById(req.params.id);
-        if (!cart) {
-            return res.status(404).json({ error: 'Hold cart not found' });
-        }
-        res.json(cart);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// নতুন হোল্ড কার্ট তৈরি করুন
 app.post('/api/hold-carts', async (req, res) => {
     try {
         const { cart, customerName, customerMobile, customerAddress, discount, note } = req.body;
@@ -200,7 +300,6 @@ app.post('/api/hold-carts', async (req, res) => {
             return res.status(400).json({ error: 'Cart is empty' });
         }
 
-        // টোটাল ক্যালকুলেট করুন
         const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
         const itemsCount = cart.reduce((sum, item) => sum + item.qty, 0);
 
@@ -216,7 +315,7 @@ app.post('/api/hold-carts', async (req, res) => {
         });
 
         await holdCart.save();
-        await createLog(`⏸️ কার্ট হোল্ড করা হয়েছে: ${customerName || 'নাম নেই'}, ${itemsCount} টি আইটেম`);
+        await createLog(`⏸️ কার্ট হোল্ড: ${customerName || 'নাম নেই'}, ${itemsCount} টি আইটেম`);
 
         res.status(201).json({
             success: true,
@@ -228,42 +327,6 @@ app.post('/api/hold-carts', async (req, res) => {
     }
 });
 
-// হোল্ড কার্ট আপডেট করুন
-app.put('/api/hold-carts/:id', async (req, res) => {
-    try {
-        const { cart, customerName, customerMobile, customerAddress, discount, note } = req.body;
-        
-        const holdCart = await HoldCart.findById(req.params.id);
-        if (!holdCart) {
-            return res.status(404).json({ error: 'Hold cart not found' });
-        }
-
-        if (cart) {
-            holdCart.cart = cart;
-            holdCart.totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            holdCart.itemsCount = cart.reduce((sum, item) => sum + item.qty, 0);
-        }
-        
-        if (customerName) holdCart.customerName = customerName;
-        if (customerMobile) holdCart.customerMobile = customerMobile;
-        if (customerAddress) holdCart.customerAddress = customerAddress;
-        if (discount !== undefined) holdCart.discount = discount;
-        if (note !== undefined) holdCart.note = note;
-
-        await holdCart.save();
-        await createLog(`🔄 হোল্ড কার্ট আপডেট: ${holdCart.customerName}`);
-
-        res.json({
-            success: true,
-            message: 'Hold cart updated',
-            holdCart
-        });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// হোল্ড কার্ট থেকে কার্ট লোড করুন (ডিলিট সহ)
 app.post('/api/hold-carts/:id/load', async (req, res) => {
     try {
         const holdCart = await HoldCart.findById(req.params.id);
@@ -271,7 +334,6 @@ app.post('/api/hold-carts/:id/load', async (req, res) => {
             return res.status(404).json({ error: 'Hold cart not found' });
         }
 
-        // কার্ট ডাটা রিটার্ন করুন
         res.json({
             success: true,
             cart: holdCart.cart,
@@ -286,12 +348,10 @@ app.post('/api/hold-carts/:id/load', async (req, res) => {
     }
 });
 
-// হোল্ড কার্ট ডিলিট করুন (লোড করার পর বা ম্যানুয়ালি)
 app.delete('/api/hold-carts/:id', async (req, res) => {
     try {
         const { password } = req.body;
         
-        // পাসওয়ার্ড ভেরিফাই (ঐচ্ছিক)
         if (password) {
             const isValid = await verifyPassword(password);
             if (!isValid) {
@@ -307,34 +367,7 @@ app.delete('/api/hold-carts/:id', async (req, res) => {
         await HoldCart.findByIdAndDelete(req.params.id);
         await createLog(`🗑️ হোল্ড কার্ট ডিলিট: ${holdCart.customerName}`);
 
-        res.json({
-            success: true,
-            message: 'Hold cart deleted'
-        });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// এক্সপায়ার্ড হোল্ড কার্ট অটো-ক্লিন করুন
-app.delete('/api/hold-carts/cleanup/expired', async (req, res) => {
-    try {
-        const { password } = req.body;
-        
-        const isValid = await verifyPassword(password);
-        if (!isValid) {
-            return res.status(401).json({ error: 'Invalid password' });
-        }
-
-        const now = new Date();
-        const result = await HoldCart.deleteMany({ expiresAt: { $lt: now } });
-
-        await createLog(`🧹 ${result.deletedCount} টি এক্সপায়ার্ড হোল্ড কার্ট ডিলিট`);
-
-        res.json({
-            success: true,
-            deletedCount: result.deletedCount
-        });
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -348,18 +381,6 @@ app.get('/api/products', async (req, res) => {
         res.json(products);
     } catch (err) { 
         res.status(500).json({ error: err.message }); 
-    }
-});
-
-app.get('/api/products/:id', async (req, res) => {
-    try {
-        const product = await Product.findById(req.params.id);
-        if (!product) {
-            return res.status(404).json({ error: 'Product not found' });
-        }
-        res.json(product);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
     }
 });
 
@@ -434,24 +455,6 @@ app.get('/api/sales', async (req, res) => {
     }
 });
 
-app.get('/api/sales/today', async (req, res) => {
-    try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        
-        const sales = await Sale.find({
-            date: { $gte: today, $lt: tomorrow }
-        }).sort({ date: -1 });
-        
-        res.json(sales);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// চেকআউট (নতুন সেল)
 app.post('/api/checkout', async (req, res) => {
     try {
         const { cart, customerName, customerMobile, customerAddress, totalAmount, paidAmount, discount, paymentMethod, holdCartId } = req.body;
@@ -505,7 +508,6 @@ app.post('/api/checkout', async (req, res) => {
         
         await newSale.save();
 
-        // যদি হোল্ড কার্ট থেকে হয়, তাহলে সেটা ডিলিট করুন
         if (holdCartId) {
             await HoldCart.findByIdAndDelete(holdCartId);
         }
@@ -524,7 +526,6 @@ app.post('/api/checkout', async (req, res) => {
     }
 });
 
-// বাকি পরিশোধ
 app.post('/api/sales/pay-due/:id', async (req, res) => {
     try {
         const { password, paidAmount } = req.body;
@@ -584,29 +585,80 @@ app.post('/api/expenses', async (req, res) => {
     }
 });
 
-// ==================== লগ রুটস ====================
+// ==================== স্ট্যাটস রুটস ====================
 
-app.get('/api/logs', async (req, res) => {
+app.get('/api/stats', async (req, res) => {
     try {
-        const logs = await Log.find().sort({ date: -1 }).limit(200);
-        res.json(logs);
-    } catch (err) { 
-        res.status(500).json({ error: err.message }); 
+        const products = await Product.find();
+        const sales = await Sale.find();
+        const expenses = await Expense.find();
+        const holdCarts = await HoldCart.find({ expiresAt: { $gt: new Date() } });
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const todaySales = sales.filter(s => new Date(s.date) >= today);
+        const todayTotal = todaySales.reduce((acc, s) => acc + (s.totalAmount || 0), 0);
+        const todayProfit = todaySales.reduce((acc, s) => acc + (s.profit || 0), 0);
+        
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        const monthSales = sales.filter(s => new Date(s.date) >= monthStart);
+        const monthTotal = monthSales.reduce((acc, s) => acc + (s.totalAmount || 0), 0);
+        
+        let stockValue = products.reduce((acc, p) => acc + ((p.costPrice || 0) * (p.stock || 0)), 0);
+        let totalSales = sales.reduce((acc, s) => acc + (s.totalAmount || 0), 0);
+        let grossProfit = sales.reduce((acc, s) => acc + (s.profit || 0), 0);
+        let totalDue = sales.reduce((acc, s) => acc + (s.dueAmount || 0), 0);
+        let totalExpense = expenses.reduce((acc, e) => acc + (e.amount || 0), 0);
+        let netProfit = grossProfit - totalExpense;
+
+        const expiredProducts = products.filter(p => p.expiryDate && new Date(p.expiryDate) < today);
+        const expiringSoonProducts = products.filter(p => {
+            if (!p.expiryDate) return false;
+            const expiry = new Date(p.expiryDate);
+            const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+            return diffDays > 0 && diffDays <= 7;
+        });
+
+        res.json({ 
+            stockValue, 
+            totalSales, 
+            grossProfit, 
+            totalDue, 
+            totalExpense, 
+            netProfit,
+            todayTotal,
+            todayProfit,
+            monthTotal,
+            totalProducts: products.length,
+            totalStock: products.reduce((acc, p) => acc + p.stock, 0),
+            expiredCount: expiredProducts.length,
+            expiringCount: expiringSoonProducts.length,
+            activeHoldCarts: holdCarts.length
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 });
 
-app.delete('/api/logs', async (req, res) => {
+// ==================== সার্চ রুটস ====================
+
+app.get('/api/search/products', async (req, res) => {
     try {
-        const { password } = req.body;
-        
-        const isValid = await verifyPassword(password);
-        if (!isValid) {
-            return res.status(401).json({ error: 'Invalid password' });
+        const { q } = req.query;
+        if (!q) {
+            return res.json([]);
         }
         
-        await Log.deleteMany({});
-        await createLog('🧹 সব লগ মুছে ফেলা হয়েছে');
-        res.json({ success: true });
+        const products = await Product.find({
+            $or: [
+                { name: { $regex: q, $options: 'i' } },
+                { barcode: { $regex: q, $options: 'i' } },
+                { category: { $regex: q, $options: 'i' } }
+            ]
+        }).limit(20);
+        
+        res.json(products);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -695,141 +747,6 @@ app.post('/api/restore', async (req, res) => {
     }
 });
 
-// ==================== স্ট্যাটস রুটস ====================
-
-app.get('/api/stats', async (req, res) => {
-    try {
-        const products = await Product.find();
-        const sales = await Sale.find();
-        const expenses = await Expense.find();
-        const holdCarts = await HoldCart.find({ expiresAt: { $gt: new Date() } });
-        
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        
-        const todaySales = sales.filter(s => new Date(s.date) >= today);
-        const todayTotal = todaySales.reduce((acc, s) => acc + (s.totalAmount || 0), 0);
-        const todayProfit = todaySales.reduce((acc, s) => acc + (s.profit || 0), 0);
-        
-        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-        const monthSales = sales.filter(s => new Date(s.date) >= monthStart);
-        const monthTotal = monthSales.reduce((acc, s) => acc + (s.totalAmount || 0), 0);
-        
-        let stockValue = products.reduce((acc, p) => acc + ((p.costPrice || 0) * (p.stock || 0)), 0);
-        let totalSales = sales.reduce((acc, s) => acc + (s.totalAmount || 0), 0);
-        let grossProfit = sales.reduce((acc, s) => acc + (s.profit || 0), 0);
-        let totalDue = sales.reduce((acc, s) => acc + (s.dueAmount || 0), 0);
-        let totalExpense = expenses.reduce((acc, e) => acc + (e.amount || 0), 0);
-        let netProfit = grossProfit - totalExpense;
-
-        const expiredProducts = products.filter(p => p.expiryDate && new Date(p.expiryDate) < today);
-        const expiringSoonProducts = products.filter(p => {
-            if (!p.expiryDate) return false;
-            const expiry = new Date(p.expiryDate);
-            const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
-            return diffDays > 0 && diffDays <= 7;
-        });
-
-        res.json({ 
-            stockValue, 
-            totalSales, 
-            grossProfit, 
-            totalDue, 
-            totalExpense, 
-            netProfit,
-            todayTotal,
-            todayProfit,
-            monthTotal,
-            totalProducts: products.length,
-            totalStock: products.reduce((acc, p) => acc + p.stock, 0),
-            expiredCount: expiredProducts.length,
-            expiringCount: expiringSoonProducts.length,
-            activeHoldCarts: holdCarts.length
-        });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// ==================== সার্চ রুটস ====================
-
-app.get('/api/search/products', async (req, res) => {
-    try {
-        const { q } = req.query;
-        if (!q) {
-            return res.json([]);
-        }
-        
-        const products = await Product.find({
-            $or: [
-                { name: { $regex: q, $options: 'i' } },
-                { barcode: { $regex: q, $options: 'i' } },
-                { category: { $regex: q, $options: 'i' } }
-            ]
-        }).limit(20);
-        
-        res.json(products);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// ==================== অথেনটিকেশন রুটস ====================
-
-app.post('/api/verify-password', async (req, res) => {
-    try {
-        const { password } = req.body;
-        const isValid = await verifyPassword(password);
-        res.json({ valid: isValid });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.post('/api/update-password', async (req, res) => {
-    try {
-        const { oldPassword, newPassword } = req.body;
-        
-        const isValid = await verifyPassword(oldPassword);
-        if (!isValid) {
-            return res.status(401).json({ error: 'বর্তমান পাসওয়ার্ড সঠিক নয়' });
-        }
-        
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        const user = await User.findOne();
-        user.password = hashedPassword;
-        user.updatedAt = new Date();
-        await user.save();
-        
-        await createLog('🔐 পাসওয়ার্ড পরিবর্তন');
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.post('/api/reset-password', async (req, res) => {
-    try {
-        const { currentPassword } = req.body;
-        
-        const isValid = await verifyPassword(currentPassword);
-        if (!isValid) {
-            return res.status(401).json({ error: 'বর্তমান পাসওয়ার্ড সঠিক নয়' });
-        }
-        
-        const hashedPassword = await bcrypt.hash('1234', 10);
-        const user = await User.findOne();
-        user.password = hashedPassword;
-        user.updatedAt = new Date();
-        await user.save();
-        
-        await createLog('🔄 পাসওয়ার্ড রিসেট');
-        res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // ==================== হেলথ চেক ====================
 
 app.get('/api/health', (req, res) => {
@@ -839,6 +756,34 @@ app.get('/api/health', (req, res) => {
         mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
     });
 });
+
+// ==================== অটো ক্লিনআপ ====================
+
+setInterval(async () => {
+    try {
+        const now = new Date();
+        const result = await HoldCart.deleteMany({ expiresAt: { $lt: now } });
+        if (result.deletedCount > 0) {
+            console.log(`🧹 Auto cleaned ${result.deletedCount} expired hold carts`);
+        }
+    } catch (err) {
+        console.error('Auto cleanup error:', err);
+    }
+}, 60 * 60 * 1000);
+
+setInterval(async () => {
+    try {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - 30);
+        
+        const result = await Log.deleteMany({ date: { $lt: cutoffDate } });
+        if (result.deletedCount > 0) {
+            console.log(`🧹 Auto cleaned ${result.deletedCount} old logs`);
+        }
+    } catch (err) {
+        console.error('Log cleanup error:', err);
+    }
+}, 6 * 60 * 60 * 1000);
 
 // ==================== স্ট্যাটিক ফাইল ====================
 
@@ -852,20 +797,6 @@ app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ error: 'Something went wrong!' });
 });
-
-// ==================== অটো ক্লিনআপ (প্রতি ঘন্টায়) ====================
-
-setInterval(async () => {
-    try {
-        const now = new Date();
-        const result = await HoldCart.deleteMany({ expiresAt: { $lt: now } });
-        if (result.deletedCount > 0) {
-            console.log(`🧹 Auto cleaned ${result.deletedCount} expired hold carts`);
-        }
-    } catch (err) {
-        console.error('Auto cleanup error:', err);
-    }
-}, 60 * 60 * 1000); // প্রতি ঘন্টা
 
 // ==================== সার্ভার স্টার্ট ====================
 
