@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>🛍️ সুপারশপ POS প্রো - ফিক্সড বারকোড স্ক্যানার</title>
+    <title>🛍️ সুপারশপ POS প্রো - অ্যাডভান্সড বারকোড স্ক্যানার</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,7 +14,7 @@
     <!-- html2pdf -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
-    <!-- HTML5 QR Code Library (সরাসরি Html5Qrcode ক্লাস) -->
+    <!-- HTML5 QR Code Library -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     
     <style>
@@ -179,6 +179,11 @@
             font-size: 1.5rem;
             cursor: pointer;
             padding: 0 10px;
+            transition: transform 0.3s;
+        }
+
+        .scanner-header button:hover {
+            transform: scale(1.1);
         }
 
         /* Scanner View */
@@ -201,19 +206,28 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 250px;
+            width: 280px;
             height: 150px;
             border: 3px solid #10b981;
             border-radius: 10px;
             box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
             pointer-events: none;
-            animation: scanAnimation 2s infinite;
         }
 
-        @keyframes scanAnimation {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            50% { transform: translate(-50%, -50%) scale(1.02); opacity: 0.8; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        .scanner-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #10b981;
+            animation: scanLine 2s linear infinite;
+        }
+
+        @keyframes scanLine {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
         }
 
         .scanner-result {
@@ -222,6 +236,44 @@
             background: #f8fafc;
             font-weight: 600;
             border-bottom: 1px solid #e2e8f0;
+            min-height: 70px;
+        }
+
+        .camera-controls {
+            padding: 10px 15px;
+            background: #f1f5f9;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            border-bottom: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .camera-controls button {
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .camera-controls button:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .camera-controls button:active {
+            transform: translateY(0);
+        }
+
+        .camera-controls button i {
+            font-size: 1.1rem;
         }
 
         .manual-input {
@@ -239,6 +291,13 @@
             border: 2px solid #e2e8f0;
             border-radius: 12px;
             font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .manual-input input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.2);
         }
 
         .manual-input button {
@@ -258,27 +317,8 @@
             transform: translateY(-2px);
         }
 
-        .camera-controls {
-            padding: 10px 15px;
-            background: #f1f5f9;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .camera-controls button {
-            padding: 8px 15px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .camera-controls button:hover {
-            background: #5a67d8;
+        .manual-input button:active {
+            transform: translateY(0);
         }
 
         /* Category Tabs */
@@ -449,6 +489,15 @@
             border: none;
             padding: 4px 10px;
             font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .cart-item .btn-group button:hover {
+            transform: scale(1.05);
+        }
+
+        .cart-item .btn-group button:active {
+            transform: scale(0.95);
         }
 
         /* Held Carts Section */
@@ -805,20 +854,22 @@
         
         <!-- Scanner View -->
         <div id="scanner-view">
-            <div class="scanner-overlay"></div>
+            <div class="scanner-overlay">
+                <div class="scanner-line"></div>
+            </div>
         </div>
         
         <div class="camera-controls">
             <button onclick="switchCamera()">
-                <i class="bi bi-arrow-repeat me-1"></i> ক্যামেরা সুইচ
+                <i class="bi bi-arrow-repeat"></i> ক্যামেরা সুইচ
             </button>
-            <button onclick="testCamera()">
-                <i class="bi bi-camera-video me-1"></i> টেস্ট ক্যামেরা
+            <button onclick="toggleTorch()" id="torchBtn">
+                <i class="bi bi-brightness-high"></i> টর্চ
             </button>
         </div>
         
         <div class="scanner-result" id="scannerResult">
-            বারকোড স্ক্যান করার জন্য ক্যামেরার দিকে ধরুন...
+            <i class="bi bi-upc-scan me-2"></i>বারকোড স্ক্যান করার জন্য ক্যামেরার দিকে ধরুন...
         </div>
         
         <div class="manual-input">
@@ -901,6 +952,9 @@
     let isScanning = false;
     let currentCameraId = null;
     let cameras = [];
+    let lastScannedCode = null;
+    let lastScanTime = 0;
+    let torchEnabled = false;
 
     // ==================== TOAST NOTIFICATION ====================
     function showToast(message, type = 'info') {
@@ -913,6 +967,26 @@
             toast.style.animation = 'slideInDown 0.3s reverse';
             setTimeout(() => toast.remove(), 300);
         }, 2500);
+    }
+
+    // ==================== BEEP SOUND FUNCTION ====================
+    function playBeep() {
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            gainNode.gain.value = 0.5;
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.1);
+        } catch (e) {
+            console.log('Beep error:', e);
+        }
     }
 
     // ==================== UPDATE SYNC STATUS ====================
@@ -1073,8 +1147,8 @@
         modal.classList.add('active');
         
         // Clear previous scanner
-        document.getElementById('scanner-view').innerHTML = '<div class="scanner-overlay"></div>';
-        document.getElementById('scannerResult').innerHTML = 'ক্যামেরা চালু হচ্ছে...';
+        document.getElementById('scanner-view').innerHTML = '<div class="scanner-overlay"><div class="scanner-line"></div></div>';
+        document.getElementById('scannerResult').innerHTML = '<i class="bi bi-upc-scan me-2"></i>ক্যামেরা চালু হচ্ছে...';
         
         // Initialize scanner
         await initializeScanner();
@@ -1097,26 +1171,24 @@
             cameras = await Html5Qrcode.getCameras();
             
             if (cameras && cameras.length > 0) {
-                // Use back camera first (usually index 1 for mobile)
-                let selectedCameraId = null;
+                // Find back camera first
+                let backCameraId = null;
                 
-                // Try to find back camera
                 for (let camera of cameras) {
-                    if (camera.label.toLowerCase().includes('back') || 
-                        camera.label.toLowerCase().includes('environment') ||
-                        camera.label.toLowerCase().includes('rear')) {
-                        selectedCameraId = camera.id;
+                    const label = camera.label.toLowerCase();
+                    if (label.includes('back') || label.includes('environment') || label.includes('rear') || label.includes('পিছন')) {
+                        backCameraId = camera.id;
                         break;
                     }
                 }
                 
                 // If no back camera found, use first camera
-                if (!selectedCameraId && cameras.length > 0) {
-                    selectedCameraId = cameras[0].id;
+                if (!backCameraId && cameras.length > 0) {
+                    backCameraId = cameras[0].id;
                 }
                 
-                if (selectedCameraId) {
-                    await startScanning(selectedCameraId);
+                if (backCameraId) {
+                    await startScanning(backCameraId);
                 } else {
                     throw new Error('No camera available');
                 }
@@ -1144,7 +1216,7 @@
             
             const config = {
                 fps: 10,
-                qrbox: { width: 250, height: 150 },
+                qrbox: { width: 280, height: 150 },
                 aspectRatio: 1.0
             };
             
@@ -1156,7 +1228,7 @@
             );
             
             isScanning = true;
-            document.getElementById('scannerResult').innerHTML = 'বারকোড স্ক্যান করুন...';
+            document.getElementById('scannerResult').innerHTML = '<i class="bi bi-upc-scan me-2"></i>বারকোড স্ক্যান করুন...';
             showToast('📷 ক্যামেরা চালু হয়েছে', 'success');
             
         } catch (error) {
@@ -1171,28 +1243,44 @@
 
     // Scan Success Callback
     function onScanSuccess(decodedText, decodedResult) {
+        const currentTime = Date.now();
+        
+        // Prevent duplicate scans within 2 seconds
+        if (decodedText === lastScannedCode && (currentTime - lastScanTime) < 2000) {
+            return;
+        }
+        
         console.log('Scan success:', decodedText);
+        
+        // Update last scanned info
+        lastScannedCode = decodedText;
+        lastScanTime = currentTime;
+        
+        // Play beep sound
+        playBeep();
         
         // Update result display
         document.getElementById('scannerResult').innerHTML = `
             <span class="text-success">
-                <i class="bi bi-check-circle-fill"></i> পাওয়া গেছে: ${decodedText}
+                <i class="bi bi-check-circle-fill"></i> স্ক্যান করা হয়েছে: ${decodedText}
             </span>
         `;
         
         // Add product to cart
         addProductByBarcode(decodedText);
         
-        // Close scanner after successful scan
+        // Reset result text after 1.5 seconds
         setTimeout(() => {
-            closeScanner();
-        }, 500);
+            if (isScanning) {
+                document.getElementById('scannerResult').innerHTML = '<i class="bi bi-upc-scan me-2"></i>বারকোড স্ক্যান করুন...';
+            }
+        }, 1500);
     }
 
     // Scan Error Callback
     function onScanError(error) {
         // Silent error handling - don't show every error
-        console.log('Scan error:', error);
+        // console.log('Scan error:', error);
     }
 
     // Switch Camera
@@ -1216,6 +1304,9 @@
                 nextCameraIndex = (currentIndex + 1) % cameras.length;
             }
             
+            // Show switching message
+            document.getElementById('scannerResult').innerHTML = 'ক্যামেরা সুইচ করা হচ্ছে...';
+            
             // Start with new camera
             await startScanning(cameras[nextCameraIndex].id);
             
@@ -1225,18 +1316,25 @@
         }
     }
 
-    // Test Camera Function
-    async function testCamera() {
+    // Toggle Torch
+    async function toggleTorch() {
+        if (!html5QrCode || !isScanning) return;
+        
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            showToast('✅ ক্যামেরা কাজ করছে!', 'success');
+            torchEnabled = !torchEnabled;
+            await html5QrCode.turnTorchOn(torchEnabled);
             
-            // Stop all tracks
-            stream.getTracks().forEach(track => track.stop());
-            
+            const torchBtn = document.getElementById('torchBtn');
+            if (torchEnabled) {
+                torchBtn.innerHTML = '<i class="bi bi-brightness-high-fill"></i> টর্চ অফ';
+                torchBtn.style.background = '#10b981';
+            } else {
+                torchBtn.innerHTML = '<i class="bi bi-brightness-high"></i> টর্চ';
+                torchBtn.style.background = '#667eea';
+            }
         } catch (error) {
-            console.error('Camera test error:', error);
-            showToast('❌ ক্যামেরা টেস্ট ব্যর্থ: ' + error.message, 'error');
+            console.error('Torch error:', error);
+            showToast('টর্চ এই ক্যামেরায় সাপোর্ট করে না', 'warning');
         }
     }
 
@@ -1256,9 +1354,16 @@
         
         html5QrCode = null;
         isScanning = false;
+        lastScannedCode = null;
+        torchEnabled = false;
         
         document.getElementById('manualBarcode').value = '';
-        document.getElementById('scanner-view').innerHTML = '<div class="scanner-overlay"></div>';
+        document.getElementById('scanner-view').innerHTML = '<div class="scanner-overlay"><div class="scanner-line"></div></div>';
+        
+        // Reset torch button
+        const torchBtn = document.getElementById('torchBtn');
+        torchBtn.innerHTML = '<i class="bi bi-brightness-high"></i> টর্চ';
+        torchBtn.style.background = '#667eea';
     }
 
     // Add product by barcode
@@ -1267,8 +1372,8 @@
         
         if (product) {
             addToCart(product._id);
-            showToast(`✅ বারকোড স্ক্যান: ${product.name}`, 'success');
             
+            // Visual feedback on search box
             const searchBox = document.getElementById('search');
             searchBox.value = barcode;
             searchBox.classList.add('scanner-active');
@@ -1279,10 +1384,6 @@
         } else {
             showToast(`❌ বারকোড ${barcode} এর পণ্য পাওয়া যায়নি`, 'error');
             document.getElementById('manualBarcode').value = barcode;
-            
-            if (confirm(`"${barcode}" বারকোডের পণ্য পাওয়া যায়নি। নতুন পণ্য যোগ করবেন?`)) {
-                showToast('পণ্য যোগ করার ফর্ম খুলবে...', 'info');
-            }
         }
     }
 
