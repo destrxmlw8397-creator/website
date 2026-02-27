@@ -369,7 +369,6 @@
             animation: pulse 2s infinite;
         }
 
-        /* Fix for dropdown positioning - right auto left auto */
         .dropdown-menu-end {
             right: auto !important;
             left: auto !important;
@@ -1317,7 +1316,6 @@
                 icon.classList.remove('bi-plus-lg');
                 icon.classList.add('bi-dash-lg');
                 
-                // Update state
                 if (sectionId === 'salesChartContainer') salesChartMinimized = false;
                 else if (sectionId === 'categoryChartContainer') categoryChartMinimized = false;
                 else if (sectionId === 'addProductContainer') addProductMinimized = false;
@@ -1326,7 +1324,6 @@
                     renderLogs();
                 }
                 
-                // Refresh charts when expanding
                 if (sectionId === 'salesChartContainer' && currentChart) {
                     setTimeout(() => currentChart.resize(), 100);
                 } else if (sectionId === 'categoryChartContainer' && categoryChart) {
@@ -1337,7 +1334,6 @@
                 icon.classList.remove('bi-dash-lg');
                 icon.classList.add('bi-plus-lg');
                 
-                // Update state
                 if (sectionId === 'salesChartContainer') salesChartMinimized = true;
                 else if (sectionId === 'categoryChartContainer') categoryChartMinimized = true;
                 else if (sectionId === 'addProductContainer') addProductMinimized = true;
@@ -1352,24 +1348,19 @@
         }
 
         function initializeEventListeners() {
-            // Keyboard shortcuts
             document.addEventListener('keydown', function(e) {
-                // Ctrl + S for save (with auth)
                 if (e.ctrlKey && e.key === 's') {
                     e.preventDefault();
                     checkAuth(save);
                 }
-                // Ctrl + F for search
                 if (e.ctrlKey && e.key === 'f') {
                     e.preventDefault();
                     document.getElementById('pSearch').focus();
                 }
-                // Ctrl + D for dark mode
                 if (e.ctrlKey && e.key === 'd') {
                     e.preventDefault();
                     toggleDarkMode();
                 }
-                // Ctrl + E for expiry report
                 if (e.ctrlKey && e.key === 'e') {
                     e.preventDefault();
                     showExpiryReport();
@@ -1377,7 +1368,7 @@
             });
         }
 
-        // 🔐 UPDATED Password Protection - Server Side Verification
+        // 🔐 Password Protection
         async function checkAuth(callback, ...args) {
             let inputPassword = prompt("🔒 সিকিউরিটি পাসওয়ার্ড দিন:");
             
@@ -1388,7 +1379,6 @@
             
             showLoading();
             try {
-                // সার্ভারে পাসওয়ার্ড ভেরিফাই করুন
                 const response = await fetch(`${API_BASE}/api/verify-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1398,9 +1388,7 @@
                 const data = await response.json();
                 
                 if (data.valid) {
-                    // পাসওয়ার্ড সঠিক - callback কল করুন এবং পাসওয়ার্ড পাঠান
                     if (typeof callback === 'function') {
-                        // সব callback-এ পাসওয়ার্ড প্যারামিটার হিসেবে পাঠান
                         callback(inputPassword, ...args);
                     }
                     showToast("✅ পাসওয়ার্ড সঠিক!", "success");
@@ -1415,7 +1403,7 @@
             }
         }
 
-        // পাসওয়ার্ড আপডেট ফাংশন
+        // Password Update
         async function updatePassword() {
             let oldP = document.getElementById('oldPass').value;
             let newP = document.getElementById('newPass').value;
@@ -1457,7 +1445,7 @@
             }
         }
 
-        // পাসওয়ার্ড রিসেট ফাংশন (ডিফল্টে)
+        // Password Reset
         async function removePassword() {
             let input = prompt("🔒 পাসওয়ার্ড রিসেট করতে বর্তমান পাসওয়ার্ড দিন:");
             if (!input) return;
@@ -1484,7 +1472,7 @@
             }
         }
 
-        // Toast Notification System
+        // Toast Notification
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
             toast.className = `toast-notification toast-${type}`;
@@ -1516,7 +1504,6 @@
         async function load() {
             showLoading();
             try {
-                // Load products
                 const pRes = await fetch(`${API_BASE}/api/products`);
                 allProducts = await pRes.json();
                 
@@ -1525,15 +1512,12 @@
                 renderProductTable();
                 updateTableSummary();
 
-                // Load sales
                 const sRes = await fetch(`${API_BASE}/api/sales`);
                 const sales = await sRes.json();
                 
-                // Load expenses
                 const eRes = await fetch(`${API_BASE}/api/expenses`);
                 const expenses = await eRes.json();
                 
-                // Load logs
                 const lRes = await fetch(`${API_BASE}/api/logs`);
                 const logs = await lRes.json();
                 activityLogs = logs.map(log => ({
@@ -1575,13 +1559,11 @@
             animateValue('tDue', 0, td, 1000);
             animateValue('tVal', 0, stockVal, 1000);
 
-            // Update goal progress
             let percent = Math.min((ts / 1000000) * 100, 100).toFixed(1);
             document.getElementById('goalProgress').style.width = percent + '%';
             document.getElementById('goalProgress').innerText = percent + '%';
             document.getElementById('achievedAmount').innerText = ts.toLocaleString() + ' ৳';
 
-            // Update due table
             updateDueTable(sales);
         }
 
@@ -1779,7 +1761,6 @@
             const expiredProducts = allProducts.filter(p => isExpired(p.expiryDate));
             const expiringSoonProducts = allProducts.filter(p => isExpiringSoon(p.expiryDate, 7));
             
-            // Update expiry notifications
             const expiryNotiContent = document.getElementById('expiryNotiContent');
             const expiryNotiHeaderCount = document.getElementById('expiryNotiHeaderCount');
             
@@ -1789,7 +1770,6 @@
             if (totalExpiryWarnings > 0) {
                 let notiHtml = '';
                 
-                // Expired products
                 expiredProducts.forEach(p => {
                     notiHtml += `
                         <div class="dropdown-item py-3 border-bottom expiry-critical">
@@ -1812,7 +1792,6 @@
                     `;
                 });
                 
-                // Expiring soon products
                 expiringSoonProducts.forEach(p => {
                     if (!isExpired(p.expiryDate)) {
                         notiHtml += `
@@ -1842,7 +1821,6 @@
                 expiryNotiContent.innerHTML = '<div class="text-center p-4"><i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i><p class="text-muted mt-2">✅ কোনো মেয়াদোত্তীর্ণ পণ্য নেই</p></div>';
             }
 
-            // Update expiry alert banner
             const expiryAlert = document.getElementById('expiryAlert');
             if (totalExpiryWarnings > 0) {
                 expiryAlert.classList.remove('d-none');
@@ -1854,7 +1832,6 @@
                 expiryAlert.classList.add('d-none');
             }
 
-            // Update notification count
             const lowStockProducts = allProducts.filter(p => p.stock < (p.alertLimit || 5));
             document.getElementById('notiCount').innerText = lowStockProducts.length + totalExpiryWarnings;
             document.getElementById('notiHeaderCount').innerText = lowStockProducts.length;
@@ -2066,7 +2043,6 @@
                 notiContent.innerHTML = '<div class="text-center p-4"><i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i><p class="text-muted mt-2">✅ সব স্টক ঠিক আছে</p></div>';
             }
 
-            // Update low stock alert banner
             if (lowStockProducts.length > 0) {
                 const alert = document.getElementById('lowStockAlert');
                 alert.classList.remove('d-none');
@@ -2402,36 +2378,58 @@
             window.print();
         }
 
-        // Log Management
+        // Log Management - আপডেটেড
         function renderLogs() {
-            document.getElementById('logCount').innerText = `(${activityLogs.length})`;
+            const logCount = document.getElementById('logCount');
+            if (logCount) {
+                logCount.innerText = `(${activityLogs.length})`;
+            }
             
             if (!logMinimized) {
                 const container = document.getElementById('logContainer');
                 if (container) {
-                    container.innerHTML = activityLogs.map(log => `
-                        <div class="d-flex justify-content-between align-items-start">
-                            <span>${log.action}</span>
-                            <small class="text-muted ms-2">${log.time}</small>
-                        </div>
-                    `).join('');
+                    if (activityLogs.length === 0) {
+                        container.innerHTML = '<div class="text-center text-muted p-3">📭 কোনো লগ নেই</div>';
+                    } else {
+                        container.innerHTML = activityLogs.map(log => `
+                            <div class="d-flex justify-content-between align-items-start">
+                                <span>${log.action}</span>
+                                <small class="text-muted ms-2">${log.time}</small>
+                            </div>
+                        `).join('');
+                    }
                 }
             }
         }
 
+        // লগ ক্লিয়ার ফাংশন - আপডেটেড
         async function clearLogs(password) {
-            if(confirm('সব লগ মুছে ফেলতে চান?')) {
-                showLoading();
-                try {
-                    // Note: You might want to add a DELETE /api/logs endpoint
+            if (!confirm('⚠️ সব লগ স্থায়ীভাবে মুছে ফেলতে চান? এই কাজ পূর্বাবস্থায় ফেরানো যাবে না।')) {
+                return;
+            }
+            
+            showLoading();
+            try {
+                const response = await fetch(`${API_BASE}/api/logs`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
                     activityLogs = [];
                     renderLogs();
-                    showToast('লগ মুছে ফেলা হয়েছে', 'success');
-                } catch (error) {
-                    showToast('লগ মুছতে সমস্যা হয়েছে', 'error');
-                } finally {
-                    hideLoading();
+                    showToast(`✅ ${data.deletedCount || 'সব'} লগ মুছে ফেলা হয়েছে`, 'success');
+                } else {
+                    showToast(data.error || 'লগ মুছতে সমস্যা হয়েছে', 'error');
                 }
+            } catch (error) {
+                console.error('Error clearing logs:', error);
+                showToast('লগ মুছতে সমস্যা হয়েছে: ' + error.message, 'error');
+            } finally {
+                hideLoading();
             }
         }
 
@@ -2457,7 +2455,6 @@
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "Inventory");
                 
-                // Add summary sheet
                 const expiredCount = allProducts.filter(p => isExpired(p.expiryDate)).length;
                 const expiringCount = allProducts.filter(p => isExpiringSoon(p.expiryDate, 7)).length;
                 
@@ -2557,7 +2554,6 @@
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
                 
-                // Header
                 doc.setFontSize(22);
                 doc.setTextColor(102, 126, 234);
                 doc.text("SuperShop Pro", 70, 20);
@@ -2569,7 +2565,6 @@
                 doc.text(`Date: ${new Date(sale.date).toLocaleDateString('bn-BD')}`, 140, 35);
                 doc.text(`Time: ${new Date(sale.date).toLocaleTimeString('bn-BD')}`, 140, 45);
                 
-                // Items Table
                 const tableData = sale.items.map(i => [i.name, i.qty, i.price, i.qty * i.price]);
                 doc.autoTable({
                     startY: 55,
@@ -2580,13 +2575,11 @@
                     footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0] }
                 });
                 
-                // Payment Summary
                 const finalY = doc.lastAutoTable.finalY + 10;
                 doc.text(`মোট: ${sale.totalAmount} ৳`, 140, finalY);
                 doc.text(`পেইড: ${sale.paidAmount} ৳`, 140, finalY + 10);
                 doc.text(`বাকি: ${sale.dueAmount} ৳`, 140, finalY + 20);
                 
-                // Footer
                 doc.setFontSize(10);
                 doc.setTextColor(128, 128, 128);
                 doc.text("ধন্যবাদ দিয়ে কেনার জন্য!", 70, finalY + 40);
