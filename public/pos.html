@@ -670,7 +670,17 @@
                     </div>
                 </div>
 
-                <button class="btn btn-success w-100 mt-3 py-3 fw-bold fs-5" onclick="processPayment()">
+                <!-- Sale Buttons -->
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-success w-50 py-3 fw-bold fs-5" onclick="processSale()">
+                        <i class="bi bi-check2-circle"></i> সেল (বাকি)
+                    </button>
+                    <button class="btn btn-info w-50 py-3 fw-bold fs-5" onclick="processFullPayment()">
+                        <i class="bi bi-cash-stack"></i> পূর্ণ পরিশোধ
+                    </button>
+                </div>
+                
+                <button class="btn btn-primary w-100 mt-2 py-2 fw-bold" onclick="processPayment()">
                     <i class="bi bi-printer-fill me-2"></i> পেমেন্ট সম্পন্ন ও PDF
                 </button>
                 
@@ -762,6 +772,7 @@
     let paymentMethod = 'cash';
     let pendingAction = null;
     let pendingActionArgs = [];
+    let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
 
     // API Base URL
     const API_BASE = '';
@@ -875,7 +886,7 @@
             showToast('✅ পণ্য লোড হয়েছে', 'success');
         } catch (error) {
             console.error('Error loading products:', error);
-            showToast('❌ সার্ভার সংযোগ ব্যর্থ!', 'error');
+            showToast('❌ সার্ভার সংযোগ ব্যর্থ! লোকাল ডাটা লোড হচ্ছে', 'warning');
             
             // Local dummy data as fallback
             products = [
@@ -888,6 +899,12 @@
                 { _id: '7', name: 'টিফিন বিস্কুট', category: 'বিস্কুট', price: 25, costPrice: 20, stock: 100, barcode: '123462' },
                 { _id: '8', name: 'ফ্রুটিকা জুস', category: 'পানীয়', price: 70, costPrice: 60, stock: 45, barcode: '123463' }
             ];
+            
+            products.forEach(p => {
+                p.isExpired = false;
+                p.daysUntilExpiry = null;
+            });
+            
             renderProducts();
             loadCategories();
         } finally {
@@ -1329,7 +1346,60 @@
         }
     }
 
-    // ==================== PROCESS PAYMENT ====================
+    // ==================== SALE FUNCTIONS ====================
+    
+    // Process Sale with due
+    function processSale() {
+        if (cart.length === 0) {
+            showToast('❌ কার্ট খালি!', 'error');
+            return;
+        }
+        
+        const total = parseFloat(document.getElementById('total').innerText);
+        const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
+        const customerName = document.getElementById('customerName').value || 'নগদ';
+        const customerMobile = document.getElementById('customerMobile').value || 'N/A';
+        const customerAddress = document.getElementById('customerAddress').value || 'N/A';
+        
+        if (paid < 0) {
+            showToast('❌ সঠিক পরিমাণ দিন', 'warning');
+            return;
+        }
+        
+        if (paid < total) {
+            const due = total - paid;
+            if (confirm(`⚠️ বাকি থাকবে: ${due.toFixed(2)}৳। কি নিশ্চিত?`)) {
+                checkAuth(function(password) {
+                    performSale(password, customerName, customerMobile, customerAddress, total, paid, due);
+                });
+            }
+        } else {
+            showToast('পূর্ণ পরিশোধের জন্য "পূর্ণ পরিশোধ" বাটন ব্যবহার করুন', 'info');
+        }
+    }
+
+    // Process Full Payment
+    function processFullPayment() {
+        if (cart.length === 0) {
+            showToast('❌ কার্ট খালি!', 'error');
+            return;
+        }
+        
+        const total = parseFloat(document.getElementById('total').innerText);
+        const customerName = document.getElementById('customerName').value || 'নগদ';
+        const customerMobile = document.getElementById('customerMobile').value || 'N/A';
+        const customerAddress = document.getElementById('customerAddress').value || 'N/A';
+        
+        // Set paid amount to total
+        document.getElementById('paidAmount').value = total;
+        calculateChange();
+        
+        checkAuth(function(password) {
+            performSale(password, customerName, customerMobile, customerAddress, total, total, 0);
+        });
+    }
+
+    // Original process payment (kept for backward compatibility)
     function processPayment() {
         if (cart.length === 0) {
             showToast('❌ কার্ট খালি!', 'error');
@@ -1370,13 +1440,21 @@
         }
         
         checkAuth(function(password) {
-            performPayment(password, customerName, customerMobile, customerAddress, total, paid);
+            performSale(password, customerName, customerMobile, customerAddress, total, paid, total - paid);
         });
     }
 
-    async function performPayment(password, customerName, customerMobile, customerAddress, total, paid) {
+    async function performSale(password, customerName, customerMobile, customerAddress, total, paid, due) {
         showLoading();
         try {
+            // Calculate total cost for profit calculation
+            let totalCost = 0;
+            cart.forEach(item => {
+                totalCost += (item.costPrice || 0) * item.qty;
+            });
+            
+            const profit = total - totalCost;
+            
             // Prepare cart data for API
             const cartData = cart.map(item => ({
                 _id: item._id,
@@ -1387,28 +1465,36 @@
                 costPrice: item.costPrice || 0
             }));
             
-            const response = await fetch(`${API_BASE}/api/checkout`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    password,
-                    cart: cartData,
-                    customerName, 
-                    customerMobile, 
-                    customerAddress,
-                    totalAmount: total, 
-                    paidAmount: paid,
-                    discount: currentDiscount,
-                    paymentMethod
-                })
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Server error');
+            // Try to save to server
+            let serverSuccess = false;
+            try {
+                const response = await fetch(`${API_BASE}/api/checkout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        password,
+                        cart: cartData,
+                        customerName, 
+                        customerMobile, 
+                        customerAddress,
+                        totalAmount: total, 
+                        paidAmount: paid,
+                        dueAmount: due,
+                        discount: currentDiscount,
+                        profit: profit,
+                        paymentMethod
+                    })
+                });
+                
+                if (response.ok) {
+                    serverSuccess = true;
+                } else {
+                    const errorData = await response.json();
+                    console.error('Server error:', errorData);
+                }
+            } catch (error) {
+                console.error('Server connection error:', error);
             }
-            
-            const result = await response.json();
             
             // Update local stock
             cart.forEach(item => {
@@ -1418,28 +1504,46 @@
                 }
             });
             
-            // Generate PDF Invoice
-            generatePDF(customerName, customerMobile, customerAddress, total, paid);
+            // Save sale to localStorage as backup
+            const saleRecord = {
+                id: Date.now(),
+                memoNo: currentMemoNo,
+                date: new Date().toISOString(),
+                customerName,
+                customerMobile,
+                customerAddress,
+                items: cartData,
+                totalAmount: total,
+                paidAmount: paid,
+                dueAmount: due,
+                discount: currentDiscount,
+                profit: profit,
+                paymentMethod,
+                synced: serverSuccess
+            };
             
-            showToast('✅ পেমেন্ট সফল! PDF তৈরি হচ্ছে...', 'success');
+            salesHistory.push(saleRecord);
+            localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+            
+            // Generate PDF Invoice
+            generatePDF(customerName, customerMobile, customerAddress, total, paid, due);
+            
+            if (serverSuccess) {
+                showToast('✅ সেল সফল! সার্ভারে সংরক্ষিত', 'success');
+            } else {
+                showToast('⚠️ সেল সফল! কিন্তু সার্ভার অফলাইন', 'warning');
+            }
             
         } catch (error) {
-            console.error('Payment error:', error);
-            showToast('❌ পেমেন্ট প্রক্রিয়ায় সমস্যা হয়েছে: ' + error.message, 'error');
-            
-            // Allow offline mode
-            if (!navigator.onLine) {
-                if (confirm('অফলাইনে আছেন। PDF তৈরি করবেন?')) {
-                    generatePDF(customerName, customerMobile, customerAddress, total, paid);
-                }
-            }
+            console.error('Sale error:', error);
+            showToast('❌ সেল প্রক্রিয়ায় সমস্যা হয়েছে', 'error');
         } finally {
             hideLoading();
         }
     }
 
     // ==================== GENERATE PDF ====================
-    function generatePDF(cName, cMobile, cAddress, total, paid) {
+    function generatePDF(cName, cMobile, cAddress, total, paid, due) {
         try {
             // Fill invoice template
             document.getElementById('invCName').innerText = cName;
@@ -1468,12 +1572,13 @@
 
             document.getElementById('invItems').innerHTML = rows;
             
-            const discountAmount = (cart.reduce((sum, i) => sum + (i.price * i.qty), 0) * currentDiscount) / 100;
+            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const discountAmount = (subtotal * currentDiscount) / 100;
             
             document.getElementById('invTotalCell').innerText = total.toFixed(2) + " ৳";
             document.getElementById('invDiscountCell').innerText = discountAmount.toFixed(2) + " ৳";
             document.getElementById('invPaidCell').innerText = paid.toFixed(2) + " ৳";
-            document.getElementById('invDueCell').innerText = (total - paid).toFixed(2) + " ৳";
+            document.getElementById('invDueCell').innerText = due.toFixed(2) + " ৳";
 
             const element = document.getElementById('inv');
             element.style.display = 'block';
@@ -1491,7 +1596,7 @@
                 currentMemoNo++;
                 element.style.display = 'none';
                 
-                // Reset cart
+                // Reset cart after successful sale
                 cart = [];
                 currentDiscount = 0;
                 document.getElementById('discountRow').style.display = 'none';
@@ -1500,6 +1605,10 @@
                 document.getElementById('customerName').value = '';
                 document.getElementById('customerMobile').value = '';
                 document.getElementById('customerAddress').value = '';
+                document.getElementById('bkashNumber').value = '';
+                document.getElementById('bkashTrxID').value = '';
+                document.getElementById('cardNumber').value = '';
+                document.getElementById('cardName').value = '';
                 updateCart();
                 renderProducts();
                 
@@ -1548,6 +1657,9 @@
         
         // Focus on search box
         document.getElementById('search').focus();
+        
+        // Load sales history
+        salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
     };
 </script>
 </body>
