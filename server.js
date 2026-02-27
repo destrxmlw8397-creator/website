@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 const app = express();
@@ -16,7 +17,14 @@ mongoose.connect(process.env.MONGO_URI)
 
 // --- ১. স্কিমা ডেফিনিশন ---
 
-// প্রোডাক্ট স্কিমা (Expiry Date যোগ করা হয়েছে)
+// ইউজার স্কিমা (পাসওয়ার্ড ম্যানেজমেন্ট)
+const UserSchema = new mongoose.Schema({
+    password: { type: String, required: true },
+    updatedAt: { type: Date, default: Date.now }
+});
+const User = mongoose.model('User', UserSchema);
+
+// প্রোডাক্ট স্কিমা (Expiry Date সহ)
 const ProductSchema = new mongoose.Schema({
     name: { type: String, required: true },
     barcode: { type: String, default: "" }, 
@@ -28,7 +36,7 @@ const ProductSchema = new mongoose.Schema({
     alertLimit: { type: Number, default: 5 },
     expiryDate: { type: Date, default: null },
     date: { type: Date, default: Date.now }
-}, { strict: false }); 
+});
 
 // সেলস স্কিমা
 const SaleSchema = new mongoose.Schema({
@@ -56,7 +64,7 @@ const LogSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now }
 });
 
-// ব্যাকআপ স্কিমা (ব্যাকআপ হিস্টোরির জন্য)
+// ব্যাকআপ স্কিমা
 const BackupSchema = new mongoose.Schema({
     name: String,
     data: Object,
@@ -69,6 +77,22 @@ const Sale = mongoose.model('Sale', SaleSchema);
 const Expense = mongoose.model('Expense', ExpenseSchema);
 const Log = mongoose.model('Log', LogSchema);
 const Backup = mongoose.model('Backup', BackupSchema);
+
+// --- ইনিশিয়ালাইজেশন: প্রথম ইউজার তৈরি (যদি না থাকে) ---
+async function initializeUser() {
+    try {
+        const userExists = await User.findOne();
+        if (!userExists) {
+            const hashedPassword = await bcrypt.hash('1234', 10);
+            const user = new User({ password: hashedPassword });
+            await user.save();
+            console.log('✅ Default user created with password: 1234');
+        }
+    } catch (error) {
+        console.error('Error creating default user:', error);
+    }
+}
+initializeUser();
 
 // --- সাহায্যকারী ফাংশন: লগ সেভ করা ---
 async function createLog(msg) {
@@ -84,9 +108,93 @@ async function createLog(msg) {
     } catch (e) { console.log("Log Error:", e); }
 }
 
-// --- API ROUTES ---
+// --- পাসওয়ার্ড অথেনটিকেশন মিডলওয়্যার ---
+async function verifyPassword(inputPassword) {
+    try {
+        const user = await User.findOne();
+        if (!user) return false;
+        return await bcrypt.compare(inputPassword, user.password);
+    } catch (error) {
+        console.error('Password verification error:', error);
+        return false;
+    }
+}
 
-// পণ্যের তালিকা দেখা
+// পাসওয়ার্ড চেক API
+app.post('/api/verify-password', async (req, res) => {
+    try {
+        const { password } = req.body;
+        const isValid = await verifyPassword(password);
+        res.json({ valid: isValid });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// পাসওয়ার্ড আপডেট API
+app.post('/api/update-password', async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        
+        // পুরনো পাসওয়ার্ড চেক
+        const isValid = await verifyPassword(oldPassword);
+        if (!isValid) {
+            return res.status(401).json({ error: 'বর্তমান পাসওয়ার্ড সঠিক নয়' });
+        }
+        
+        // নতুন পাসওয়ার্ড হ্যাশ করে সেভ
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const user = await User.findOne();
+        user.password = hashedPassword;
+        user.updatedAt = new Date();
+        await user.save();
+        
+        await createLog('🔐 পাসওয়ার্ড পরিবর্তন করা হয়েছে');
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// পাসওয়ার্ড রিমুভ API (ডিফল্টে রিসেট)
+app.post('/api/reset-password', async (req, res) => {
+    try {
+        const { currentPassword } = req.body;
+        
+        // পুরনো পাসওয়ার্ড চেক
+        const isValid = await verifyPassword(currentPassword);
+        if (!isValid) {
+            return res.status(401).json({ error: 'বর্তমান পাসওয়ার্ড সঠিক নয়' });
+        }
+        
+        // ডিফল্ট পাসওয়ার্ডে রিসেট
+        const hashedPassword = await bcrypt.hash('1234', 10);
+        const user = await User.findOne();
+        user.password = hashedPassword;
+        user.updatedAt = new Date();
+        await user.save();
+        
+        await createLog('🔄 পাসওয়ার্ড ডিফল্টে রিসেট করা হয়েছে');
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// পাসওয়ার্ড স্ট্যাটাস API (পাসওয়ার্ড সেট করা আছে কিনা)
+app.get('/api/password-status', async (req, res) => {
+    try {
+        const user = await User.findOne();
+        // সবসময় true রিটার্ন করবে কারণ ডিফল্ট ইউজার আছে
+        res.json({ hasPassword: true });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// --- API ROUTES (সব প্রোটেক্টেড অ্যাকশনের আগে পাসওয়ার্ড ভেরিফিকেশন) ---
+
+// পণ্যের তালিকা দেখা (পাবলিক - পাসওয়ার্ড লাগবে না)
 app.get('/api/products', async (req, res) => {
     try {
         const products = await Product.find().sort({ date: -1 });
@@ -94,28 +202,52 @@ app.get('/api/products', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// নতুন পণ্য যোগ করা
+// নতুন পণ্য যোগ করা (প্রোটেক্টেড)
 app.post('/api/products', async (req, res) => {
     try {
-        const newProduct = new Product(req.body);
+        const { password, ...productData } = req.body;
+        
+        // পাসওয়ার্ড ভেরিফাই
+        const isValid = await verifyPassword(password);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+        
+        const newProduct = new Product(productData);
         await newProduct.save();
         await createLog(`✅ নতুন পণ্য যোগ করা হয়েছে: ${newProduct.name}`);
         res.status(201).json(newProduct);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// পণ্য আপডেট করা
+// পণ্য আপডেট করা (প্রোটেক্টেড)
 app.put('/api/products/:id', async (req, res) => {
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const { password, ...updateData } = req.body;
+        
+        // পাসওয়ার্ড ভেরিফাই
+        const isValid = await verifyPassword(password);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+        
+        const updatedProduct = await Product.findByIdAndUpdate(req.params.id, updateData, { new: true });
         await createLog(`🔄 পণ্য আপডেট করা হয়েছে: ${updatedProduct.name}`);
         res.json(updatedProduct);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// পণ্য ডিলিট করা
+// পণ্য ডিলিট করা (প্রোটেক্টেড)
 app.delete('/api/products/:id', async (req, res) => {
     try {
+        const { password } = req.body;
+        
+        // পাসওয়ার্ড ভেরিফাই
+        const isValid = await verifyPassword(password);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+        
         const p = await Product.findById(req.params.id);
         if(p) {
             await createLog(`❌ পণ্য ডিলিট করা হয়েছে: ${p.name}`);
@@ -127,7 +259,7 @@ app.delete('/api/products/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// বিক্রির রিপোর্ট দেখা
+// বিক্রির রিপোর্ট দেখা (পাবলিক)
 app.get('/api/sales', async (req, res) => {
     try {
         const sales = await Sale.find().sort({ date: -1 });
@@ -135,7 +267,7 @@ app.get('/api/sales', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// খরচ এপিআই (GET & POST)
+// খরচ এপিআই (GET - পাবলিক)
 app.get('/api/expenses', async (req, res) => {
     try {
         const expenses = await Expense.find().sort({ date: -1 });
@@ -143,16 +275,25 @@ app.get('/api/expenses', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// খরচ যোগ করা (POST - প্রোটেক্টেড)
 app.post('/api/expenses', async (req, res) => {
     try {
-        const newExpense = new Expense(req.body);
+        const { password, ...expenseData } = req.body;
+        
+        // পাসওয়ার্ড ভেরিফাই
+        const isValid = await verifyPassword(password);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+        
+        const newExpense = new Expense(expenseData);
         await newExpense.save();
         await createLog(`💰 খরচ এন্ট্রি: ${newExpense.title} - ${newExpense.amount}৳`);
         res.status(201).json(newExpense);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// লগ এপিআই
+// লগ এপিআই (পাবলিক)
 app.get('/api/logs', async (req, res) => {
     try {
         const logs = await Log.find().sort({ date: -1 }).limit(50);
@@ -160,10 +301,17 @@ app.get('/api/logs', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// বাকি পরিশোধ (Pay Due)
+// বাকি পরিশোধ (Pay Due - প্রোটেক্টেড)
 app.post('/api/sales/pay-due/:id', async (req, res) => {
     try {
-        const { paidAmount } = req.body;
+        const { password, paidAmount } = req.body;
+        
+        // পাসওয়ার্ড ভেরিফাই
+        const isValid = await verifyPassword(password);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+        
         const sale = await Sale.findById(req.params.id);
         if (sale) {
             sale.paidAmount += Number(paidAmount);
@@ -177,10 +325,17 @@ app.post('/api/sales/pay-due/:id', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// চেকআউট (স্টক ও প্রফিট ম্যানেজমেন্ট)
+// চেকআউট (স্টক ও প্রফিট ম্যানেজমেন্ট - প্রোটেক্টেড)
 app.post('/api/checkout', async (req, res) => {
     try {
-        const { cart, customerName, customerMobile, paidAmount, totalAmount } = req.body;
+        const { password, cart, customerName, customerMobile, paidAmount, totalAmount } = req.body;
+        
+        // পাসওয়ার্ড ভেরিফাই
+        const isValid = await verifyPassword(password);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+        
         let totalCost = 0;
 
         for (let item of cart) {
@@ -207,9 +362,17 @@ app.post('/api/checkout', async (req, res) => {
     }
 });
 
-// ব্যাকআপ তৈরি
+// ব্যাকআপ তৈরি (প্রোটেক্টেড)
 app.post('/api/backup', async (req, res) => {
     try {
+        const { password } = req.body;
+        
+        // পাসওয়ার্ড ভেরিফাই
+        const isValid = await verifyPassword(password);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+        
         const products = await Product.find();
         const sales = await Sale.find();
         const expenses = await Expense.find();
@@ -238,10 +401,17 @@ app.post('/api/backup', async (req, res) => {
     }
 });
 
-// ব্যাকআপ পুনরুদ্ধার
+// ব্যাকআপ পুনরুদ্ধার (প্রোটেক্টেড)
 app.post('/api/restore', async (req, res) => {
     try {
-        const { backupId } = req.body;
+        const { password, backupId } = req.body;
+        
+        // পাসওয়ার্ড ভেরিফাই
+        const isValid = await verifyPassword(password);
+        if (!isValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+        
         const backup = await Backup.findById(backupId);
         
         if (!backup) {
@@ -266,7 +436,7 @@ app.post('/api/restore', async (req, res) => {
     }
 });
 
-// ব্যাকআপ লিস্ট
+// ব্যাকআপ লিস্ট (পাবলিক)
 app.get('/api/backups', async (req, res) => {
     try {
         const backups = await Backup.find().sort({ date: -1 }).limit(20);
@@ -276,7 +446,7 @@ app.get('/api/backups', async (req, res) => {
     }
 });
 
-// অ্যাডভান্সড ড্যাশবোর্ড স্ট্যাটস (Dashboard Summary)
+// অ্যাডভান্সড ড্যাশবোর্ড স্ট্যাটস (পাবলিক)
 app.get('/api/stats', async (req, res) => {
     try {
         const products = await Product.find();
