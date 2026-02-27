@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>🛍️ সুপারশপ POS প্রো - HTML5 বারকোড স্ক্যানার সহ</title>
+    <title>🛍️ সুপারশপ POS প্রো - ফিক্সড বারকোড স্ক্যানার</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -14,8 +14,8 @@
     <!-- html2pdf -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
-    <!-- HTML5 QR Code Scanner Library (সহজ এবং নির্ভরযোগ্য) -->
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <!-- HTML5 QR Code Library (সরাসরি Html5Qrcode ক্লাস) -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -129,7 +129,7 @@
             transform: scale(0.95);
         }
 
-        /* Scanner Modal - HTML5 QR Code Scanner এর জন্য আপডেটেড */
+        /* Scanner Modal */
         .scanner-modal {
             display: none;
             position: fixed;
@@ -142,7 +142,7 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
-            padding: 20px;
+            padding: 10px;
         }
 
         .scanner-modal.active {
@@ -181,17 +181,39 @@
             padding: 0 10px;
         }
 
-        /* HTML5 QR Code Scanner এর জন্য কাস্টম স্টাইল */
-        #html5-qrcode-scanner {
+        /* Scanner View */
+        #scanner-view {
             width: 100%;
-            min-height: 400px;
+            height: 400px;
             background: #000;
+            position: relative;
+            overflow: hidden;
         }
 
-        #html5-qrcode-scanner video {
+        #scanner-view video {
             width: 100%;
-            max-height: 400px;
+            height: 100%;
             object-fit: cover;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 150px;
+            border: 3px solid #10b981;
+            border-radius: 10px;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+            pointer-events: none;
+            animation: scanAnimation 2s infinite;
+        }
+
+        @keyframes scanAnimation {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.02); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
 
         .scanner-result {
@@ -236,18 +258,27 @@
             transform: translateY(-2px);
         }
 
-        /* ক্যামেরা সিলেক্টর */
-        .camera-selector {
+        .camera-controls {
             padding: 10px 15px;
             background: #f1f5f9;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
             border-bottom: 1px solid #e2e8f0;
         }
 
-        .camera-selector select {
-            width: 100%;
-            padding: 8px;
+        .camera-controls button {
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
             border-radius: 8px;
-            border: 2px solid #e2e8f0;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .camera-controls button:hover {
+            background: #5a67d8;
         }
 
         /* Category Tabs */
@@ -764,7 +795,7 @@
     </div>
 </div>
 
-<!-- Scanner Modal - HTML5 QR Code Scanner ব্যবহার করে -->
+<!-- Scanner Modal -->
 <div class="scanner-modal" id="scannerModal">
     <div class="scanner-container">
         <div class="scanner-header">
@@ -772,14 +803,18 @@
             <button onclick="closeScanner()"><i class="bi bi-x-lg"></i></button>
         </div>
         
-        <!-- HTML5 QR Code Scanner এখানে রেন্ডার হবে -->
-        <div id="html5-qrcode-scanner"></div>
+        <!-- Scanner View -->
+        <div id="scanner-view">
+            <div class="scanner-overlay"></div>
+        </div>
         
-        <!-- ক্যামেরা সিলেক্টর (যদি একাধিক ক্যামেরা থাকে) -->
-        <div class="camera-selector" id="cameraSelector" style="display: none;">
-            <select id="cameraSelect" onchange="switchCamera(this.value)">
-                <option value="">ক্যামেরা নির্বাচন করুন</option>
-            </select>
+        <div class="camera-controls">
+            <button onclick="switchCamera()">
+                <i class="bi bi-arrow-repeat me-1"></i> ক্যামেরা সুইচ
+            </button>
+            <button onclick="testCamera()">
+                <i class="bi bi-camera-video me-1"></i> টেস্ট ক্যামেরা
+            </button>
         </div>
         
         <div class="scanner-result" id="scannerResult">
@@ -861,11 +896,11 @@
     let isOffline = false;
     let currentHoldCartId = null;
     
-    // HTML5 QR Code Scanner Variables
-    let html5QrcodeScanner = null;
-    let isScannerInitialized = false;
+    // Scanner Variables
+    let html5QrCode = null;
+    let isScanning = false;
     let currentCameraId = null;
-    let availableCameras = [];
+    let cameras = [];
 
     // ==================== TOAST NOTIFICATION ====================
     function showToast(message, type = 'info') {
@@ -902,7 +937,7 @@
     window.addEventListener('offline', updateSyncStatus);
     setInterval(updateSyncStatus, 5000);
 
-    // ==================== LOAD PRODUCTS FROM DATABASE ====================
+    // ==================== LOAD PRODUCTS ====================
     async function loadProducts() {
         document.getElementById('productList').innerHTML = `
             <div class="col-12 text-center py-4">
@@ -919,7 +954,7 @@
             loadCategories();
         } catch (error) {
             console.error('Error loading products:', error);
-            showToast('❌ সার্ভার সংযোগ ব্যর্থ!', 'warning');
+            showToast('❌ সার্ভার সংযোগ ব্যর্থ! লোকাল ডাটা লোড হচ্ছে', 'warning');
             
             const cachedProducts = localStorage.getItem('cachedProducts');
             if (cachedProducts) {
@@ -1030,89 +1065,112 @@
         renderProducts(filtered);
     });
 
-    // ==================== SCANNER FUNCTIONS (HTML5 QR Code) ====================
+    // ==================== SCANNER FUNCTIONS ====================
     
     // Open Scanner Modal
     async function openScanner() {
         const modal = document.getElementById('scannerModal');
         modal.classList.add('active');
         
-        // Small delay to ensure DOM is ready
-        setTimeout(() => {
-            initializeScanner();
-        }, 500);
-    }
-
-    // Close Scanner Modal
-    function closeScanner() {
-        const modal = document.getElementById('scannerModal');
-        modal.classList.remove('active');
-        
-        // Stop scanner
-        if (html5QrcodeScanner) {
-            try {
-                html5QrcodeScanner.clear();
-            } catch (e) {
-                console.log('Scanner clear error:', e);
-            }
-            html5QrcodeScanner = null;
-        }
-        isScannerInitialized = false;
-        
-        document.getElementById('manualBarcode').value = '';
-        document.getElementById('scannerResult').innerHTML = 'বারকোড স্ক্যান করার জন্য ক্যামেরার দিকে ধরুন...';
-    }
-
-    // Initialize HTML5 QR Code Scanner
-    function initializeScanner() {
-        if (isScannerInitialized) return;
-        
-        const scannerElement = document.getElementById('html5-qrcode-scanner');
-        if (!scannerElement) return;
-        
         // Clear previous scanner
-        scannerElement.innerHTML = '';
+        document.getElementById('scanner-view').innerHTML = '<div class="scanner-overlay"></div>';
+        document.getElementById('scannerResult').innerHTML = 'ক্যামেরা চালু হচ্ছে...';
         
+        // Initialize scanner
+        await initializeScanner();
+    }
+
+    // Initialize Scanner
+    async function initializeScanner() {
         try {
-            // Create new scanner instance
-            html5QrcodeScanner = new Html5QrcodeScanner(
-                "html5-qrcode-scanner", 
-                { 
-                    fps: 10, 
-                    qrbox: { width: 300, height: 200 },
-                    rememberLastUsedCamera: true,
-                    showTorchButtonIfSupported: true,
-                    showZoomSliderIfSupported: true,
-                    defaultZoomValueIfSupported: 2
-                },
-                /* verbose= */ false
-            );
+            // Check if browser supports camera
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showToast('❌ আপনার ব্রাউজার ক্যামেরা সাপোর্ট করে না', 'error');
+                document.getElementById('scannerResult').innerHTML = 'ক্যামেরা সাপোর্ট করে না';
+                return;
+            }
+
+            // Create scanner instance
+            html5QrCode = new Html5Qrcode("scanner-view");
             
-            // Render scanner
-            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-            isScannerInitialized = true;
+            // Get cameras
+            cameras = await Html5Qrcode.getCameras();
             
-            showToast('📷 ক্যামেরা চালু হচ্ছে...', 'info');
+            if (cameras && cameras.length > 0) {
+                // Use back camera first (usually index 1 for mobile)
+                let selectedCameraId = null;
+                
+                // Try to find back camera
+                for (let camera of cameras) {
+                    if (camera.label.toLowerCase().includes('back') || 
+                        camera.label.toLowerCase().includes('environment') ||
+                        camera.label.toLowerCase().includes('rear')) {
+                        selectedCameraId = camera.id;
+                        break;
+                    }
+                }
+                
+                // If no back camera found, use first camera
+                if (!selectedCameraId && cameras.length > 0) {
+                    selectedCameraId = cameras[0].id;
+                }
+                
+                if (selectedCameraId) {
+                    await startScanning(selectedCameraId);
+                } else {
+                    throw new Error('No camera available');
+                }
+            } else {
+                throw new Error('No cameras found');
+            }
             
         } catch (error) {
-            console.error('Scanner initialization error:', error);
-            scannerElement.innerHTML = `
-                <div style="padding: 50px; text-align: center; background: #f8fafc;">
-                    <i class="bi bi-exclamation-triangle" style="font-size: 50px; color: #ef4444;"></i>
-                    <p style="margin-top: 20px; font-weight: bold;">ক্যামেরা চালু করতে সমস্যা হয়েছে</p>
-                    <p style="color: #666;">দয়া করে নিশ্চিত করুন যে আপনি ক্যামেরা পারমিশন দিয়েছেন</p>
-                    <button onclick="initializeScanner()" class="btn btn-primary mt-3">
-                        <i class="bi bi-arrow-repeat me-2"></i>আবার চেষ্টা করুন
-                    </button>
-                </div>
+            console.error('Scanner init error:', error);
+            document.getElementById('scannerResult').innerHTML = `
+                <span class="text-danger">
+                    <i class="bi bi-exclamation-circle"></i> ক্যামেরা চালু করতে সমস্যা: ${error.message}
+                </span>
             `;
             showToast('❌ ক্যামেরা চালু করতে সমস্যা', 'error');
         }
     }
 
+    // Start Scanning
+    async function startScanning(cameraId) {
+        if (isScanning) return;
+        
+        try {
+            currentCameraId = cameraId;
+            
+            const config = {
+                fps: 10,
+                qrbox: { width: 250, height: 150 },
+                aspectRatio: 1.0
+            };
+            
+            await html5QrCode.start(
+                cameraId,
+                config,
+                onScanSuccess,
+                onScanError
+            );
+            
+            isScanning = true;
+            document.getElementById('scannerResult').innerHTML = 'বারকোড স্ক্যান করুন...';
+            showToast('📷 ক্যামেরা চালু হয়েছে', 'success');
+            
+        } catch (error) {
+            console.error('Start scanning error:', error);
+            document.getElementById('scannerResult').innerHTML = `
+                <span class="text-danger">
+                    <i class="bi bi-exclamation-circle"></i> ক্যামেরা চালু করতে সমস্যা: ${error.message}
+                </span>
+            `;
+        }
+    }
+
     // Scan Success Callback
     function onScanSuccess(decodedText, decodedResult) {
-        // Handle scan success
         console.log('Scan success:', decodedText);
         
         // Update result display
@@ -1131,40 +1189,76 @@
         }, 500);
     }
 
-    // Scan Failure Callback
-    function onScanFailure(error) {
-        // This is called frequently, so we don't log every error
-        // Just update UI if needed
-        if (error && error.includes("NotFound")) {
-            document.getElementById('scannerResult').innerHTML = `
-                <span class="text-danger">
-                    <i class="bi bi-exclamation-circle"></i> ক্যামেরা পাওয়া যায়নি
-                </span>
-            `;
+    // Scan Error Callback
+    function onScanError(error) {
+        // Silent error handling - don't show every error
+        console.log('Scan error:', error);
+    }
+
+    // Switch Camera
+    async function switchCamera() {
+        if (!cameras || cameras.length < 2) {
+            showToast('একাধিক ক্যামেরা পাওয়া যায়নি', 'warning');
+            return;
+        }
+        
+        try {
+            // Stop current scanning
+            if (html5QrCode && isScanning) {
+                await html5QrCode.stop();
+                isScanning = false;
+            }
+            
+            // Find next camera
+            let nextCameraIndex = 0;
+            if (currentCameraId) {
+                const currentIndex = cameras.findIndex(c => c.id === currentCameraId);
+                nextCameraIndex = (currentIndex + 1) % cameras.length;
+            }
+            
+            // Start with new camera
+            await startScanning(cameras[nextCameraIndex].id);
+            
+        } catch (error) {
+            console.error('Switch camera error:', error);
+            showToast('❌ ক্যামেরা সুইচ করতে সমস্যা', 'error');
         }
     }
 
-    // Switch Camera (if multiple cameras available)
-    function switchCamera(cameraId) {
-        if (html5QrcodeScanner && html5QrcodeScanner.pause) {
-            // Note: Html5QrcodeScanner doesn't directly support camera switching
-            // We need to reinitialize with the new camera
-            showToast('ক্যামেরা সুইচ করা হচ্ছে...', 'info');
+    // Test Camera Function
+    async function testCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            showToast('✅ ক্যামেরা কাজ করছে!', 'success');
             
-            // Close current scanner
-            if (html5QrcodeScanner) {
-                try {
-                    html5QrcodeScanner.clear();
-                } catch (e) {}
-                html5QrcodeScanner = null;
-            }
-            isScannerInitialized = false;
+            // Stop all tracks
+            stream.getTracks().forEach(track => track.stop());
             
-            // Reinitialize with selected camera
-            setTimeout(() => {
-                initializeScanner();
-            }, 500);
+        } catch (error) {
+            console.error('Camera test error:', error);
+            showToast('❌ ক্যামেরা টেস্ট ব্যর্থ: ' + error.message, 'error');
         }
+    }
+
+    // Close Scanner
+    async function closeScanner() {
+        const modal = document.getElementById('scannerModal');
+        modal.classList.remove('active');
+        
+        if (html5QrCode && isScanning) {
+            try {
+                await html5QrCode.stop();
+                await html5QrCode.clear();
+            } catch (e) {
+                console.log('Scanner stop error:', e);
+            }
+        }
+        
+        html5QrCode = null;
+        isScanning = false;
+        
+        document.getElementById('manualBarcode').value = '';
+        document.getElementById('scanner-view').innerHTML = '<div class="scanner-overlay"></div>';
     }
 
     // Add product by barcode
@@ -1175,7 +1269,6 @@
             addToCart(product._id);
             showToast(`✅ বারকোড স্ক্যান: ${product.name}`, 'success');
             
-            // Visual feedback on search box
             const searchBox = document.getElementById('search');
             searchBox.value = barcode;
             searchBox.classList.add('scanner-active');
@@ -1187,9 +1280,7 @@
             showToast(`❌ বারকোড ${barcode} এর পণ্য পাওয়া যায়নি`, 'error');
             document.getElementById('manualBarcode').value = barcode;
             
-            // Ask if user wants to add new product
             if (confirm(`"${barcode}" বারকোডের পণ্য পাওয়া যায়নি। নতুন পণ্য যোগ করবেন?`)) {
-                // You can implement add new product functionality here
                 showToast('পণ্য যোগ করার ফর্ম খুলবে...', 'info');
             }
         }
@@ -1381,7 +1472,7 @@
         document.getElementById('invMethod').innerText = method === 'cash' ? 'নগদ' : method === 'bkash' ? 'বিকাশ' : 'কার্ড';
     }
 
-    // ==================== হোল্ড কার্ট ফাংশন ====================
+    // ==================== HOLD CART FUNCTIONS ====================
     async function holdCart() {
         if (cart.length === 0) {
             showToast('❌ কার্ট খালি!', 'error');
@@ -1592,7 +1683,7 @@
         }
     }
 
-    // ==================== পেমেন্ট প্রসেস ====================
+    // ==================== PAYMENT PROCESS ====================
     async function processPayment() {
         if (cart.length === 0) {
             showToast('❌ কার্ট খালি!', 'error');
@@ -1687,7 +1778,7 @@
         }
     }
 
-    // ==================== PDF জেনারেট ====================
+    // ==================== PDF GENERATE ====================
     function generatePDF(cName, cMobile, cAddress, total, paid) {
         try {
             document.getElementById('invCName').innerText = cName;
@@ -1740,14 +1831,14 @@
         }
     }
 
-    // ==================== অটো রিফ্রেশ ====================
+    // ==================== AUTO REFRESH ====================
     setInterval(() => {
         if (navigator.onLine && document.getElementById('heldCartsList').style.display === 'block') {
             loadHeldCarts();
         }
     }, 30000);
 
-    // ==================== ইনিশিয়ালাইজেশন ====================
+    // ==================== INITIALIZATION ====================
     window.onload = () => {
         document.getElementById('memoNoDisplay').innerText = currentMemoNo;
         loadProducts();
