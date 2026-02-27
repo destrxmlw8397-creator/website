@@ -649,7 +649,7 @@
                             <i class="bi bi-lock"></i> পাসওয়ার্ড সেট করুন
                         </a></li>
                         <li><a class="dropdown-item" href="#" onclick="removePassword()">
-                            <i class="bi bi-unlock"></i> পাসওয়ার্ড সরিয়ে দিন
+                            <i class="bi bi-unlock"></i> পাসওয়ার্ড রিসেট করুন
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#backupModal">
@@ -682,7 +682,7 @@
                 </div>
 
                 <!-- Quick Actions -->
-                <button onclick="createBackup()" class="btn btn-dark btn-sm">
+                <button onclick="checkAuth(createBackup)" class="btn btn-dark btn-sm">
                     <i class="bi bi-cloud-arrow-up"></i> ব্যাকআপ
                 </button>
                 
@@ -917,7 +917,7 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button onclick="save()" class="btn btn-primary">
+                            <button onclick="checkAuth(save)" class="btn btn-primary">
                                 <i class="bi bi-save me-2"></i>
                                 ইনভেন্টরি আপডেট
                             </button>
@@ -951,7 +951,7 @@
                     <div id="logContainerWrapper" class="chart-content">
                         <div id="logContainer" class="log-container"></div>
                         <div class="mt-3">
-                            <button onclick="clearLogs()" class="btn btn-sm btn-outline-danger w-100">
+                            <button onclick="checkAuth(clearLogs)" class="btn btn-sm btn-outline-danger w-100">
                                 <i class="bi bi-trash me-2"></i>
                                 লগ মুছে ফেলুন
                             </button>
@@ -1090,7 +1090,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
-                    <button type="button" class="btn btn-success" onclick="updateProduct()">সংরক্ষণ করুন</button>
+                    <button type="button" class="btn btn-success" onclick="checkAuth(updateProduct)">সংরক্ষণ করুন</button>
                 </div>
             </div>
         </div>
@@ -1129,7 +1129,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
-                    <button type="button" class="btn btn-danger" onclick="addExpense()">খরচ যোগ করুন</button>
+                    <button type="button" class="btn btn-danger" onclick="checkAuth(addExpense)">খরচ যোগ করুন</button>
                 </div>
             </div>
         </div>
@@ -1203,11 +1203,11 @@
                         <!-- Backups will be listed here -->
                     </div>
                     <div class="d-grid gap-2">
-                        <button onclick="createBackup()" class="btn btn-primary">
+                        <button onclick="checkAuth(createBackup)" class="btn btn-primary">
                             <i class="bi bi-cloud-arrow-up me-2"></i>
                             নতুন ব্যাকআপ তৈরি করুন
                         </button>
-                        <button onclick="restoreBackup()" class="btn btn-success">
+                        <button onclick="checkAuth(restoreBackup)" class="btn btn-success">
                             <i class="bi bi-cloud-arrow-down me-2"></i>
                             ব্যাকআপ থেকে পুনরুদ্ধার
                         </button>
@@ -1282,7 +1282,6 @@
         let currentChart = null;
         let categoryChart = null;
         let activityLogs = [];
-        let systemPass = localStorage.getItem('appPassword') || '1234';
         
         let currentPage = 1;
         const rowsPerPage = 10;
@@ -1355,10 +1354,10 @@
         function initializeEventListeners() {
             // Keyboard shortcuts
             document.addEventListener('keydown', function(e) {
-                // Ctrl + S for save
+                // Ctrl + S for save (with auth)
                 if (e.ctrlKey && e.key === 's') {
                     e.preventDefault();
-                    save();
+                    checkAuth(save);
                 }
                 // Ctrl + F for search
                 if (e.ctrlKey && e.key === 'f') {
@@ -1378,21 +1377,46 @@
             });
         }
 
-        // Password Protection
-        function checkAuth(callback, ...args) {
-            if (!systemPass || systemPass === "null") {
-                callback(...args);
+        // 🔐 UPDATED Password Protection - Server Side Verification
+        async function checkAuth(callback, ...args) {
+            let inputPassword = prompt("🔒 সিকিউরিটি পাসওয়ার্ড দিন:");
+            
+            if (!inputPassword) {
+                showToast("পাসওয়ার্ড দেওয়া হয়নি!", "warning");
                 return;
             }
-            let input = prompt("সিকিউরিটি পাসওয়ার্ড দিন:");
-            if (input === systemPass) {
-                callback(...args);
-            } else {
-                showToast("ভুল পাসওয়ার্ড!", "error");
+            
+            showLoading();
+            try {
+                // সার্ভারে পাসওয়ার্ড ভেরিফাই করুন
+                const response = await fetch(`${API_BASE}/api/verify-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: inputPassword })
+                });
+                
+                const data = await response.json();
+                
+                if (data.valid) {
+                    // পাসওয়ার্ড সঠিক - callback কল করুন এবং পাসওয়ার্ড পাঠান
+                    if (typeof callback === 'function') {
+                        // সব callback-এ পাসওয়ার্ড প্যারামিটার হিসেবে পাঠান
+                        callback(inputPassword, ...args);
+                    }
+                    showToast("✅ পাসওয়ার্ড সঠিক!", "success");
+                } else {
+                    showToast("❌ ভুল পাসওয়ার্ড!", "error");
+                }
+            } catch (error) {
+                console.error('Auth error:', error);
+                showToast("পাসওয়ার্ড ভেরিফাই করতে সমস্যা হয়েছে", "error");
+            } finally {
+                hideLoading();
             }
         }
 
-        function updatePassword() {
+        // পাসওয়ার্ড আপডেট ফাংশন
+        async function updatePassword() {
             let oldP = document.getElementById('oldPass').value;
             let newP = document.getElementById('newPass').value;
             let confirmP = document.getElementById('confirmPass').value;
@@ -1402,32 +1426,61 @@
                 return;
             }
             
-            if(oldP === systemPass || (!systemPass || systemPass === "null")) {
-                if(newP.length > 0) {
-                    localStorage.setItem('appPassword', newP);
-                    systemPass = newP;
-                    showToast("পাসওয়ার্ড সফলভাবে আপডেট হয়েছে", "success");
+            if (newP.length < 4) {
+                showToast("পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে", "warning");
+                return;
+            }
+            
+            showLoading();
+            try {
+                const response = await fetch(`${API_BASE}/api/update-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ oldPassword: oldP, newPassword: newP })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast("✅ পাসওয়ার্ড সফলভাবে আপডেট হয়েছে", "success");
                     bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
+                    document.getElementById('oldPass').value = '';
+                    document.getElementById('newPass').value = '';
+                    document.getElementById('confirmPass').value = '';
                 } else {
-                    showToast("নতুন পাসওয়ার্ড দিন", "warning");
+                    showToast(data.error || "পাসওয়ার্ড আপডেট করতে সমস্যা হয়েছে", "error");
                 }
-            } else {
-                showToast("বর্তমান পাসওয়ার্ড সঠিক নয়!", "error");
+            } catch (error) {
+                showToast("পাসওয়ার্ড আপডেট করতে সমস্যা হয়েছে", "error");
+            } finally {
+                hideLoading();
             }
         }
 
-        function removePassword() {
-            if (!systemPass || systemPass === "null") {
-                showToast("কোনো পাসওয়ার্ড সেট করা নেই!", "warning");
-                return;
-            }
-            let input = prompt("পাসওয়ার্ড সরাতে বর্তমান পাসওয়ার্ড দিন:");
-            if (input === systemPass) {
-                localStorage.setItem('appPassword', "null");
-                systemPass = "null";
-                showToast("সিস্টেম পাসওয়ার্ড সরিয়ে দেয়া হয়েছে", "success");
-            } else {
-                showToast("ভুল পাসওয়ার্ড!", "error");
+        // পাসওয়ার্ড রিসেট ফাংশন (ডিফল্টে)
+        async function removePassword() {
+            let input = prompt("🔒 পাসওয়ার্ড রিসেট করতে বর্তমান পাসওয়ার্ড দিন:");
+            if (!input) return;
+            
+            showLoading();
+            try {
+                const response = await fetch(`${API_BASE}/api/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currentPassword: input })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast("✅ পাসওয়ার্ড ডিফল্ট '1234' এ রিসেট করা হয়েছে", "success");
+                } else {
+                    showToast(data.error || "পাসওয়ার্ড রিসেট করতে সমস্যা হয়েছে", "error");
+                }
+            } catch (error) {
+                showToast("পাসওয়ার্ড রিসেট করতে সমস্যা হয়েছে", "error");
+            } finally {
+                hideLoading();
             }
         }
 
@@ -1556,7 +1609,7 @@
                     <td class="text-danger fw-bold">${s.dueAmount}৳</td>
                     <td>${new Date(s.date).toLocaleDateString('bn-BD')}</td>
                     <td>
-                        <button class="btn btn-sm btn-success" onclick="payDue('${s._id}', ${s.dueAmount})">
+                        <button class="btn btn-sm btn-success" onclick="checkAuth(payDue, '${s._id}', ${s.dueAmount})">
                             <i class="bi bi-cash"></i> জমা
                         </button>
                         <button class="btn btn-sm btn-info" onclick="printInvoice('${s._id}')">
@@ -1751,7 +1804,7 @@
                                 </div>
                                 <div>
                                     <button class="btn btn-sm btn-outline-danger" onclick="checkAuth(markExpiredForDiscount, '${p._id}')" title="ডিসকাউন্টে বিক্রি">
-                                        <i class="bi bi-tag"></i> ডিসকাউнт
+                                        <i class="bi bi-tag"></i> ডিসকাউন্ট
                                     </button>
                                 </div>
                             </div>
@@ -1807,27 +1860,27 @@
             document.getElementById('notiHeaderCount').innerText = lowStockProducts.length;
         }
 
-        function markExpiredForDiscount(productId) {
+        function markExpiredForDiscount(password, productId) {
             const product = allProducts.find(p => p._id === productId);
             if (product) {
                 const discountPrice = prompt(`"${product.name}" এর জন্য ডিসকাউন্ট মূল্য দিন (বর্তমান মূল্য: ${product.price}৳):`, Math.round(product.price * 0.7));
                 if (discountPrice && !isNaN(discountPrice) && discountPrice > 0) {
-                    updateProductPrice(productId, Number(discountPrice));
+                    updateProductPrice(password, productId, Number(discountPrice));
                 }
             }
         }
 
-        function extendExpiryAlert(productId) {
+        function extendExpiryAlert(password, productId) {
             showToast('আগামীকাল আবার মনে করানো হবে', 'success');
         }
 
-        async function updateProductPrice(productId, newPrice) {
+        async function updateProductPrice(password, productId, newPrice) {
             showLoading();
             try {
                 await fetch(`${API_BASE}/api/products/${productId}`, { 
                     method: 'PUT', 
                     headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ price: newPrice })
+                    body: JSON.stringify({ password, price: newPrice })
                 });
                 await load();
                 showToast('মূল্য আপডেট করা হয়েছে', 'success');
@@ -1906,7 +1959,7 @@
                     </td>
                     <td>
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary" onclick="openEditModal('${p._id}')" title="এডিট">
+                            <button class="btn btn-outline-primary" onclick="checkAuth(openEditModal, '${p._id}')" title="এডিট">
                                 <i class="bi bi-pencil"></i>
                             </button>
                             <button class="btn btn-outline-info" onclick="quickView('${p._id}')" title="দ্রুত দেখুন">
@@ -2023,23 +2076,23 @@
             }
         }
 
-        function restockProduct(productId) {
+        function restockProduct(password, productId) {
             let qty = prompt("কত Quantity যোগ করতে চান?");
             if(qty && !isNaN(qty) && parseInt(qty) > 0) {
                 const product = allProducts.find(p => p._id === productId);
                 if(product) {
-                    updateProductStock(productId, product.stock + parseInt(qty));
+                    updateProductStock(password, productId, product.stock + parseInt(qty));
                 }
             }
         }
 
-        async function updateProductStock(productId, newStock) {
+        async function updateProductStock(password, productId, newStock) {
             showLoading();
             try {
                 await fetch(`${API_BASE}/api/products/${productId}`, { 
                     method: 'PUT', 
                     headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ stock: newStock })
+                    body: JSON.stringify({ password, stock: newStock })
                 });
                 showToast('স্টক আপডেট করা হয়েছে', 'success');
                 await load();
@@ -2120,12 +2173,13 @@
         }
 
         // CRUD Operations
-        async function save() {
+        async function save(password) {
             if (!validateProductInput()) return;
             
             showLoading();
             try {
                 const payload = { 
+                    password,
                     barcode: document.getElementById('barcode').value,
                     name: document.getElementById('name').value, 
                     category: document.getElementById('category').value,
@@ -2191,9 +2245,10 @@
             document.getElementById('expiryDate').value = '';
         }
 
-        async function updateProduct() {
+        async function updateProduct(password) {
             const id = document.getElementById('editId').value;
             const payload = {
+                password,
                 name: document.getElementById('editName').value,
                 costPrice: Number(document.getElementById('editCost').value),
                 price: Number(document.getElementById('editPrice').value),
@@ -2221,11 +2276,15 @@
             }
         }
 
-        async function deleteProduct(id, name) {
+        async function deleteProduct(password, id, name) {
             if (confirm(`আপনি কি "${name}" পণ্যটি ডিলিট করতে চান?`)) {
                 showLoading();
                 try {
-                    await fetch(`${API_BASE}/api/products/${id}`, { method: 'DELETE' });
+                    await fetch(`${API_BASE}/api/products/${id}`, { 
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password })
+                    });
                     showToast('পণ্য ডিলিট করা হয়েছে', 'success');
                     await load();
                     
@@ -2237,7 +2296,7 @@
             }
         }
 
-        function openEditModal(id) {
+        function openEditModal(password, id) {
             const product = allProducts.find(p => p._id === id);
             if (product) {
                 document.getElementById('editId').value = id;
@@ -2251,7 +2310,7 @@
         }
 
         // Expense Management
-        async function addExpense() {
+        async function addExpense(password) {
             let title = document.getElementById('expTitle').value;
             let amount = Number(document.getElementById('expAmount').value);
             let category = document.getElementById('expCategory').value;
@@ -2269,6 +2328,7 @@
             showLoading();
             try {
                 const expenseData = { 
+                    password,
                     title, 
                     amount, 
                     category,
@@ -2296,7 +2356,7 @@
         }
 
         // Due Payment
-        async function payDue(saleId, currentDue) {
+        async function payDue(password, saleId, currentDue) {
             let amount = prompt(`বাকি আছে ${currentDue}৳। কত টাকা জমা নিতে চান?`, currentDue);
             if(amount && !isNaN(amount) && amount > 0) {
                 showLoading();
@@ -2304,7 +2364,7 @@
                     await fetch(`${API_BASE}/api/sales/pay-due/${saleId}`, { 
                         method: 'POST', 
                         headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({ paidAmount: Number(amount) })
+                        body: JSON.stringify({ password, paidAmount: Number(amount) })
                     });
                     
                     showToast(`${amount}৳ জমা নেয়া হয়েছে`, 'success');
@@ -2359,7 +2419,7 @@
             }
         }
 
-        async function clearLogs() {
+        async function clearLogs(password) {
             if(confirm('সব লগ মুছে ফেলতে চান?')) {
                 showLoading();
                 try {
@@ -2548,7 +2608,7 @@
                 
                 const list = document.getElementById('backupList');
                 list.innerHTML = backups.map(b => `
-                    <a href="#" class="list-group-item list-group-item-action" onclick="selectBackup('${b._id}')">
+                    <a href="#" class="list-group-item list-group-item-action" onclick="checkAuth(selectBackup, '${b._id}')">
                         <div class="d-flex w-100 justify-content-between">
                             <h6 class="mb-1">${new Date(b.date).toLocaleString('bn-BD')}</h6>
                             <small>${(b.size / 1024).toFixed(2)} KB</small>
@@ -2561,10 +2621,14 @@
             }
         }
 
-        async function createBackup() {
+        async function createBackup(password) {
             showLoading();
             try {
-                await fetch(`${API_BASE}/api/backup`, { method: 'POST' });
+                await fetch(`${API_BASE}/api/backup`, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
                 showToast('ব্যাকআপ তৈরি হয়েছে', 'success');
                 loadBackupList();
             } catch (error) {
@@ -2574,10 +2638,9 @@
             }
         }
 
-        async function restoreBackup() {
+        async function restoreBackup(password) {
             showLoading();
             try {
-                // This would need a selected backup ID
                 showToast('পুনরুদ্ধার ফিচার ব্যাকআপ সিলেক্ট করুন', 'info');
             } catch (error) {
                 showToast('পুনরুদ্ধার করতে সমস্যা হয়েছে', 'error');
@@ -2586,20 +2649,19 @@
             }
         }
 
-        function selectBackup(backupId) {
-            // Handle backup selection for restore
+        function selectBackup(password, backupId) {
             if (confirm('এই ব্যাকআপ থেকে ডাটা পুনরুদ্ধার করতে চান?')) {
-                restoreFromBackup(backupId);
+                restoreFromBackup(password, backupId);
             }
         }
 
-        async function restoreFromBackup(backupId) {
+        async function restoreFromBackup(password, backupId) {
             showLoading();
             try {
                 await fetch(`${API_BASE}/api/restore`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ backupId })
+                    body: JSON.stringify({ password, backupId })
                 });
                 showToast('ডাটা পুনরুদ্ধার করা হয়েছে', 'success');
                 await load();
@@ -2615,34 +2677,36 @@
             const file = event.target.files[0];
             if (!file) return;
             
-            showLoading();
-            const reader = new FileReader();
-            
-            reader.onload = async function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    
-                    if (data.products) {
-                        for (let product of data.products) {
-                            await fetch(`${API_BASE}/api/products`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(product)
-                            });
+            checkAuth(async function(password) {
+                showLoading();
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        if (data.products) {
+                            for (let product of data.products) {
+                                await fetch(`${API_BASE}/api/products`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ password, ...product })
+                                });
+                            }
                         }
+                        
+                        showToast('ডাটা ইমপোর্ট করা হয়েছে', 'success');
+                        await load();
+                        
+                    } catch (error) {
+                        showToast('ফাইল প্রসেস করতে সমস্যা হয়েছে', 'error');
+                    } finally {
+                        hideLoading();
                     }
-                    
-                    showToast('ডাটা ইমপোর্ট করা হয়েছে', 'success');
-                    await load();
-                    
-                } catch (error) {
-                    showToast('ফাইল প্রসেস করতে সমস্যা হয়েছে', 'error');
-                } finally {
-                    hideLoading();
-                }
-            };
-            
-            reader.readAsText(file);
+                };
+                
+                reader.readAsText(file);
+            });
         }
 
         // UI Functions
