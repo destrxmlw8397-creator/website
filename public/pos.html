@@ -2,8 +2,8 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>🛍️ Morsalin Supershop POS - প্রফেশনাল সেলস কাউন্টার</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛒 সুপারশপ POS প্রো - অনলাইন কাউন্টার</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,7 +19,7 @@
 
         body {
             font-family: 'Hind Siliguri', 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 10px;
         }
@@ -38,7 +38,7 @@
 
         /* Products Panel */
         .products-panel {
-            background: #f1f5f9;
+            background: #f8fafc;
             height: 100%;
             overflow-y: auto;
             padding: 20px;
@@ -73,8 +73,8 @@
         }
 
         .search-box input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 4px rgba(59,130,246,0.2);
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.2);
             outline: none;
         }
 
@@ -116,11 +116,11 @@
 
         .category-tab:hover,
         .category-tab.active {
-            background: #3b82f6;
+            background: #667eea;
             color: white;
-            border-color: #3b82f6;
+            border-color: #667eea;
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(59,130,246,0.3);
+            box-shadow: 0 8px 16px rgba(102,126,234,0.3);
         }
 
         /* Quick Action Buttons */
@@ -149,7 +149,7 @@
 
         .btn-clear { background: #ef4444; color: white; }
         .btn-discount { background: #f59e0b; color: white; }
-        .btn-hold { background: #3b82f6; color: white; }
+        .btn-hold { background: #667eea; color: white; }
 
         .quick-action-btn:hover {
             transform: translateY(-3px);
@@ -173,8 +173,8 @@
 
         .product-card:hover {
             transform: translateY(-6px);
-            border-color: #3b82f6;
-            box-shadow: 0 16px 28px rgba(59,130,246,0.2);
+            border-color: #667eea;
+            box-shadow: 0 16px 28px rgba(102,126,234,0.2);
         }
 
         .product-card.disabled {
@@ -199,18 +199,6 @@
         .stock-medium { background: #f59e0b; color: white; }
         .stock-low { background: #ef4444; color: white; }
 
-        .expiry-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            background: #ef4444;
-            color: white;
-        }
-
         /* Cart Panel */
         .cart-panel {
             background: white;
@@ -223,7 +211,7 @@
 
         .cart-header {
             padding-bottom: 18px;
-            border-bottom: 3px solid #3b82f6;
+            border-bottom: 3px solid #667eea;
         }
 
         .cart-header h4 {
@@ -244,7 +232,7 @@
             padding: 14px;
             margin-bottom: 10px;
             animation: slideIn 0.3s ease;
-            border-left: 5px solid #3b82f6;
+            border-left: 5px solid #667eea;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
@@ -271,7 +259,7 @@
         }
 
         .held-carts-section .btn-info {
-            background: #3b82f6;
+            background: #667eea;
             color: white;
             border: none;
             padding: 12px;
@@ -283,9 +271,9 @@
         }
 
         .held-carts-section .btn-info:hover {
-            background: #2563eb;
+            background: #5a67d8;
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(59,130,246,0.4);
+            box-shadow: 0 8px 20px rgba(102,126,234,0.4);
         }
 
         #heldCartsList {
@@ -303,7 +291,7 @@
             padding: 15px;
             border-radius: 12px;
             margin-bottom: 10px;
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #667eea;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             transition: all 0.2s;
         }
@@ -346,56 +334,9 @@
 
         .payment-method:hover,
         .payment-method.active {
-            background: #3b82f6;
-            border-color: #3b82f6;
+            background: #667eea;
+            border-color: #667eea;
             transform: scale(1.02);
-        }
-
-        /* Password Modal */
-        .password-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            backdrop-filter: blur(5px);
-        }
-
-        .password-modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 30px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            animation: modalPop 0.3s ease;
-        }
-
-        @keyframes modalPop {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .password-input {
-            border: 2px solid #e2e8f0;
-            border-radius: 50px;
-            padding: 15px 20px;
-            font-size: 1.2rem;
-            width: 100%;
-            margin: 20px 0;
-            text-align: center;
-            letter-spacing: 5px;
-        }
-
-        .password-input:focus {
-            border-color: #3b82f6;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
         }
 
         /* Toast Notification */
@@ -421,7 +362,7 @@
         .toast-success { background: #10b981; }
         .toast-error { background: #ef4444; }
         .toast-warning { background: #f59e0b; }
-        .toast-info { background: #3b82f6; }
+        .toast-info { background: #667eea; }
 
         @keyframes slideInDown {
             from { transform: translateY(-100%); opacity: 0; }
@@ -515,76 +456,36 @@
         }
         .footer-banner { background-color: #e67e22; color: white; text-align: center; padding: 8px; margin: 15px; border-radius: 50px; font-weight: bold; }
 
-        /* Loading Spinner */
-        .loading-spinner {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255,255,255,0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10001;
-            backdrop-filter: blur(3px);
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3b82f6;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         /* Responsive */
         @media (max-width: 768px) {
             .row.g-0 { flex-direction: column; }
             .col-md-7, .col-md-5 { width: 100%; }
             .cart-panel { margin-top: 20px; border-left: none; }
-            .product-card { margin-bottom: 10px; }
             .shop-name-red { font-size: 35px; }
-            .memo-no-badge, .cash-memo-badge { height: 80px; font-size: 12px; }
-            .quick-actions { gap: 8px; }
         }
     </style>
 </head>
 <body>
 
-<!-- Loading Spinner -->
-<div id="loadingSpinner" class="loading-spinner" style="display: none;">
-    <div class="spinner"></div>
-</div>
-
-<!-- Password Modal -->
-<div id="passwordModal" class="password-modal" style="display: none;">
-    <div class="password-modal-content">
-        <i class="bi bi-shield-lock" style="font-size: 4rem; color: #3b82f6;"></i>
-        <h4 class="mt-3 mb-2">পাসওয়ার্ড প্রয়োজন</h4>
-        <p class="text-muted mb-4">সুরক্ষিত অ্যাকশনের জন্য পাসওয়ার্ড দিন</p>
-        <input type="password" id="passwordInput" class="password-input" placeholder="****" maxlength="10" autocomplete="off">
-        <div class="d-flex gap-2">
-            <button class="btn btn-secondary w-50" onclick="closePasswordModal()">বাতিল</button>
-            <button class="btn btn-primary w-50" onclick="submitPassword()">নিশ্চিত</button>
-        </div>
-    </div>
-</div>
-
 <div class="pos-container">
     <div class="row g-0 h-100">
         <!-- Products Panel -->
         <div class="col-md-7 products-panel" id="productsPanel">
+            <!-- Header with sync status -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>পণ্য তালিকা</h5>
+                <div>
+                    <span class="badge bg-success" id="syncStatus"><i class="bi bi-wifi"></i> অনলাইন</span>
+                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="loadProducts()">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </button>
+                </div>
+            </div>
+
             <!-- Search Box -->
             <div class="search-box">
                 <i class="bi bi-search"></i>
-                <input type="text" id="search" placeholder="🔍 বারকোড স্ক্যান বা নাম লিখুন..." autofocus>
+                <input type="text" id="search" placeholder="🔍 বারকোড স্ক্যান / নাম লিখুন..." autofocus>
             </div>
 
             <!-- Category Tabs -->
@@ -606,7 +507,14 @@
             </div>
 
             <!-- Products Grid -->
-            <div class="row g-3" id="productList"></div>
+            <div class="row g-3" id="productList">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">পণ্য লোড হচ্ছে...</p>
+                </div>
+            </div>
         </div>
 
         <!-- Cart Panel -->
@@ -618,7 +526,9 @@
                 <input type="text" id="customerAddress" class="form-control mb-3" placeholder="🏠 ঠিকানা">
             </div>
 
-            <div class="cart-items" id="cartItems"></div>
+            <div class="cart-items" id="cartItems">
+                <p class="text-muted text-center py-5">🛒 কার্ট খালি</p>
+            </div>
 
             <!-- Held Carts Section -->
             <div class="held-carts-section">
@@ -652,15 +562,6 @@
                     <div class="payment-method" onclick="setPaymentMethod('card')"><i class="bi bi-credit-card"></i> কার্ড</div>
                 </div>
 
-                <div id="bkashFields" style="display: none;">
-                    <input type="text" class="form-control mb-2" placeholder="📱 বিকাশ নম্বর" id="bkashNumber">
-                    <input type="text" class="form-control mb-2" placeholder="🔢 ট্রানজেকশন আইডি" id="bkashTrxID">
-                </div>
-                <div id="cardFields" style="display: none;">
-                    <input type="text" class="form-control mb-2" placeholder="💳 কার্ড নম্বর" id="cardNumber">
-                    <input type="text" class="form-control mb-2" placeholder="👤 কার্ডের নাম" id="cardName">
-                </div>
-
                 <div class="row g-2 mt-3">
                     <div class="col-6">
                         <input type="number" id="paidAmount" class="form-control" placeholder="💰 পরিশোধ" onkeyup="calculateChange()">
@@ -670,17 +571,7 @@
                     </div>
                 </div>
 
-                <!-- Sale Buttons -->
-                <div class="d-flex gap-2 mt-3">
-                    <button class="btn btn-success w-50 py-3 fw-bold fs-5" onclick="processSale()">
-                        <i class="bi bi-check2-circle"></i> সেল (বাকি)
-                    </button>
-                    <button class="btn btn-info w-50 py-3 fw-bold fs-5" onclick="processFullPayment()">
-                        <i class="bi bi-cash-stack"></i> পূর্ণ পরিশোধ
-                    </button>
-                </div>
-                
-                <button class="btn btn-primary w-100 mt-2 py-2 fw-bold" onclick="processPayment()">
+                <button class="btn btn-success w-100 mt-3 py-3 fw-bold fs-5" onclick="processPayment()">
                     <i class="bi bi-printer-fill me-2"></i> পেমেন্ট সম্পন্ন ও PDF
                 </button>
                 
@@ -697,10 +588,10 @@
     <div class="memo-header">
         <div class="memo-no-badge"><span>মেমো নং- <span id="memoNoDisplay">1</span></span></div>
         <div class="cash-memo-badge">ক্যাশ মেমো</div>
-        <h1 class="shop-name-red">MORSALIN SUPERSHOP</h1>
-        <p style="margin:0; font-weight:bold;">প্রোঃ মোঃ মোর্শালিন | <span class="contact-blue">০১৭৪০-৮৮১৮৪৩, ০১৭১৩-৭২৪০৯৩</span></p>
-        <div style="font-size: 10px; padding: 5px 50px;">সকল প্রকার পণ্য পাইকারী ও খুচরা বিক্রয়</div>
-        <div class="address-purple">রিনা ভিলা হোল্ডিং-৫৬/১ মালোপাড়া, সাহেব বাজার, রাজশাহী।</div>
+        <h1 class="shop-name-red">সুপারশপ প্রো</h1>
+        <p style="margin:0; font-weight:bold;">মোঃ মোরসালিন | <span class="contact-blue">০১৭৪০-৮৮১৮৪৩, ০১৭১৩-৭২৪০৯৩</span></p>
+        <div style="font-size: 10px; padding: 5px 50px;">সকল প্রকার পণ্যের পাইকারী ও খুচরা বিক্রয়</div>
+        <div class="address-purple">মালোপাড়া, সাহেব বাজার, রাজশাহী।</div>
     </div>
 
     <div class="cust-info-grid">
@@ -729,27 +620,12 @@
                     <td style="background-color: #d1d9ff; border: 1px solid #000;">মোট টাকা</td>
                     <td id="invTotalCell" style="background-color: #ffccbc; border: 1px solid #000;"></td>
                 </tr>
-                <tr>
-                    <td colspan="3" style="border:none;"></td>
-                    <td style="background-color: #d1d9ff; border: 1px solid #000;">ডিসকাউন্ট</td>
-                    <td id="invDiscountCell" style="background-color: #ffccbc; border: 1px solid #000;">0৳</td>
-                </tr>
-                <tr>
-                    <td colspan="3" style="border:none;"></td>
-                    <td style="background-color: #d1d9ff; border: 1px solid #000;">পেইড</td>
-                    <td id="invPaidCell" style="background-color: #ffccbc; border: 1px solid #000;"></td>
-                </tr>
-                <tr>
-                    <td colspan="3" style="border:none;"></td>
-                    <td style="background-color: #d1d9ff; border: 1px solid #000;">বাকি</td>
-                    <td id="invDueCell" style="background-color: #ffccbc; border: 1px solid #000;"></td>
-                </tr>
             </tfoot>
         </table>
     </div>
 
-    <div style="padding: 10px; font-weight: bold; text-align: center;">
-        <p>পেমেন্ট মেথড: <span id="invPaymentMethod"></span></p>
+    <div style="padding: 10px; font-weight: bold;">
+        <p>পেইড: <span id="invPaid"></span> | বাকি: <span id="invDue"></span></p>
     </div>
 
     <div class="footer-banner">{ যে কোন স্থানে মাল ডেলিভারী দেওয়া হয় }</div>
@@ -770,79 +646,7 @@
     let currentMemoNo = localStorage.getItem('lastMemoNo') ? parseInt(localStorage.getItem('lastMemoNo')) + 1 : 1;
     let currentDiscount = 0;
     let paymentMethod = 'cash';
-    let pendingAction = null;
-    let pendingActionArgs = [];
-    let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
-
-    // API Base URL
-    const API_BASE = '';
-
-    // ==================== LOADING SPINNER ====================
-    function showLoading() {
-        document.getElementById('loadingSpinner').style.display = 'flex';
-    }
-
-    function hideLoading() {
-        document.getElementById('loadingSpinner').style.display = 'none';
-    }
-
-    // ==================== PASSWORD PROTECTION ====================
-    function checkAuth(callback, ...args) {
-        pendingAction = callback;
-        pendingActionArgs = args;
-        document.getElementById('passwordModal').style.display = 'flex';
-        document.getElementById('passwordInput').value = '';
-        document.getElementById('passwordInput').focus();
-    }
-
-    function closePasswordModal() {
-        document.getElementById('passwordModal').style.display = 'none';
-        pendingAction = null;
-        pendingActionArgs = [];
-    }
-
-    async function submitPassword() {
-        const password = document.getElementById('passwordInput').value;
-        if (!password) {
-            showToast('পাসওয়ার্ড দিন', 'warning');
-            return;
-        }
-
-        showLoading();
-        try {
-            const response = await fetch(`${API_BASE}/api/verify-password`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password })
-            });
-            
-            const data = await response.json();
-            
-            if (data.valid) {
-                closePasswordModal();
-                if (pendingAction) {
-                    pendingAction(...pendingActionArgs);
-                }
-                showToast('✅ পাসওয়ার্ড সঠিক', 'success');
-            } else {
-                showToast('❌ ভুল পাসওয়ার্ড', 'error');
-                document.getElementById('passwordInput').value = '';
-                document.getElementById('passwordInput').focus();
-            }
-        } catch (error) {
-            console.error('Auth error:', error);
-            showToast('পাসওয়ার্ড ভেরিফাই করতে সমস্যা', 'error');
-        } finally {
-            hideLoading();
-        }
-    }
-
-    // Enter key in password input
-    document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            submitPassword();
-        }
-    });
+    let isOffline = false;
 
     // ==================== TOAST NOTIFICATION ====================
     function showToast(message, type = 'info') {
@@ -857,59 +661,70 @@
         }, 2500);
     }
 
+    // ==================== UPDATE SYNC STATUS ====================
+    function updateSyncStatus() {
+        const statusEl = document.getElementById('syncStatus');
+        if (navigator.onLine) {
+            statusEl.className = 'badge bg-success';
+            statusEl.innerHTML = '<i class="bi bi-wifi"></i> অনলাইন';
+            if (isOffline) {
+                isOffline = false;
+                loadProducts(); // Auto-reload when back online
+            }
+        } else {
+            statusEl.className = 'badge bg-warning';
+            statusEl.innerHTML = '<i class="bi bi-wifi-off"></i> অফলাইন';
+            isOffline = true;
+        }
+    }
+
+    window.addEventListener('online', updateSyncStatus);
+    window.addEventListener('offline', updateSyncStatus);
+    setInterval(updateSyncStatus, 5000);
+
     // ==================== LOAD PRODUCTS FROM DATABASE ====================
     async function loadProducts() {
-        showLoading();
+        document.getElementById('productList').innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">পণ্য লোড হচ্ছে...</p>
+            </div>
+        `;
+
         try {
-            const res = await fetch(`${API_BASE}/api/products`);
+            const res = await fetch('/api/products');
             if (!res.ok) throw new Error('Network response failed');
             products = await res.json();
-            
-            // Check for expired products
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            products.forEach(p => {
-                if (p.expiryDate) {
-                    const expiry = new Date(p.expiryDate);
-                    expiry.setHours(0, 0, 0, 0);
-                    p.isExpired = expiry < today;
-                    p.daysUntilExpiry = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
-                } else {
-                    p.isExpired = false;
-                    p.daysUntilExpiry = null;
-                }
-            });
-            
             renderProducts();
             loadCategories();
             showToast('✅ পণ্য লোড হয়েছে', 'success');
         } catch (error) {
             console.error('Error loading products:', error);
-            showToast('❌ সার্ভার সংযোগ ব্যর্থ! লোকাল ডাটা লোড হচ্ছে', 'warning');
+            showToast('❌ সার্ভার সংযোগ ব্যর্থ! লোকাল ক্যাশে লোড হচ্ছে', 'warning');
             
-            // Local dummy data as fallback
-            products = [
-                { _id: '1', name: 'বাসমতি চাল (৫কেজি)', category: 'চাল', price: 650, costPrice: 600, stock: 25, barcode: '123456' },
-                { _id: '2', name: 'মুসুর ডাল (১কেজি)', category: 'ডাল', price: 140, costPrice: 120, stock: 18, barcode: '123457' },
-                { _id: '3', name: 'সয়াবিন তেল (৫লি)', category: 'তেল', price: 850, costPrice: 800, stock: 10, barcode: '123458' },
-                { _id: '4', name: 'আকিজ নুন (১কেজি)', category: 'মশলা', price: 45, costPrice: 35, stock: 50, barcode: '123459' },
-                { _id: '5', name: 'চিনি (১কেজি)', category: 'চিনি', price: 130, costPrice: 110, stock: 8, barcode: '123460' },
-                { _id: '6', name: 'ফ্রেশ ডিম (১২পিস)', category: 'দুগ্ধ', price: 140, costPrice: 120, stock: 30, barcode: '123461' },
-                { _id: '7', name: 'টিফিন বিস্কুট', category: 'বিস্কুট', price: 25, costPrice: 20, stock: 100, barcode: '123462' },
-                { _id: '8', name: 'ফ্রুটিকা জুস', category: 'পানীয়', price: 70, costPrice: 60, stock: 45, barcode: '123463' }
-            ];
-            
-            products.forEach(p => {
-                p.isExpired = false;
-                p.daysUntilExpiry = null;
-            });
-            
-            renderProducts();
-            loadCategories();
-        } finally {
-            hideLoading();
+            // Try to load from localStorage cache
+            const cachedProducts = localStorage.getItem('cachedProducts');
+            if (cachedProducts) {
+                products = JSON.parse(cachedProducts);
+                renderProducts();
+                loadCategories();
+            } else {
+                // Fallback demo data
+                products = [
+                    { _id: '1', name: 'বাসমতি চাল (৫কেজি)', category: 'চাল', price: 650, costPrice: 600, stock: 25, barcode: '123456' },
+                    { _id: '2', name: 'মুসুর ডাল (১কেজি)', category: 'ডাল', price: 140, costPrice: 120, stock: 18, barcode: '123457' },
+                    { _id: '3', name: 'সয়াবিন তেল (৫লি)', category: 'তেল', price: 850, costPrice: 800, stock: 10, barcode: '123458' },
+                    { _id: '4', name: 'আকিজ নুন (১কেজি)', category: 'মশলা', price: 45, costPrice: 35, stock: 50, barcode: '123459' },
+                    { _id: '5', name: 'চিনি (১কেজি)', category: 'চিনি', price: 130, costPrice: 110, stock: 8, barcode: '123460' },
+                    { _id: '6', name: 'ফ্রেশ ডিম (১২পিস)', category: 'দুগ্ধ', price: 140, costPrice: 120, stock: 30, barcode: '123461' },
+                    { _id: '7', name: 'টিফিন বিস্কুট', category: 'বিস্কুট', price: 25, costPrice: 20, stock: 100, barcode: '123462' },
+                    { _id: '8', name: 'ফ্রুটিকা জুস', category: 'পানীয়', price: 70, costPrice: 60, stock: 45, barcode: '123463' }
+                ];
+                renderProducts();
+                loadCategories();
+            }
         }
+        
         displayHeldCarts();
     }
 
@@ -917,28 +732,29 @@
     function renderProducts(productList = products) {
         const list = document.getElementById('productList');
         if (!list) return;
+        
+        // Cache products
+        localStorage.setItem('cachedProducts', JSON.stringify(products));
+        
+        if (productList.length === 0) {
+            list.innerHTML = '<div class="col-12 text-center py-5"><i class="bi bi-emoji-frown display-1"></i><p class="mt-3">কোনো পণ্য পাওয়া যায়নি</p></div>';
+            return;
+        }
+        
         list.innerHTML = '';
         
         productList.forEach(p => {
             const stockClass = p.stock > 20 ? 'stock-high' : p.stock > 10 ? 'stock-medium' : 'stock-low';
-            const disabled = p.stock <= 0 || p.isExpired ? 'disabled' : '';
-            
-            let expiryBadge = '';
-            if (p.isExpired) {
-                expiryBadge = '<div class="expiry-badge">⛔ মেয়াদোত্তীর্ণ</div>';
-            } else if (p.daysUntilExpiry && p.daysUntilExpiry <= 7) {
-                expiryBadge = `<div class="expiry-badge" style="background: #f59e0b;">⚠️ ${p.daysUntilExpiry} দিন বাকি</div>`;
-            }
+            const disabled = p.stock <= 0 ? 'disabled' : '';
             
             list.innerHTML += `
                 <div class="col-6 col-lg-4">
                     <div class="product-card ${disabled}" onclick="addToCart('${p._id}')">
-                        ${expiryBadge}
                         <span class="stock-badge ${stockClass}">📦 ${p.stock}</span>
                         <h6 class="mt-3 fw-bold">${p.name}</h6>
                         <div class="d-flex justify-content-between align-items-center mt-2">
                             <span class="text-primary fw-bold fs-5">${p.price}৳</span>
-                            <small class="text-success fw-bold">+${(p.price - (p.costPrice || 0))}৳</small>
+                            <small class="text-success fw-bold">+${Math.round(p.price - (p.costPrice || 0))}৳</small>
                         </div>
                         ${p.barcode ? `<small class="text-muted d-block mt-1">🔖 ${p.barcode}</small>` : ''}
                     </div>
@@ -959,11 +775,7 @@
         }
         
         categories.forEach(cat => {
-            const tab = document.createElement('div');
-            tab.className = 'category-tab';
-            tab.innerText = cat;
-            tab.setAttribute('onclick', `filterCategory('${cat}')`);
-            tabs.appendChild(tab);
+            tabs.innerHTML += `<div class="category-tab" onclick="filterCategory('${cat}')">${cat}</div>`;
         });
     }
 
@@ -983,11 +795,7 @@
         if (searchTerm.length > 0) {
             const barcodeMatch = products.find(p => p.barcode && p.barcode.toLowerCase() === searchTerm);
             if (barcodeMatch) {
-                if (barcodeMatch.stock > 0 && !barcodeMatch.isExpired) {
-                    addToCart(barcodeMatch._id);
-                } else {
-                    showToast('❌ পণ্যটি বিক্রয়যোগ্য নয়', 'error');
-                }
+                addToCart(barcodeMatch._id);
                 this.value = '';
                 this.classList.add('scanner-active');
                 setTimeout(() => this.classList.remove('scanner-active'), 500);
@@ -1015,10 +823,6 @@
             showToast('❌ পণ্যটি স্টকে নেই!', 'error');
             return;
         }
-        if (product.isExpired) {
-            showToast('❌ মেয়াদোত্তীর্ণ পণ্য বিক্রয়যোগ্য নয়!', 'error');
-            return;
-        }
         
         const existingItem = cart.find(i => i._id === productId);
         if (existingItem) {
@@ -1030,8 +834,7 @@
         } else {
             cart.push({ 
                 ...product, 
-                qty: 1,
-                originalPrice: product.price
+                qty: 1
             });
         }
         
@@ -1046,6 +849,15 @@
         let subtotal = 0;
         
         if (!cartDiv) return;
+        
+        if (cart.length === 0) {
+            cartDiv.innerHTML = '<p class="text-muted text-center py-5">🛒 কার্ট খালি</p>';
+            cartCount.innerText = '0';
+            document.getElementById('subtotal').innerText = '0৳';
+            document.getElementById('total').innerText = '0৳';
+            return;
+        }
+        
         cartDiv.innerHTML = '';
         
         cart.forEach(item => {
@@ -1058,8 +870,6 @@
                         <div>
                             <h6 class="mb-1 fw-bold">${item.name}</h6>
                             <small class="text-muted">${item.price}৳ × ${item.qty}</small>
-                            ${item.daysUntilExpiry && item.daysUntilExpiry <= 7 ? 
-                                `<br><small class="badge bg-warning text-dark">⚠️ ${item.daysUntilExpiry} দিন বাকি</small>` : ''}
                         </div>
                         <div class="text-end">
                             <div class="fw-bold text-primary">${total}৳</div>
@@ -1141,7 +951,7 @@
             updateTotal(subtotal);
             showToast(`💰 ${discount}% ডিসকাউন্ট প্রয়োগ হয়েছে`, 'success');
         } else {
-            showToast('❌ সঠিক discount দিন (০-১০০)', 'error');
+            showToast('❌ ভ্যালিড ডিসকাউন্ট দিন (০-১০০)', 'error');
         }
     }
 
@@ -1167,8 +977,6 @@
         paymentMethod = method;
         document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('active'));
         event.target.classList.add('active');
-        document.getElementById('bkashFields').style.display = method === 'bkash' ? 'block' : 'none';
-        document.getElementById('cardFields').style.display = method === 'card' ? 'block' : 'none';
     }
 
     // ==================== HOLD CART ====================
@@ -1182,18 +990,9 @@
         
         heldCarts.push({
             id: Date.now(),
-            cart: cart.map(item => ({
-                _id: item._id,
-                name: item.name,
-                price: item.price,
-                qty: item.qty,
-                category: item.category,
-                costPrice: item.costPrice,
-                originalPrice: item.originalPrice
-            })),
+            cart: [...cart],
             customerName: document.getElementById('customerName').value || 'নাম নেই',
             customerMobile: document.getElementById('customerMobile').value || 'N/A',
-            customerAddress: document.getElementById('customerAddress').value || 'N/A',
             discount: currentDiscount,
             time: new Date().toLocaleString('bn-BD'),
             timestamp: Date.now()
@@ -1273,40 +1072,11 @@
             }
         }
         
-        // Verify products are still available
-        const unavailableItems = [];
-        heldCart.cart = heldCart.cart.filter(item => {
-            const product = products.find(p => p._id === item._id);
-            if (!product) {
-                unavailableItems.push(item.name);
-                return false;
-            }
-            if (product.stock < item.qty) {
-                showToast(`⚠️ ${item.name} এর পর্যাপ্ত স্টক নেই`, 'warning');
-                return false;
-            }
-            if (product.isExpired) {
-                showToast(`⚠️ ${item.name} মেয়াদোত্তীর্ণ`, 'warning');
-                return false;
-            }
-            return true;
-        });
-        
-        if (unavailableItems.length > 0) {
-            showToast(`❌ কিছু পণ্য আর নেই: ${unavailableItems.join(', ')}`, 'error');
-        }
-        
-        if (heldCart.cart.length === 0) {
-            showToast('❌ কোনো পণ্য লোড করা যায়নি', 'error');
-            return;
-        }
-        
-        cart = heldCart.cart;
+        cart = [...heldCart.cart];
         currentDiscount = heldCart.discount || 0;
         
         document.getElementById('customerName').value = heldCart.customerName || '';
         document.getElementById('customerMobile').value = heldCart.customerMobile || '';
-        document.getElementById('customerAddress').value = heldCart.customerAddress || '';
         
         if (currentDiscount > 0) {
             document.getElementById('discountRow').style.display = 'flex';
@@ -1346,61 +1116,8 @@
         }
     }
 
-    // ==================== SALE FUNCTIONS ====================
-    
-    // Process Sale with due
-    function processSale() {
-        if (cart.length === 0) {
-            showToast('❌ কার্ট খালি!', 'error');
-            return;
-        }
-        
-        const total = parseFloat(document.getElementById('total').innerText);
-        const paid = parseFloat(document.getElementById('paidAmount').value) || 0;
-        const customerName = document.getElementById('customerName').value || 'নগদ';
-        const customerMobile = document.getElementById('customerMobile').value || 'N/A';
-        const customerAddress = document.getElementById('customerAddress').value || 'N/A';
-        
-        if (paid < 0) {
-            showToast('❌ সঠিক পরিমাণ দিন', 'warning');
-            return;
-        }
-        
-        if (paid < total) {
-            const due = total - paid;
-            if (confirm(`⚠️ বাকি থাকবে: ${due.toFixed(2)}৳। কি নিশ্চিত?`)) {
-                checkAuth(function(password) {
-                    performSale(password, customerName, customerMobile, customerAddress, total, paid, due);
-                });
-            }
-        } else {
-            showToast('পূর্ণ পরিশোধের জন্য "পূর্ণ পরিশোধ" বাটন ব্যবহার করুন', 'info');
-        }
-    }
-
-    // Process Full Payment
-    function processFullPayment() {
-        if (cart.length === 0) {
-            showToast('❌ কার্ট খালি!', 'error');
-            return;
-        }
-        
-        const total = parseFloat(document.getElementById('total').innerText);
-        const customerName = document.getElementById('customerName').value || 'নগদ';
-        const customerMobile = document.getElementById('customerMobile').value || 'N/A';
-        const customerAddress = document.getElementById('customerAddress').value || 'N/A';
-        
-        // Set paid amount to total
-        document.getElementById('paidAmount').value = total;
-        calculateChange();
-        
-        checkAuth(function(password) {
-            performSale(password, customerName, customerMobile, customerAddress, total, total, 0);
-        });
-    }
-
-    // Original process payment (kept for backward compatibility)
-    function processPayment() {
+    // ==================== PROCESS PAYMENT ====================
+    async function processPayment() {
         if (cart.length === 0) {
             showToast('❌ কার্ট খালি!', 'error');
             return;
@@ -1421,80 +1138,36 @@
             return;
         }
         
-        // Check if any product is expired
-        const expiredInCart = cart.filter(item => item.isExpired);
-        if (expiredInCart.length > 0) {
-            showToast('❌ মেয়াদোত্তীর্ণ পণ্য বিক্রয়যোগ্য নয়', 'error');
-            return;
-        }
+        showToast('🔄 পেমেন্ট প্রসেসিং...', 'info');
         
-        // Check stock availability again
-        const stockIssues = cart.filter(item => {
-            const product = products.find(p => p._id === item._id);
-            return !product || product.stock < item.qty;
-        });
-        
-        if (stockIssues.length > 0) {
-            showToast('⚠️ কিছু পণ্যের স্টক পরিবর্তিত হয়েছে', 'warning');
-            return;
-        }
-        
-        checkAuth(function(password) {
-            performSale(password, customerName, customerMobile, customerAddress, total, paid, total - paid);
-        });
-    }
-
-    async function performSale(password, customerName, customerMobile, customerAddress, total, paid, due) {
-        showLoading();
         try {
-            // Calculate total cost for profit calculation
-            let totalCost = 0;
-            cart.forEach(item => {
-                totalCost += (item.costPrice || 0) * item.qty;
+            // API call to server
+            const response = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    cart: cart.map(item => ({
+                        _id: item._id,
+                        name: item.name,
+                        price: item.price,
+                        qty: item.qty,
+                        category: item.category
+                    })),
+                    customerName, 
+                    customerMobile, 
+                    totalAmount: total, 
+                    paidAmount: paid,
+                    discount: currentDiscount,
+                    paymentMethod
+                })
             });
             
-            const profit = total - totalCost;
-            
-            // Prepare cart data for API
-            const cartData = cart.map(item => ({
-                _id: item._id,
-                name: item.name,
-                price: item.price,
-                qty: item.qty,
-                category: item.category,
-                costPrice: item.costPrice || 0
-            }));
-            
-            // Try to save to server
-            let serverSuccess = false;
-            try {
-                const response = await fetch(`${API_BASE}/api/checkout`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        password,
-                        cart: cartData,
-                        customerName, 
-                        customerMobile, 
-                        customerAddress,
-                        totalAmount: total, 
-                        paidAmount: paid,
-                        dueAmount: due,
-                        discount: currentDiscount,
-                        profit: profit,
-                        paymentMethod
-                    })
-                });
-                
-                if (response.ok) {
-                    serverSuccess = true;
-                } else {
-                    const errorData = await response.json();
-                    console.error('Server error:', errorData);
-                }
-            } catch (error) {
-                console.error('Server connection error:', error);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Server error');
             }
+            
+            const result = await response.json();
             
             // Update local stock
             cart.forEach(item => {
@@ -1504,46 +1177,42 @@
                 }
             });
             
-            // Save sale to localStorage as backup
-            const saleRecord = {
-                id: Date.now(),
-                memoNo: currentMemoNo,
-                date: new Date().toISOString(),
-                customerName,
-                customerMobile,
-                customerAddress,
-                items: cartData,
-                totalAmount: total,
-                paidAmount: paid,
-                dueAmount: due,
-                discount: currentDiscount,
-                profit: profit,
-                paymentMethod,
-                synced: serverSuccess
-            };
-            
-            salesHistory.push(saleRecord);
-            localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+            // Update cached products
+            localStorage.setItem('cachedProducts', JSON.stringify(products));
             
             // Generate PDF Invoice
-            generatePDF(customerName, customerMobile, customerAddress, total, paid, due);
+            generatePDF(customerName, customerMobile, customerAddress, total, paid);
             
-            if (serverSuccess) {
-                showToast('✅ সেল সফল! সার্ভারে সংরক্ষিত', 'success');
-            } else {
-                showToast('⚠️ সেল সফল! কিন্তু সার্ভার অফলাইন', 'warning');
-            }
+            showToast('✅ পেমেন্ট সফল! PDF তৈরি হচ্ছে...', 'success');
             
         } catch (error) {
-            console.error('Sale error:', error);
-            showToast('❌ সেল প্রক্রিয়ায় সমস্যা হয়েছে', 'error');
-        } finally {
-            hideLoading();
+            console.error('Payment error:', error);
+            showToast('❌ পেমেন্ট প্রক্রিয়ায় সমস্যা হয়েছে: ' + error.message, 'error');
+            
+            // Offline mode - save to localStorage for sync later
+            if (isOffline) {
+                const offlineSales = JSON.parse(localStorage.getItem('offlineSales')) || [];
+                offlineSales.push({
+                    cart: cart,
+                    customerName,
+                    customerMobile,
+                    totalAmount: total,
+                    paidAmount: paid,
+                    discount: currentDiscount,
+                    paymentMethod,
+                    date: new Date().toISOString()
+                });
+                localStorage.setItem('offlineSales', JSON.stringify(offlineSales));
+                
+                // Still generate PDF for offline
+                generatePDF(customerName, customerMobile, customerAddress, total, paid);
+                showToast('📱 অফলাইন মোডে সেভ করা হয়েছে', 'success');
+            }
         }
     }
 
     // ==================== GENERATE PDF ====================
-    function generatePDF(cName, cMobile, cAddress, total, paid, due) {
+    function generatePDF(cName, cMobile, cAddress, total, paid) {
         try {
             // Fill invoice template
             document.getElementById('invCName').innerText = cName;
@@ -1551,8 +1220,6 @@
             document.getElementById('invCAddress').innerText = cAddress;
             document.getElementById('invDate').innerText = new Date().toLocaleDateString('bn-BD');
             document.getElementById('memoNoDisplay').innerText = currentMemoNo;
-            document.getElementById('invPaymentMethod').innerText = paymentMethod === 'cash' ? 'নগদ' : 
-                                                                    paymentMethod === 'bkash' ? 'বিকাশ' : 'কার্ড';
             
             let rows = '';
             cart.forEach((i, idx) => {
@@ -1571,21 +1238,16 @@
             }
 
             document.getElementById('invItems').innerHTML = rows;
-            
-            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-            const discountAmount = (subtotal * currentDiscount) / 100;
-            
             document.getElementById('invTotalCell').innerText = total.toFixed(2) + " ৳";
-            document.getElementById('invDiscountCell').innerText = discountAmount.toFixed(2) + " ৳";
-            document.getElementById('invPaidCell').innerText = paid.toFixed(2) + " ৳";
-            document.getElementById('invDueCell').innerText = due.toFixed(2) + " ৳";
+            document.getElementById('invPaid').innerText = paid.toFixed(2) + " ৳";
+            document.getElementById('invDue').innerText = (total - paid).toFixed(2) + " ৳";
 
             const element = document.getElementById('inv');
             element.style.display = 'block';
 
             const opt = {
                 margin: [0.5, 0.5, 0.5, 0.5],
-                filename: `Morsalin_Memo_${currentMemoNo}.pdf`,
+                filename: `Supershop_Memo_${currentMemoNo}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true, letterRendering: true },
                 jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
@@ -1596,7 +1258,7 @@
                 currentMemoNo++;
                 element.style.display = 'none';
                 
-                // Reset cart after successful sale
+                // Reset cart
                 cart = [];
                 currentDiscount = 0;
                 document.getElementById('discountRow').style.display = 'none';
@@ -1605,12 +1267,8 @@
                 document.getElementById('customerName').value = '';
                 document.getElementById('customerMobile').value = '';
                 document.getElementById('customerAddress').value = '';
-                document.getElementById('bkashNumber').value = '';
-                document.getElementById('bkashTrxID').value = '';
-                document.getElementById('cardNumber').value = '';
-                document.getElementById('cardName').value = '';
                 updateCart();
-                renderProducts();
+                renderProducts(); // Refresh product display
                 
                 showToast('✅ PDF ডাউনলোড হচ্ছে...', 'success');
             }).catch(err => {
@@ -1624,7 +1282,7 @@
         }
     }
 
-    // ==================== CLEAN OLD HELD CARTS (> 24 ঘন্টা) ====================
+    // ==================== CLEAN OLD HELD CARTS ====================
     function cleanOldHeldCarts() {
         try {
             const heldCarts = JSON.parse(localStorage.getItem('heldCarts')) || [];
@@ -1643,23 +1301,45 @@
         }
     }
 
-    // ==================== AUTO REFRESH PRODUCTS ====================
-    setInterval(() => {
-        loadProducts();
-    }, 300000); // Every 5 minutes
+    // ==================== SYNC OFFLINE SALES ====================
+    async function syncOfflineSales() {
+        if (!navigator.onLine) return;
+        
+        const offlineSales = JSON.parse(localStorage.getItem('offlineSales')) || [];
+        if (offlineSales.length === 0) return;
+        
+        showToast(`🔄 ${offlineSales.length} টি অফলাইন সেল সিঙ্ক হচ্ছে...`, 'info');
+        
+        for (const sale of offlineSales) {
+            try {
+                await fetch('/api/checkout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(sale)
+                });
+            } catch (e) {
+                console.error('Sync error:', e);
+            }
+        }
+        
+        localStorage.removeItem('offlineSales');
+        showToast('✅ অফলাইন সেল সিঙ্ক সম্পন্ন', 'success');
+    }
 
     // ==================== INITIALIZATION ====================
     window.onload = () => {
         document.getElementById('memoNoDisplay').innerText = currentMemoNo;
         loadProducts();
+        updateSyncStatus();
+        
+        // Try to sync offline sales
+        syncOfflineSales();
+        
         // Auto-clean old carts every hour
         setInterval(cleanOldHeldCarts, 60 * 60 * 1000);
         
-        // Focus on search box
-        document.getElementById('search').focus();
-        
-        // Load sales history
-        salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
+        // Auto-sync every 5 minutes
+        setInterval(syncOfflineSales, 5 * 60 * 1000);
     };
 </script>
 </body>
