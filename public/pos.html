@@ -877,9 +877,6 @@
                 <input type="text" id="manualBarcode" placeholder="ম্যানুয়ালি বারকোড দিন">
                 <button onclick="processManualBarcode()">যোগ করুন</button>
             </div>
-            <div id="notFoundMessage" style="display: none; margin-top: 10px; padding: 10px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 8px; color: #856404; text-align: center;">
-                <i class="bi bi-exclamation-triangle"></i> বারকোড পাওয়া যায়নি। ম্যানুয়ালি যোগ করুন।
-            </div>
         </div>
     </div>
 </div>
@@ -1149,9 +1146,6 @@
         const modal = document.getElementById('scannerModal');
         modal.classList.add('active');
         
-        // Hide not found message
-        document.getElementById('notFoundMessage').style.display = 'none';
-        
         // Clear previous scanner
         document.getElementById('scanner-view').innerHTML = '<div class="scanner-overlay"><div class="scanner-line"></div></div>';
         document.getElementById('scannerResult').innerHTML = '<i class="bi bi-upc-scan me-2"></i>ক্যামেরা চালু হচ্ছে...';
@@ -1313,9 +1307,6 @@
             // Show switching message
             document.getElementById('scannerResult').innerHTML = 'ক্যামেরা সুইচ করা হচ্ছে...';
             
-            // Hide not found message
-            document.getElementById('notFoundMessage').style.display = 'none';
-            
             // Start with new camera
             await startScanning(cameras[nextCameraIndex].id);
             
@@ -1373,9 +1364,6 @@
         const torchBtn = document.getElementById('torchBtn');
         torchBtn.innerHTML = '<i class="bi bi-brightness-high"></i> টর্চ';
         torchBtn.style.background = '#667eea';
-        
-        // Hide not found message
-        document.getElementById('notFoundMessage').style.display = 'none';
     }
 
     // Add product by barcode
@@ -1393,18 +1381,9 @@
                 searchBox.value = '';
                 searchBox.classList.remove('scanner-active');
             }, 1000);
-            
-            // Hide not found message if visible
-            document.getElementById('notFoundMessage').style.display = 'none';
         } else {
             showToast(`❌ বারকোড ${barcode} এর পণ্য পাওয়া যায়নি`, 'error');
             document.getElementById('manualBarcode').value = barcode;
-            
-            // Show not found message
-            document.getElementById('notFoundMessage').style.display = 'block';
-            
-            // Focus on manual input
-            document.getElementById('manualBarcode').focus();
         }
     }
 
