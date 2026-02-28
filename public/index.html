@@ -11,6 +11,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <!-- HTML5 QR Code Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     
     <style>
         * {
@@ -622,12 +624,257 @@
             padding: 4px 8px;
             border-radius: 20px;
         }
+
+        /* Barcode Scanner Button */
+        .barcode-scanner-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 0 12px 12px 0;
+            padding: 0 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .barcode-scanner-btn:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: scale(1.05);
+        }
+
+        .barcode-scanner-btn:active {
+            transform: scale(0.95);
+        }
+
+        .input-group .form-control:last-child {
+            border-radius: 12px 0 0 12px !important;
+        }
+
+        /* Scanner Modal */
+        .scanner-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        .scanner-modal.active {
+            display: flex;
+        }
+
+        .scanner-container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        .scanner-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .scanner-header h5 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .scanner-header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+
+        #scanner-view {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #scanner-view video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            height: 150px;
+            border: 3px solid #10b981;
+            border-radius: 10px;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        .scanner-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #10b981;
+            animation: scanLine 2s linear infinite;
+        }
+
+        @keyframes scanLine {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+
+        .scanner-result {
+            padding: 15px;
+            text-align: center;
+            background: #f8fafc;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+            min-height: 70px;
+        }
+
+        .camera-controls {
+            padding: 10px 15px;
+            background: #f1f5f9;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            border-bottom: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .camera-controls button {
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .camera-controls button:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .camera-controls button:active {
+            transform: translateY(0);
+        }
+
+        .scanner-option {
+            padding: 10px 15px;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .scanner-option button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .scanner-option .btn-mobile {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .scanner-option .btn-hardware {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+            color: #333;
+        }
+
+        .scanner-option button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .scanner-option button:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
     <!-- Loading Spinner -->
     <div class="loading" id="loadingSpinner">
         <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Scanner Modal -->
+    <div class="scanner-modal" id="scannerModal">
+        <div class="scanner-container">
+            <div class="scanner-header">
+                <h5><i class="bi bi-upc-scan me-2"></i>বারকোড স্ক্যানার</h5>
+                <button onclick="closeScanner()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            
+            <!-- Scanner Option -->
+            <div class="scanner-option" id="scannerOption">
+                <button class="btn-mobile" onclick="startMobileScanner()">
+                    <i class="bi bi-phone"></i> মোবাইল ক্যামেরা দিয়ে স্ক্যান করুন
+                </button>
+                <button class="btn-hardware" onclick="startHardwareScanner()">
+                    <i class="bi bi-upc-scan"></i> আসল বারকোড স্ক্যানার ব্যবহার করুন
+                </button>
+            </div>
+            
+            <!-- Scanner View (hidden initially) -->
+            <div id="scanner-view" style="display: none;">
+                <div class="scanner-overlay">
+                    <div class="scanner-line"></div>
+                </div>
+            </div>
+            
+            <div class="camera-controls" id="cameraControls" style="display: none;">
+                <button onclick="switchCamera()">
+                    <i class="bi bi-arrow-repeat"></i> ক্যামেরা সুইচ
+                </button>
+                <button onclick="toggleTorch()" id="torchBtn">
+                    <i class="bi bi-brightness-high"></i> টর্চ
+                </button>
+            </div>
+            
+            <div class="scanner-result" id="scannerResult">
+                <i class="bi bi-upc-scan me-2"></i>স্ক্যান করার জন্য একটি অপশন সিলেক্ট করুন...
+            </div>
+        </div>
     </div>
 
     <!-- Navbar -->
@@ -863,9 +1110,12 @@
                         <div class="mb-3">
                             <label class="form-label">বারকোড</label>
                             <div class="input-group">
-                                <input type="text" id="barcode" class="form-control" placeholder="বারকোড (ঐচ্ছিক)">
-                                <button class="btn btn-outline-secondary" type="button" onclick="generateBarcode()">
+                                <input type="text" id="barcode" class="form-control" placeholder="বারকোড (ঐচ্ছিক)" style="border-radius: 12px 0 0 12px;">
+                                <button class="btn btn-outline-secondary" type="button" onclick="generateBarcode()" style="border-radius: 0;">
                                     <i class="bi bi-upc-scan"></i>
+                                </button>
+                                <button class="barcode-scanner-btn" type="button" onclick="openBarcodeScanner()" style="border-radius: 0 12px 12px 0;">
+                                    <i class="bi bi-camera-fill"></i>
                                 </button>
                             </div>
                         </div>
@@ -1268,6 +1518,15 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // ==================== GLOBAL VARIABLES ====================
+        let products = [];
+        let cart = [];
+        let currentMemoNo = localStorage.getItem('lastMemoNo') ? parseInt(localStorage.getItem('lastMemoNo')) + 1 : 1;
+        let currentDiscount = 0;
+        let paymentMethod = 'cash';
+        let isOffline = false;
+        let currentHoldCartId = null;
+        
         // Loading Spinner
         function showLoading() {
             document.getElementById('loadingSpinner').classList.add('show');
@@ -1292,6 +1551,16 @@
         let categoryChartMinimized = true;
         let addProductMinimized = true;
         let logMinimized = true;
+
+        // Scanner Variables
+        let html5QrCode = null;
+        let isScanning = false;
+        let currentCameraId = null;
+        let cameras = [];
+        let lastScannedCode = null;
+        let lastScanTime = 0;
+        let torchEnabled = false;
+        let scannerTargetInput = 'barcode'; // which input field to fill
 
         // API Base URL
         const API_BASE = '';
@@ -1393,6 +1662,229 @@
             });
         }
 
+        // ==================== BARCODE SCANNER FUNCTIONS ====================
+        
+        // Open scanner with options
+        function openBarcodeScanner() {
+            const modal = document.getElementById('scannerModal');
+            modal.classList.add('active');
+            
+            // Show scanner options, hide camera view
+            document.getElementById('scannerOption').style.display = 'block';
+            document.getElementById('scanner-view').style.display = 'none';
+            document.getElementById('cameraControls').style.display = 'none';
+            document.getElementById('scannerResult').innerHTML = '<i class="bi bi-upc-scan me-2"></i>স্ক্যান করার জন্য একটি অপশন সিলেক্ট করুন...';
+        }
+
+        // Close scanner
+        function closeScanner() {
+            const modal = document.getElementById('scannerModal');
+            modal.classList.remove('active');
+            
+            // Stop scanner if running
+            if (html5QrCode && isScanning) {
+                try {
+                    html5QrCode.stop();
+                    html5QrCode.clear();
+                } catch (e) {}
+                html5QrCode = null;
+                isScanning = false;
+            }
+            
+            document.getElementById('scannerOption').style.display = 'block';
+            document.getElementById('scanner-view').style.display = 'none';
+            document.getElementById('cameraControls').style.display = 'none';
+        }
+
+        // Start mobile camera scanner
+        async function startMobileScanner() {
+            // Hide options, show camera view
+            document.getElementById('scannerOption').style.display = 'none';
+            document.getElementById('scanner-view').style.display = 'block';
+            document.getElementById('cameraControls').style.display = 'flex';
+            document.getElementById('scannerResult').innerHTML = 'ক্যামেরা চালু হচ্ছে...';
+            
+            try {
+                // Check camera support
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    throw new Error('ক্যামেরা সাপোর্ট করে না');
+                }
+
+                // Create scanner instance
+                html5QrCode = new Html5Qrcode("scanner-view");
+                
+                // Get cameras
+                cameras = await Html5Qrcode.getCameras();
+                
+                if (cameras && cameras.length > 0) {
+                    // Find back camera
+                    let backCameraId = null;
+                    for (let camera of cameras) {
+                        const label = camera.label.toLowerCase();
+                        if (label.includes('back') || label.includes('environment') || label.includes('rear')) {
+                            backCameraId = camera.id;
+                            break;
+                        }
+                    }
+                    
+                    const cameraId = backCameraId || cameras[0].id;
+                    await startCameraScanning(cameraId);
+                } else {
+                    throw new Error('কোনো ক্যামেরা পাওয়া যায়নি');
+                }
+            } catch (error) {
+                document.getElementById('scannerResult').innerHTML = `
+                    <span class="text-danger">
+                        <i class="bi bi-exclamation-circle"></i> ${error.message}
+                    </span>
+                `;
+            }
+        }
+
+        // Start camera scanning
+        async function startCameraScanning(cameraId) {
+            try {
+                currentCameraId = cameraId;
+                
+                const config = {
+                    fps: 10,
+                    qrbox: { width: 280, height: 150 },
+                    aspectRatio: 1.0
+                };
+                
+                await html5QrCode.start(
+                    cameraId,
+                    config,
+                    onScanSuccess,
+                    (error) => {} // silent error
+                );
+                
+                isScanning = true;
+                document.getElementById('scannerResult').innerHTML = 'বারকোড স্ক্যান করুন...';
+                
+            } catch (error) {
+                document.getElementById('scannerResult').innerHTML = `
+                    <span class="text-danger">
+                        <i class="bi bi-exclamation-circle"></i> ক্যামেরা চালু করতে সমস্যা
+                    </span>
+                `;
+            }
+        }
+
+        // Scan success callback
+        function onScanSuccess(decodedText, decodedResult) {
+            const currentTime = Date.now();
+            
+            // Prevent duplicate scans within 2 seconds
+            if (decodedText === lastScannedCode && (currentTime - lastScanTime) < 2000) {
+                return;
+            }
+            
+            lastScannedCode = decodedText;
+            lastScanTime = currentTime;
+            
+            // Play beep sound
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.frequency.value = 800;
+                gainNode.gain.value = 0.5;
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {}
+            
+            // Update result display
+            document.getElementById('scannerResult').innerHTML = `
+                <span class="text-success">
+                    <i class="bi bi-check-circle-fill"></i> স্ক্যান করা হয়েছে: ${decodedText}
+                </span>
+            `;
+            
+            // Fill barcode input field
+            document.getElementById('barcode').value = decodedText;
+            
+            // Auto-close after 1.5 seconds
+            setTimeout(() => {
+                closeScanner();
+            }, 1500);
+        }
+
+        // Start hardware scanner
+        function startHardwareScanner() {
+            // Hide options
+            document.getElementById('scannerOption').style.display = 'none';
+            
+            // Show message for hardware scanner
+            document.getElementById('scannerResult').innerHTML = `
+                <div class="text-center">
+                    <i class="bi bi-upc-scan" style="font-size: 3rem; color: #667eea;"></i>
+                    <p class="mt-3">অনুগ্রহ করে আসল বারকোড স্ক্যানার দিয়ে স্ক্যান করুন...</p>
+                    <p class="text-muted small">স্ক্যান করার পর এটি স্বয়ংক্রিয়ভাবে ইনপুট ফিল্ডে যুক্ত হবে</p>
+                </div>
+            `;
+            
+            // Focus on barcode input for hardware scanner
+            document.getElementById('barcode').focus();
+            
+            // Auto-close after 30 seconds
+            setTimeout(() => {
+                closeScanner();
+            }, 30000);
+        }
+
+        // Switch camera
+        async function switchCamera() {
+            if (!cameras || cameras.length < 2) {
+                alert('একাধিক ক্যামেরা পাওয়া যায়নি');
+                return;
+            }
+            
+            try {
+                if (html5QrCode && isScanning) {
+                    await html5QrCode.stop();
+                    isScanning = false;
+                }
+                
+                let nextCameraIndex = 0;
+                if (currentCameraId) {
+                    const currentIndex = cameras.findIndex(c => c.id === currentCameraId);
+                    nextCameraIndex = (currentIndex + 1) % cameras.length;
+                }
+                
+                document.getElementById('scannerResult').innerHTML = 'ক্যামেরা সুইচ করা হচ্ছে...';
+                await startCameraScanning(cameras[nextCameraIndex].id);
+                
+            } catch (error) {
+                console.error('Switch camera error:', error);
+            }
+        }
+
+        // Toggle torch
+        async function toggleTorch() {
+            if (!html5QrCode || !isScanning) return;
+            
+            try {
+                torchEnabled = !torchEnabled;
+                await html5QrCode.turnTorchOn(torchEnabled);
+                
+                const torchBtn = document.getElementById('torchBtn');
+                if (torchEnabled) {
+                    torchBtn.innerHTML = '<i class="bi bi-brightness-high-fill"></i> টর্চ অফ';
+                    torchBtn.style.background = '#10b981';
+                } else {
+                    torchBtn.innerHTML = '<i class="bi bi-brightness-high"></i> টর্চ';
+                    torchBtn.style.background = '#667eea';
+                }
+            } catch (error) {
+                alert('টর্চ এই ক্যামেরায় সাপোর্ট করে না');
+            }
+        }
+
+        // ==================== AUTH FUNCTIONS ====================
+        
         // 🔐 Password Protection
         async function checkAuth(callback, ...args) {
             let inputPassword = prompt("🔒 সিকিউরিটি পাসওয়ার্ড দিন:");
@@ -1497,7 +1989,7 @@
             }
         }
 
-        // Toast Notification
+        // ==================== TOAST NOTIFICATION ====================
         function showToast(message, type = 'info') {
             const toast = document.createElement('div');
             toast.className = `toast-notification toast-${type}`;
@@ -1525,7 +2017,29 @@
             }, 3000);
         }
 
-        // Data Loading
+        // ==================== UPDATE SYNC STATUS ====================
+        function updateSyncStatus() {
+            const statusEl = document.getElementById('syncStatus');
+            if (navigator.onLine) {
+                statusEl.className = 'badge bg-success';
+                statusEl.innerHTML = '<i class="bi bi-wifi"></i> অনলাইন';
+                if (isOffline) {
+                    isOffline = false;
+                    loadProducts();
+                    loadHeldCarts();
+                }
+            } else {
+                statusEl.className = 'badge bg-warning';
+                statusEl.innerHTML = '<i class="bi bi-wifi-off"></i> অফলাইন';
+                isOffline = true;
+            }
+        }
+
+        window.addEventListener('online', updateSyncStatus);
+        window.addEventListener('offline', updateSyncStatus);
+        setInterval(updateSyncStatus, 5000);
+
+        // ==================== LOAD PRODUCTS ====================
         async function load() {
             showLoading();
             try {
