@@ -716,6 +716,110 @@
             .shop-name-red { font-size: 30px; }
             .quick-actions { grid-template-columns: repeat(2, 1fr); }
         }
+        
+        /* Discount Modal Styles */
+        .discount-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+        }
+        .discount-modal {
+            background: white;
+            padding: 30px 25px;
+            border-radius: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 30px 50px rgba(0,0,0,0.5);
+            animation: zoomIn 0.3s;
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .discount-modal h3 {
+            font-weight: 700;
+            color: #1e293b;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        .discount-modal .form-group {
+            margin-bottom: 20px;
+        }
+        .discount-modal .form-group label {
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .discount-modal .form-control {
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 14px;
+            font-size: 1.1rem;
+        }
+        .discount-modal .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.2);
+        }
+        .discount-type-group {
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .discount-type-group .btn-type {
+            flex: 1;
+            border: none;
+            border-radius: 30px;
+            padding: 12px;
+            font-weight: 700;
+            background: white;
+            color: #334155;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .discount-type-group .btn-type.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .discount-modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        .discount-modal-actions button {
+            flex: 1;
+            border: none;
+            border-radius: 30px;
+            padding: 14px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .btn-apply-discount {
+            background: #10b981;
+            color: white;
+        }
+        .btn-apply-discount:hover { background: #059669; transform: translateY(-2px); }
+        .btn-cancel-discount {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        .btn-cancel-discount:hover { background: #cbd5e1; transform: translateY(-2px); }
+        .btn-remove-discount {
+            background: #ef4444;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -756,7 +860,7 @@
                 <button class="quick-action-btn btn-clear" onclick="clearCart()">
                     <i class="bi bi-trash3"></i> খালি
                 </button>
-                <button class="quick-action-btn btn-discount" onclick="applyDiscount()">
+                <button class="quick-action-btn btn-discount" onclick="openDiscountModal()">
                     <i class="bi bi-percent"></i> ডিসকাউন্ট
                 </button>
                 <button class="quick-action-btn btn-hold" onclick="holdCart()">
@@ -934,6 +1038,29 @@
     </div>
 </div>
 
+<!-- Discount Modal (Pop-up) -->
+<div class="discount-modal-overlay" id="discountModalOverlay">
+    <div class="discount-modal">
+        <h3><i class="bi bi-percent-circle text-warning me-2"></i>ডিসকাউন্ট প্রয়োগ করুন</h3>
+        <div class="form-group">
+            <label>পরিমাণ</label>
+            <input type="number" id="discountValue" class="form-control" placeholder="যেমন: ১০০ বা ১০" value="0" min="0" step="any">
+        </div>
+        <div class="form-group">
+            <label>ধরন</label>
+            <div class="discount-type-group">
+                <button type="button" class="btn-type active" id="discountTypeFlat" onclick="setDiscountType('flat')">💰 ফ্ল্যাট (টাকা)</button>
+                <button type="button" class="btn-type" id="discountTypePercent" onclick="setDiscountType('percent')">📊 শতাংশ (%)</button>
+            </div>
+        </div>
+        <div class="discount-modal-actions">
+            <button class="btn-apply-discount" onclick="applyDiscountFromModal()"><i class="bi bi-check-lg"></i> প্রয়োগ</button>
+            <button class="btn-cancel-discount" onclick="closeDiscountModal()">বাতিল</button>
+            <button class="btn-remove-discount" onclick="removeDiscount()"><i class="bi bi-x-lg"></i> সরান</button>
+        </div>
+    </div>
+</div>
+
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -943,6 +1070,7 @@
     let cart = [];
     let currentMemoNo = localStorage.getItem('lastMemoNo') ? parseInt(localStorage.getItem('lastMemoNo')) + 1 : 1;
     let currentDiscount = 0;
+    let currentDiscountType = 'flat'; // 'flat' অথবা 'percent'
     let paymentMethod = 'cash';
     let isOffline = false;
     let currentHoldCartId = null;
@@ -1446,6 +1574,8 @@
             cartCount.innerText = '0';
             document.getElementById('subtotal').innerText = '0৳';
             document.getElementById('total').innerText = '0৳';
+            document.getElementById('discountRow').style.display = 'none';
+            currentDiscount = 0;
             return;
         }
         
@@ -1477,6 +1607,13 @@
         
         cartCount.innerText = cart.length;
         document.getElementById('subtotal').innerText = subtotal + '৳';
+        
+        // ডিসকাউন্ট পুনরায় হিসাব করুন (যদি থাকে)
+        if (currentDiscount > 0) {
+            document.getElementById('discountRow').style.display = 'flex';
+        } else {
+            document.getElementById('discountRow').style.display = 'none';
+        }
         updateTotal(subtotal);
     }
 
@@ -1528,29 +1665,83 @@
         }
     }
 
-    // ==================== APPLY DISCOUNT ====================
-    function applyDiscount() {
+    // ==================== DISCOUNT MODAL FUNCTIONS ====================
+    function openDiscountModal() {
         if (cart.length === 0) {
             showToast('কার্টে কোনো পণ্য নেই', 'warning');
             return;
         }
-        
-        let discount = prompt('🎯 ডিসকাউন্ট পরিমাণ (% - ০-১০০):', currentDiscount || '0');
-        discount = parseFloat(discount);
-        if (!isNaN(discount) && discount >= 0 && discount <= 100) {
-            currentDiscount = discount;
-            document.getElementById('discountRow').style.display = 'flex';
-            const subtotal = parseFloat(document.getElementById('subtotal').innerText) || 0;
-            updateTotal(subtotal);
-            showToast(`💰 ${discount}% ডিসকাউন্ট প্রয়োগ হয়েছে`, 'success');
+        document.getElementById('discountModalOverlay').style.display = 'flex';
+        document.getElementById('discountValue').value = currentDiscount || 0;
+        // ডিফল্ট ফ্ল্যাট নির্বাচন করা আছে কিনা নিশ্চিত করুন
+        setDiscountType(currentDiscountType);
+    }
+
+    function closeDiscountModal() {
+        document.getElementById('discountModalOverlay').style.display = 'none';
+    }
+
+    function setDiscountType(type) {
+        currentDiscountType = type;
+        const flatBtn = document.getElementById('discountTypeFlat');
+        const percentBtn = document.getElementById('discountTypePercent');
+        if (type === 'flat') {
+            flatBtn.classList.add('active');
+            percentBtn.classList.remove('active');
         } else {
-            showToast('❌ ভ্যালিড ডিসকাউন্ট দিন (০-১০০)', 'error');
+            percentBtn.classList.add('active');
+            flatBtn.classList.remove('active');
         }
     }
 
-    // ==================== UPDATE TOTAL ====================
+    function applyDiscountFromModal() {
+        let discountValue = parseFloat(document.getElementById('discountValue').value);
+        const subtotal = parseFloat(document.getElementById('subtotal').innerText) || 0;
+        
+        if (isNaN(discountValue) || discountValue < 0) {
+            showToast('ভ্যালিড ডিসকাউন্ট পরিমাণ দিন', 'error');
+            return;
+        }
+        
+        if (currentDiscountType === 'percent') {
+            if (discountValue > 100) {
+                showToast('শতাংশ ডিসকাউন্ট ১০০ এর বেশি হতে পারবে না', 'warning');
+                discountValue = 100;
+            }
+            currentDiscount = discountValue;
+            showToast(`📊 ${discountValue}% ডিসকাউন্ট প্রয়োগ হয়েছে`, 'success');
+        } else {
+            // ফ্ল্যাট ডিসকাউন্ট: সাবটোটালের চেয়ে বেশি হতে পারবে না
+            if (discountValue > subtotal) {
+                showToast(`ফ্ল্যাট ডিসকাউন্ট সাবটোটাল (${subtotal}৳) এর বেশি হতে পারবে না`, 'warning');
+                discountValue = subtotal;
+            }
+            currentDiscount = discountValue;
+            showToast(`💰 ${discountValue}৳ ডিসকাউন্ট প্রয়োগ হয়েছে`, 'success');
+        }
+        
+        document.getElementById('discountRow').style.display = 'flex';
+        updateTotal(subtotal);
+        closeDiscountModal();
+    }
+
+    function removeDiscount() {
+        currentDiscount = 0;
+        document.getElementById('discountRow').style.display = 'none';
+        const subtotal = parseFloat(document.getElementById('subtotal').innerText) || 0;
+        updateTotal(subtotal);
+        closeDiscountModal();
+        showToast('ডিসকাউন্ট সরানো হয়েছে', 'info');
+    }
+
+    // ==================== UPDATE TOTAL (ডিসকাউন্ট সহ) ====================
     function updateTotal(subtotal) {
-        const discountAmount = (subtotal * currentDiscount) / 100;
+        let discountAmount = 0;
+        if (currentDiscountType === 'percent' && currentDiscount > 0) {
+            discountAmount = (subtotal * currentDiscount) / 100;
+        } else if (currentDiscountType === 'flat' && currentDiscount > 0) {
+            discountAmount = currentDiscount;
+        }
         const total = subtotal - discountAmount;
         document.getElementById('discountAmount').innerText = discountAmount.toFixed(0) + '৳';
         document.getElementById('total').innerText = total.toFixed(0) + '৳';
@@ -1610,6 +1801,7 @@
                     customerMobile,
                     customerAddress,
                     discount: currentDiscount,
+                    discountType: currentDiscountType,
                     note: ''
                 })
             });
@@ -1620,6 +1812,7 @@
             
             cart = [];
             currentDiscount = 0;
+            currentDiscountType = 'flat';
             currentHoldCartId = null;
             document.getElementById('discountRow').style.display = 'none';
             document.getElementById('paidAmount').value = '';
@@ -1679,7 +1872,7 @@
                             <br>
                             <small class="text-muted" style="font-size:10px;">
                                 📦 ${cart.itemsCount} আইটেম | 💰 ${cart.totalAmount}৳
-                                ${cart.discount ? `<span class="badge bg-warning ms-1">-${cart.discount}%</span>` : ''}
+                                ${cart.discount ? `<span class="badge bg-warning ms-1">-${cart.discount}${cart.discountType==='percent'?'%':'৳'}</span>` : ''}
                             </small>
                             <br>
                             <small class="text-info" style="font-size:9px;">⏱️ ${time}</small>
@@ -1725,6 +1918,7 @@
             
             cart = data.cart;
             currentDiscount = data.discount || 0;
+            currentDiscountType = data.discountType || 'flat';
             currentHoldCartId = cartId;
             
             document.getElementById('customerName').value = data.customerName || '';
@@ -1831,6 +2025,7 @@
                     totalAmount: total, 
                     paidAmount: paid,
                     discount: currentDiscount,
+                    discountType: currentDiscountType,
                     paymentMethod,
                     holdCartId: currentHoldCartId
                 })
@@ -1861,6 +2056,7 @@
             
             cart = [];
             currentDiscount = 0;
+            currentDiscountType = 'flat';
             currentHoldCartId = null;
             document.getElementById('discountRow').style.display = 'none';
             document.getElementById('paidAmount').value = '';
