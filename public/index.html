@@ -11,7 +11,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
-    <!-- HTML5 QR Code Scanner Library -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     
     <style>
@@ -75,7 +74,6 @@
             background: #3d3d5c;
         }
 
-        /* Navbar Styling */
         .navbar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -87,7 +85,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Stat Cards */
         .stat-card {
             background: white;
             border-radius: 20px;
@@ -149,7 +146,6 @@
             color: #667eea;
         }
 
-        /* Chart Containers */
         .chart-container {
             background: white;
             padding: 25px;
@@ -191,10 +187,6 @@
             transform: scale(1.1);
         }
 
-        .minimize-btn i {
-            transition: transform 0.3s ease;
-        }
-
         .chart-content {
             transition: all 0.3s ease;
         }
@@ -203,7 +195,6 @@
             display: none !important;
         }
 
-        /* Table Container */
         .table-container {
             background: white;
             border-radius: 20px;
@@ -274,7 +265,6 @@
             color: white;
         }
 
-        /* Form Styling */
         .form-control, .form-select {
             border-radius: 12px;
             border: 1px solid #e0e0e0;
@@ -288,7 +278,6 @@
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
         }
 
-        /* Buttons */
         .btn {
             border-radius: 12px;
             padding: 10px 20px;
@@ -343,7 +332,6 @@
             color: #333;
         }
 
-        /* Notification Button */
         .notification-btn {
             position: relative;
             background: rgba(255, 255, 255, 0.2);
@@ -371,28 +359,12 @@
             animation: pulse 2s infinite;
         }
 
-        .dropdown-menu-end {
-            right: auto !important;
-            left: auto !important;
-            transform: translateX(0) !important;
-        }
-        
-        @media (max-width: 576px) {
-            .dropdown-menu {
-                max-width: 90vw !important;
-                min-width: 280px !important;
-                right: auto !important;
-                left: auto !important;
-            }
-        }
-
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
 
-        /* Log Container */
         .log-container {
             max-height: 200px;
             overflow-y: auto;
@@ -403,22 +375,12 @@
             border: 1px solid #e0e0e0;
         }
 
-        .log-container div {
-            padding: 5px 0;
-            border-bottom: 1px dashed #e0e0e0;
-        }
-
-        .log-container div:last-child {
-            border-bottom: none;
-        }
-
         .dark-mode .log-container {
             background: #1e1e2f;
             border-color: #3d3d5c;
             color: #a0a0b0;
         }
 
-        /* Progress Bar */
         .progress {
             height: 25px;
             border-radius: 15px;
@@ -433,7 +395,6 @@
             transition: width 1s ease;
         }
 
-        /* Pagination */
         .pagination-container {
             display: flex;
             justify-content: center;
@@ -480,7 +441,6 @@
             border-color: #667eea;
         }
 
-        /* Search Box */
         .search-box {
             position: relative;
         }
@@ -497,7 +457,6 @@
             padding-left: 45px;
         }
 
-        /* Modal Styling */
         .modal-content {
             border-radius: 25px;
             border: none;
@@ -520,7 +479,6 @@
             padding: 30px;
         }
 
-        /* Loading Animation */
         .loading {
             position: fixed;
             top: 0;
@@ -552,63 +510,55 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Tooltip */
-        .tooltip {
-            position: relative;
-            display: inline-block;
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #43e97b;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
         }
 
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 120px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -60px;
-            opacity: 0;
-            transition: opacity 0.3s;
+        .toast-notification.toast-error {
+            background: #ff0844;
         }
 
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
+        .toast-notification.toast-warning {
+            background: #f59e0b;
         }
 
-        /* Responsive */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         @media (max-width: 768px) {
             .stat-card h3 {
                 font-size: 1.4rem;
             }
-            
             .navbar-brand {
                 font-size: 1.2rem;
             }
-            
             .btn {
                 padding: 8px 15px;
                 font-size: 0.9rem;
             }
         }
 
-        /* Print Styles */
         @media print {
             .no-print {
                 display: none !important;
             }
-            
             .card {
                 box-shadow: none !important;
                 border: 1px solid #ddd !important;
             }
         }
 
-        /* Expiry Date Styling */
         .expiry-warning {
             background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
             border-left: 4px solid #ffc107;
@@ -619,283 +569,56 @@
             border-left: 4px solid #dc3545;
         }
 
-        .expiry-badge {
-            font-size: 0.75rem;
-            padding: 4px 8px;
-            border-radius: 20px;
-        }
-
-        /* Barcode Scanner Button */
-        .barcode-scanner-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
+        .user-info {
             color: white;
-            border-radius: 0 12px 12px 0;
-            padding: 0 15px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            justify-content: center;
-            border-left: 1px solid rgba(255,255,255,0.3);
+            gap: 10px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 25px;
         }
 
-        .barcode-scanner-btn:hover {
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-            transform: scale(1.05);
-        }
-
-        .barcode-scanner-btn:active {
-            transform: scale(0.95);
-        }
-
-        .input-group .form-control:last-child {
-            border-radius: 12px 0 0 12px !important;
-        }
-
-        /* Scanner Modal */
-        .scanner-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 10000;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding: 10px;
-        }
-
-        .scanner-modal.active {
-            display: flex;
-        }
-
-        .scanner-container {
-            width: 100%;
-            max-width: 600px;
-            background: white;
-            border-radius: 30px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
-        }
-
-        .scanner-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .scanner-header h5 {
-            margin: 0;
-            font-weight: 700;
-        }
-
-        .scanner-header button {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0 10px;
-        }
-
-        #scanner-view {
-            width: 100%;
-            height: 400px;
-            background: #000;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #scanner-view video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .scanner-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 280px;
-            height: 150px;
-            border: 3px solid #10b981;
-            border-radius: 10px;
-            box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
-            pointer-events: none;
-        }
-
-        .scanner-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
+        .role-badge {
             background: #10b981;
-            animation: scanLine 2s linear infinite;
-        }
-
-        @keyframes scanLine {
-            0% { top: 0; }
-            50% { top: 100%; }
-            100% { top: 0; }
-        }
-
-        .scanner-result {
-            padding: 15px;
-            text-align: center;
-            background: #f8fafc;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
             font-weight: 600;
-            border-bottom: 1px solid #e2e8f0;
-            min-height: 70px;
-        }
-
-        .camera-controls {
-            padding: 10px 15px;
-            background: #f1f5f9;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            border-bottom: 1px solid #e2e8f0;
-            flex-wrap: wrap;
-        }
-
-        .camera-controls button {
-            padding: 8px 15px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s;
-        }
-
-        .camera-controls button:hover {
-            background: #5a67d8;
-            transform: translateY(-2px);
-        }
-
-        .camera-controls button:active {
-            transform: translateY(0);
-        }
-
-        .scanner-option {
-            padding: 10px 15px;
-            background: #fff;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .scanner-option button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s;
-        }
-
-        .scanner-option .btn-mobile {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            margin-bottom: 10px;
-        }
-
-        .scanner-option .btn-hardware {
-            background: linear-gradient(135deg, #43e97b, #38f9d7);
-            color: #333;
-        }
-
-        .scanner-option button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .scanner-option button:active {
-            transform: translateY(0);
         }
     </style>
 </head>
 <body>
-    <!-- Loading Spinner -->
     <div class="loading" id="loadingSpinner">
         <div class="loading-spinner"></div>
     </div>
 
-    <!-- Scanner Modal -->
-    <div class="scanner-modal" id="scannerModal">
-        <div class="scanner-container">
-            <div class="scanner-header">
-                <h5><i class="bi bi-upc-scan me-2"></i>বারকোড স্ক্যানার</h5>
-                <button onclick="closeScanner()"><i class="bi bi-x-lg"></i></button>
-            </div>
-            
-            <!-- Scanner Option -->
-            <div class="scanner-option" id="scannerOption">
-                <button class="btn-mobile" onclick="startMobileScanner()">
-                    <i class="bi bi-phone"></i> মোবাইল ক্যামেরা দিয়ে স্ক্যান করুন
-                </button>
-                <button class="btn-hardware" onclick="startHardwareScanner()">
-                    <i class="bi bi-upc-scan"></i> আসল বারকোড স্ক্যানার ব্যবহার করুন
-                </button>
-            </div>
-            
-            <!-- Scanner View (hidden initially) -->
-            <div id="scanner-view" style="display: none;">
-                <div class="scanner-overlay">
-                    <div class="scanner-line"></div>
-                </div>
-            </div>
-            
-            <div class="camera-controls" id="cameraControls" style="display: none;">
-                <button onclick="switchCamera()">
-                    <i class="bi bi-arrow-repeat"></i> ক্যামেরা সুইচ
-                </button>
-                <button onclick="toggleTorch()" id="torchBtn">
-                    <i class="bi bi-brightness-high"></i> টর্চ
-                </button>
-            </div>
-            
-            <div class="scanner-result" id="scannerResult">
-                <i class="bi bi-upc-scan me-2"></i>স্ক্যান করার জন্য একটি অপশন সিলেক্ট করুন...
-            </div>
-        </div>
-    </div>
-
-    <!-- Navbar -->
     <nav class="navbar navbar-dark no-print">
         <div class="container-fluid px-4">
             <span class="navbar-brand">
                 <i class="bi bi-shop"></i> Morsalin Supershop
-                <small class="fs-6 ms-2 opacity-75">v2.0 প্রো</small>
+                <small class="fs-6 ms-2 opacity-75">v2.1 প্রো</small>
             </span>
             <div class="d-flex align-items-center gap-2">
-                <!-- Settings Dropdown -->
+                <div class="user-info" id="userInfo">
+                    <i class="bi bi-person-circle"></i>
+                    <span id="userName">admin</span>
+                    <span class="role-badge" id="userRole">admin</span>
+                </div>
+                
                 <div class="dropdown">
                     <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <i class="bi bi-gear"></i> সেটিংস
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#passwordModal">
-                            <i class="bi bi-lock"></i> পাসওয়ার্ড সেট করুন
+                            <i class="bi bi-lock"></i> পাসওয়ার্ড পরিবর্তন
                         </a></li>
-                        <li><a class="dropdown-item" href="#" onclick="removePassword()">
-                            <i class="bi bi-unlock"></i> পাসওয়ার্ড রিসেট করুন
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#userManagementModal" id="userManagementBtn" style="display: none;">
+                            <i class="bi bi-people"></i> ইউজার ম্যানেজমেন্ট
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()">
+                            <i class="bi bi-box-arrow-right"></i> লগআউট
                         </a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#backupModal">
@@ -904,12 +627,10 @@
                     </ul>
                 </div>
 
-                <!-- Dark Mode Toggle -->
                 <button onclick="toggleDarkMode()" class="btn btn-outline-light btn-sm">
                     <i class="bi bi-moon"></i>
                 </button>
 
-                <!-- Export Dropdown -->
                 <div class="dropdown">
                     <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                         <i class="bi bi-download"></i> এক্সপোর্ট
@@ -927,7 +648,6 @@
                     </ul>
                 </div>
 
-                <!-- Quick Actions -->
                 <button onclick="checkAuth(createBackup)" class="btn btn-dark btn-sm">
                     <i class="bi bi-cloud-arrow-up"></i> ব্যাকআপ
                 </button>
@@ -936,7 +656,6 @@
                     <i class="bi bi-cart"></i> POS কাউন্টার
                 </a>
 
-                <!-- Notifications -->
                 <div class="dropdown">
                     <button class="notification-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="notificationDropdown">
                         <i class="bi bi-bell"></i>
@@ -963,9 +682,7 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="container-fluid px-4 py-4">
-        <!-- Low Stock Alert Banner -->
         <div class="alert alert-danger alert-dismissible fade show d-none" id="lowStockAlert" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             <strong>সতর্কতা!</strong> নিচের পণ্যগুলোর স্টক ফুরিয়ে আসছে: 
@@ -973,7 +690,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- Expiry Alert Banner -->
         <div class="alert alert-warning alert-dismissible fade show d-none" id="expiryAlert" role="alert">
             <i class="bi bi-calendar-exclamation-fill me-2"></i>
             <strong>মেয়াদোত্তীর্ণ সতর্কতা!</strong> নিচের পণ্যগুলোর মেয়াদ শেষ হওয়ার পথে: 
@@ -981,7 +697,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        <!-- Statistics Cards -->
         <div class="row g-4 mb-4">
             <div class="col-xl-2 col-lg-4 col-md-6">
                 <div class="stat-card p-4">
@@ -1027,7 +742,6 @@
             </div>
         </div>
 
-        <!-- Charts Row with Minimize Buttons - এখন ডিফল্ট মিনিমাইজড -->
         <div class="row g-4 mb-4">
             <div class="col-lg-8">
                 <div class="chart-container">
@@ -1037,10 +751,10 @@
                             বিক্রয় ও লাভ বিশ্লেষণ
                         </h5>
                         <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('salesChartContainer', 'salesChartMinimizeIcon')">
-                            <i class="bi bi-plus-lg" id="salesChartMinimizeIcon"></i> <!-- ডিফল্ট প্লাস আইকন -->
+                            <i class="bi bi-plus-lg" id="salesChartMinimizeIcon"></i>
                         </button>
                     </div>
-                    <div id="salesChartContainer" class="chart-content collapsed"> <!-- ডিফল্ট collapsed -->
+                    <div id="salesChartContainer" class="chart-content collapsed">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div class="d-flex gap-2">
                                 <select class="form-select form-select-sm" id="chartFilter" onchange="load()" style="width: 150px;">
@@ -1066,10 +780,10 @@
                             ক্যাটাগরি ভিত্তিক সেলস
                         </h5>
                         <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('categoryChartContainer', 'categoryChartMinimizeIcon')">
-                            <i class="bi bi-plus-lg" id="categoryChartMinimizeIcon"></i> <!-- ডিফল্ট প্লাস আইকন -->
+                            <i class="bi bi-plus-lg" id="categoryChartMinimizeIcon"></i>
                         </button>
                     </div>
-                    <div id="categoryChartContainer" class="chart-content collapsed"> <!-- ডিফল্ট collapsed -->
+                    <div id="categoryChartContainer" class="chart-content collapsed">
                         <canvas id="categoryChart"></canvas>
                         <div class="mt-4">
                             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -1091,282 +805,484 @@
             </div>
         </div>
 
-        <!-- Main Content Row -->
-        <div class="row g-4">
-            <!-- Left Column -->
-            <div class="col-lg-4">
-                <!-- Add Product Card with Minimize Button - ডিফল্ট মিনিমাইজড -->
-                <div class="table-container mb-4">
-                    <div class="table-header" onclick="toggleSection('addProductContainer', 'addProductMinimizeIcon')">
-                        <h5 class="mb-0">
-                            <i class="bi bi-plus-circle me-2"></i>
-                            পণ্য যোগ করুন
-                        </h5>
-                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('addProductContainer', 'addProductMinimizeIcon')">
-                            <i class="bi bi-plus-lg" id="addProductMinimizeIcon"></i> <!-- ডিফল্ট প্লাস আইকন -->
-                        </button>
+        <!-- Tabs for different sections -->
+        <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab">
+                    <i class="bi bi-box-seam"></i> ইনভেন্টরি
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="suppliers-tab" data-bs-toggle="tab" data-bs-target="#suppliers" type="button" role="tab">
+                    <i class="bi bi-truck"></i> সাপ্লায়ার
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="customers-tab" data-bs-toggle="tab" data-bs-target="#customers" type="button" role="tab">
+                    <i class="bi bi-people"></i> কাস্টমার
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="returns-tab" data-bs-toggle="tab" data-bs-target="#returns" type="button" role="tab">
+                    <i class="bi bi-arrow-return-left"></i> রিটার্ন
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Inventory Tab -->
+            <div class="tab-pane fade show active" id="inventory" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <div class="table-container mb-4">
+                            <div class="table-header" onclick="toggleSection('addProductContainer', 'addProductMinimizeIcon')">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-plus-circle me-2"></i>
+                                    পণ্য যোগ করুন
+                                </h5>
+                                <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('addProductContainer', 'addProductMinimizeIcon')">
+                                    <i class="bi bi-plus-lg" id="addProductMinimizeIcon"></i>
+                                </button>
+                            </div>
+                            <div id="addProductContainer" class="chart-content collapsed">
+                                <div class="mb-3">
+                                    <label class="form-label">বারকোড</label>
+                                    <div class="input-group">
+                                        <input type="text" id="barcode" class="form-control" placeholder="বারকোড (ঐচ্ছিক)" style="border-radius: 12px 0 0 12px;">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="generateBarcode()" style="border-radius: 0;">
+                                            <i class="bi bi-upc-scan"></i>
+                                        </button>
+                                        <button class="barcode-scanner-btn" type="button" onclick="openBarcodeScanner()" style="border-radius: 0 12px 12px 0;">
+                                            <i class="bi bi-camera-fill"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">পণ্যের নাম <span class="text-danger">*</span></label>
+                                    <input type="text" id="name" class="form-control" placeholder="পণ্যের নাম">
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label">ক্যাটাগরি</label>
+                                        <input type="text" id="category" class="form-control" placeholder="যেমন: চাল">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">সরবরাহকারী</label>
+                                        <select id="supplier" class="form-select">
+                                            <option value="">সিলেক্ট করুন</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label">কেনা দাম <span class="text-danger">*</span></label>
+                                        <input type="number" id="cost" class="form-control" placeholder="০.০০">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">বিক্রয় মূল্য <span class="text-danger">*</span></label>
+                                        <input type="number" id="price" class="form-control" placeholder="০.০০">
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <label class="form-label">স্টক পরিমাণ <span class="text-danger">*</span></label>
+                                        <input type="number" id="stock" class="form-control" placeholder="০">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label">সতর্কতা সীমা</label>
+                                        <input type="number" id="alertLimit" class="form-control" placeholder="যেমন: ৫" value="5">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">মেয়াদোত্তীর্ণ তারিখ <span class="text-muted">(ঐচ্ছিক)</span></label>
+                                    <input type="date" id="expiryDate" class="form-control" min="">
+                                    <small class="text-muted">পচনশীল পণ্যের জন্য মেয়াদ দিন</small>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button onclick="checkAuth(save)" class="btn btn-primary">
+                                        <i class="bi bi-save me-2"></i>
+                                        ইনভেন্টরি আপডেট
+                                    </button>
+                                    <div class="d-flex gap-2">
+                                        <button onclick="document.getElementById('fileInput').click()" class="btn btn-outline-dark w-50">
+                                            <i class="bi bi-upload me-2"></i>
+                                            ইমপোর্ট
+                                        </button>
+                                        <button onclick="exportTemplate()" class="btn btn-outline-info w-50">
+                                            <i class="bi bi-file-earmark-spreadsheet me-2"></i>
+                                            টেমপ্লেট
+                                        </button>
+                                        <input type="file" id="fileInput" class="d-none" onchange="importJSON(event)" accept=".json,.xlsx,.csv">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <div class="table-header" onclick="toggleSection('logContainerWrapper', 'logMinimizeIcon')">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-clock-history me-2"></i>
+                                    অ্যাক্টিভিটি লগ
+                                    <small class="text-muted fs-6 ms-2" id="logCount">(০)</small>
+                                </h5>
+                                <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('logContainerWrapper', 'logMinimizeIcon')">
+                                    <i class="bi bi-plus-lg" id="logMinimizeIcon"></i>
+                                </button>
+                            </div>
+                            <div id="logContainerWrapper" class="chart-content collapsed">
+                                <div id="logContainer" class="log-container"></div>
+                                <div class="mt-3">
+                                    <button onclick="checkAuth(clearLogs)" class="btn btn-sm btn-outline-danger w-100">
+                                        <i class="bi bi-trash me-2"></i>
+                                        লগ মুছে ফেলুন
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div id="addProductContainer" class="chart-content collapsed"> <!-- ডিফল্ট collapsed -->
-                        <div class="mb-3">
-                            <label class="form-label">বারকোড</label>
-                            <div class="input-group">
-                                <input type="text" id="barcode" class="form-control" placeholder="বারকোড (ঐচ্ছিক)" style="border-radius: 12px 0 0 12px;">
-                                <button class="btn btn-outline-secondary" type="button" onclick="generateBarcode()" style="border-radius: 0;">
-                                    <i class="bi bi-upc-scan"></i>
-                                </button>
-                                <button class="barcode-scanner-btn" type="button" onclick="openBarcodeScanner()" style="border-radius: 0 12px 12px 0;">
-                                    <i class="bi bi-camera-fill"></i>
-                                </button>
-                            </div>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">পণ্যের নাম <span class="text-danger">*</span></label>
-                            <input type="text" id="name" class="form-control" placeholder="পণ্যের নাম">
-                        </div>
+                    <div class="col-lg-8">
+                        <div class="table-container">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-box-seam me-2"></i>
+                                    ইনভেন্টরি ম্যানেজমেন্ট
+                                </h5>
+                                <div class="d-flex gap-2">
+                                    <div class="search-box">
+                                        <i class="bi bi-search"></i>
+                                        <input type="text" id="pSearch" class="form-control" placeholder="সার্চ করুন..." onkeyup="filterProducts()">
+                                    </div>
+                                    <select class="form-select form-select-sm" id="categoryFilter" onchange="filterProducts()" style="width: 150px;">
+                                        <option value="">সব ক্যাটাগরি</option>
+                                    </select>
+                                    <select class="form-select form-select-sm" id="expiryFilter" onchange="filterProducts()" style="width: 150px;">
+                                        <option value="">সব পণ্য</option>
+                                        <option value="expired">মেয়াদোত্তীর্ণ</option>
+                                        <option value="expiringSoon">মেয়াদ নিকটে (৭ দিন)</option>
+                                        <option value="valid">ভালো পণ্য</option>
+                                    </select>
+                                </div>
+                            </div>
 
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label class="form-label">ক্যাটাগরি</label>
-                                <input type="text" id="category" class="form-control" placeholder="যেমন: চাল">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle" id="pTable">
+                                    <thead>
+                                        <tr>
+                                            <th>বারকোড</th>
+                                            <th>পণ্যের নাম</th>
+                                            <th>ক্যাটাগরি</th>
+                                            <th>সাপ্লায়ার</th>
+                                            <th>কেনা</th>
+                                            <th>বেচা</th>
+                                            <th>স্টক</th>
+                                            <th>মেয়াদ</th>
+                                            <th>স্ট্যাটাস</th>
+                                            <th>অ্যাকশন</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pBody"></tbody>
+                                </table>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label">সরবরাহকারী</label>
-                                <input type="text" id="supplier" class="form-control" placeholder="Supplier নাম">
-                            </div>
-                        </div>
 
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label class="form-label">কেনা দাম <span class="text-danger">*</span></label>
-                                <input type="number" id="cost" class="form-control" placeholder="০.০০">
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                <div>
+                                    <span class="text-muted">মোট পণ্য: <strong id="totalProducts">০</strong></span>
+                                    <span class="text-muted ms-3">মোট স্টক: <strong id="totalStock">০</strong></span>
+                                    <span class="text-muted ms-3">মেয়াদোত্তীর্ণ: <strong id="expiredCount">০</strong></span>
+                                </div>
+                                <div id="pagination" class="pagination-container"></div>
                             </div>
-                            <div class="col-6">
-                                <label class="form-label">বিক্রয় মূল্য <span class="text-danger">*</span></label>
-                                <input type="number" id="price" class="form-control" placeholder="০.০০">
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label class="form-label">স্টক পরিমাণ <span class="text-danger">*</span></label>
-                                <input type="number" id="stock" class="form-control" placeholder="০">
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label">সতর্কতা সীমা</label>
-                                <input type="number" id="alertLimit" class="form-control" placeholder="যেমন: ৫" value="5">
-                            </div>
-                        </div>
-
-                        <!-- Expiry Date Field -->
-                        <div class="mb-3">
-                            <label class="form-label">মেয়াদোত্তীর্ণ তারিখ <span class="text-muted">(ঐচ্ছিক)</span></label>
-                            <input type="date" id="expiryDate" class="form-control" min="">
-                            <small class="text-muted">পচনশীল পণ্যের জন্য মেয়াদ দিন</small>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button onclick="checkAuth(save)" class="btn btn-primary">
-                                <i class="bi bi-save me-2"></i>
-                                ইনভেন্টরি আপডেট
-                            </button>
-                            <div class="d-flex gap-2">
-                                <button onclick="document.getElementById('fileInput').click()" class="btn btn-outline-dark w-50">
-                                    <i class="bi bi-upload me-2"></i>
-                                    ইমপোর্ট
-                                </button>
-                                <button onclick="exportTemplate()" class="btn btn-outline-info w-50">
-                                    <i class="bi bi-file-earmark-spreadsheet me-2"></i>
-                                    টেমপ্লেট
-                                </button>
-                                <input type="file" id="fileInput" class="d-none" onchange="importJSON(event)" accept=".json,.xlsx,.csv">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Activity Log Card with Minimize Button - ডিফল্ট মিনিমাইজড -->
-                <div class="table-container">
-                    <div class="table-header" onclick="toggleSection('logContainerWrapper', 'logMinimizeIcon')">
-                        <h5 class="mb-0">
-                            <i class="bi bi-clock-history me-2"></i>
-                            অ্যাক্টিভিটি লগ
-                            <small class="text-muted fs-6 ms-2" id="logCount">(০)</small>
-                        </h5>
-                        <button class="minimize-btn" onclick="event.stopPropagation(); toggleSection('logContainerWrapper', 'logMinimizeIcon')">
-                            <i class="bi bi-plus-lg" id="logMinimizeIcon"></i> <!-- ডিফল্ট প্লাস আইকন -->
-                        </button>
-                    </div>
-                    <div id="logContainerWrapper" class="chart-content collapsed"> <!-- ডিফল্ট collapsed -->
-                        <div id="logContainer" class="log-container"></div>
-                        <div class="mt-3">
-                            <button onclick="checkAuth(clearLogs)" class="btn btn-sm btn-outline-danger w-100">
-                                <i class="bi bi-trash me-2"></i>
-                                লগ মুছে ফেলুন
-                            </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column (Inventory Table - সবসময় খোলা) -->
-            <div class="col-lg-8">
+            <!-- Suppliers Tab -->
+            <div class="tab-pane fade" id="suppliers" role="tabpanel">
                 <div class="table-container">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="mb-0">
-                            <i class="bi bi-box-seam me-2"></i>
-                            ইনভেন্টরি ম্যানেজমেন্ট
-                        </h5>
-                        <div class="d-flex gap-2">
-                            <div class="search-box">
-                                <i class="bi bi-search"></i>
-                                <input type="text" id="pSearch" class="form-control" placeholder="সার্চ করুন..." onkeyup="filterProducts()">
-                            </div>
-                            <select class="form-select form-select-sm" id="categoryFilter" onchange="filterProducts()" style="width: 150px;">
-                                <option value="">সব ক্যাটাগরি</option>
-                            </select>
-                            <select class="form-select form-select-sm" id="expiryFilter" onchange="filterProducts()" style="width: 150px;">
-                                <option value="">সব পণ্য</option>
-                                <option value="expired">মেয়াদোত্তীর্ণ</option>
-                                <option value="expiringSoon">মেয়াদ নিকটে (৭ দিন)</option>
-                                <option value="valid">ভালো পণ্য</option>
-                            </select>
-                        </div>
+                        <h5><i class="bi bi-truck me-2"></i>সাপ্লায়ার ম্যানেজমেন্ট</h5>
+                        <button class="btn btn-primary" onclick="openSupplierModal()">
+                            <i class="bi bi-plus-circle"></i> নতুন সাপ্লায়ার
+                        </button>
                     </div>
-
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle" id="pTable">
+                        <table class="table">
                             <thead>
                                 <tr>
-                                    <th>বারকোড</th>
-                                    <th>পণ্যের নাম</th>
-                                    <th>ক্যাটাগরি</th>
-                                    <th>সাপ্লায়ার</th>
-                                    <th>কেনা</th>
-                                    <th>বেচা</th>
-                                    <th>স্টক</th>
-                                    <th>মেয়াদ</th>
-                                    <th>স্ট্যাটাস</th>
+                                    <th>নাম</th>
+                                    <th>ফোন</th>
+                                    <th>ইমেইল</th>
+                                    <th>ঠিকানা</th>
+                                    <th>বাকি</th>
                                     <th>অ্যাকশন</th>
                                 </tr>
                             </thead>
-                            <tbody id="pBody"></tbody>
+                            <tbody id="supplierBody"></tbody>
                         </table>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Table Footer with Summary -->
-                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
-                        <div>
-                            <span class="text-muted">মোট পণ্য: <strong id="totalProducts">০</strong></span>
-                            <span class="text-muted ms-3">মোট স্টক: <strong id="totalStock">০</strong></span>
-                            <span class="text-muted ms-3">মেয়াদোত্তীর্ণ: <strong id="expiredCount">০</strong></span>
-                        </div>
-                        <div id="pagination" class="pagination-container"></div>
+            <!-- Customers Tab -->
+            <div class="tab-pane fade" id="customers" role="tabpanel">
+                <div class="table-container">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5><i class="bi bi-people me-2"></i>কাস্টমার ম্যানেজমেন্ট</h5>
+                        <button class="btn btn-primary" onclick="openCustomerModal()">
+                            <i class="bi bi-plus-circle"></i> নতুন কাস্টমার
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>নাম</th>
+                                    <th>ফোন</th>
+                                    <th>ঠিকানা</th>
+                                    <th>মোট বাকি</th>
+                                    <th>অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customerBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Returns Tab -->
+            <div class="tab-pane fade" id="returns" role="tabpanel">
+                <div class="table-container">
+                    <h5><i class="bi bi-arrow-return-left me-2"></i>রিটার্ন হিস্ট্রি</h5>
+                    <div class="table-responsive mt-3">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>তারিখ</th>
+                                    <th>ইনভয়েস নং</th>
+                                    <th>কাস্টমার</th>
+                                    <th>পণ্য</th>
+                                    <th>রিফান্ড</th>
+                                    <th>কারণ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="returnBody"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Password Modal -->
-    <div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
+    <!-- Modals -->
+    <div class="modal fade" id="passwordModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-shield-lock me-2"></i>
-                        পাসওয়ার্ড পরিবর্তন করুন
-                    </h5>
+                    <h5><i class="bi bi-lock me-2"></i>পাসওয়ার্ড পরিবর্তন</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">বর্তমান পাসওয়ার্ড</label>
+                        <label>বর্তমান পাসওয়ার্ড</label>
                         <input type="password" id="oldPass" class="form-control">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">নতুন পাসওয়ার্ড</label>
+                        <label>নতুন পাসওয়ার্ড</label>
                         <input type="password" id="newPass" class="form-control">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">নতুন পাসওয়ার্ড (আবার)</label>
+                        <label>নতুন পাসওয়ার্ড (আবার)</label>
                         <input type="password" id="confirmPass" class="form-control">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
-                    <button type="button" class="btn btn-primary" onclick="updatePassword()">আপডেট করুন</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                    <button class="btn btn-primary" onclick="updatePassword()">আপডেট</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Edit Modal -->
-    <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="userManagementModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5><i class="bi bi-people me-2"></i>ইউজার ম্যানেজমেন্ট</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <h6>নতুন ইউজার যোগ করুন</h6>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" id="newUsername" class="form-control" placeholder="ইউজার নাম">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="password" id="newUserPass" class="form-control" placeholder="পাসওয়ার্ড">
+                            </div>
+                            <div class="col-md-3">
+                                <select id="newUserRole" class="form-select">
+                                    <option value="staff">স্টাফ</option>
+                                    <option value="admin">অ্যাডমিন</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-primary w-100" onclick="createUser()">যোগ করুন</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ইউজার নাম</th>
+                                    <th>রোল</th>
+                                    <th>তৈরির তারিখ</th>
+                                    <th>অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userListBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-pencil-square me-2"></i>
-                        পণ্য এডিট করুন
-                    </h5>
+                    <h5><i class="bi bi-pencil-square me-2"></i>পণ্য এডিট করুন</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="editId">
                     <div class="mb-3">
-                        <label class="form-label">পণ্যের নাম</label>
+                        <label>পণ্যের নাম</label>
                         <input type="text" id="editName" class="form-control">
                     </div>
                     <div class="row mb-3">
                         <div class="col-6">
-                            <label class="form-label">কেনা দাম</label>
+                            <label>কেনা দাম</label>
                             <input type="number" id="editCost" class="form-control">
                         </div>
                         <div class="col-6">
-                            <label class="form-label">বিক্রয় মূল্য</label>
+                            <label>বিক্রয় মূল্য</label>
                             <input type="number" id="editPrice" class="form-control">
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">স্টক পরিমাণ</label>
+                        <label>স্টক পরিমাণ</label>
                         <input type="number" id="editStock" class="form-control">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">মেয়াদোত্তীর্ণ তারিখ</label>
+                        <label>মেয়াদোত্তীর্ণ তারিখ</label>
                         <input type="date" id="editExpiryDate" class="form-control">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
-                    <button type="button" class="btn btn-success" onclick="checkAuth(updateProduct)">সংরক্ষণ করুন</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                    <button class="btn btn-success" onclick="checkAuth(updateProduct)">সংরক্ষণ করুন</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Expense Modal -->
-    <div class="modal fade" id="expenseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="supplierModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-cash me-2"></i>
-                        খরচ এন্ট্রি
-                    </h5>
+                    <h5><i class="bi bi-truck me-2"></i>সাপ্লায়ার তথ্য</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="supplierId">
+                    <div class="mb-3">
+                        <label>নাম <span class="text-danger">*</span></label>
+                        <input type="text" id="supplierName" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>ফোন <span class="text-danger">*</span></label>
+                        <input type="text" id="supplierPhone" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>ইমেইল</label>
+                        <input type="email" id="supplierEmail" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>ঠিকানা</label>
+                        <textarea id="supplierAddress" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label>নোট</label>
+                        <textarea id="supplierNote" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                    <button class="btn btn-primary" onclick="checkAuth(saveSupplier)">সংরক্ষণ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="customerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5><i class="bi bi-person me-2"></i>কাস্টমার তথ্য</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="customerId">
+                    <div class="mb-3">
+                        <label>নাম <span class="text-danger">*</span></label>
+                        <input type="text" id="customerNameInput" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>ফোন <span class="text-danger">*</span></label>
+                        <input type="text" id="customerPhone" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>ঠিকানা</label>
+                        <textarea id="customerAddressInput" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                    <button class="btn btn-primary" onclick="checkAuth(saveCustomer)">সংরক্ষণ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="expenseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5><i class="bi bi-cash me-2"></i>খরচ এন্ট্রি</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">খরচের বিবরণ</label>
-                        <input type="text" id="expTitle" class="form-control" placeholder="যেমন: ভাড়া, বিল ইত্যাদি">
+                        <label>খরচের বিবরণ</label>
+                        <input type="text" id="expTitle" class="form-control">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">টাকার পরিমাণ</label>
-                        <input type="number" id="expAmount" class="form-control" placeholder="০.০০">
+                        <label>টাকার পরিমাণ</label>
+                        <input type="number" id="expAmount" class="form-control">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">খরচের ধরন</label>
+                        <label>খরচের ধরন</label>
                         <select id="expCategory" class="form-select">
                             <option value="ভাড়া">ভাড়া</option>
                             <option value="বিল">বিল</option>
@@ -1377,44 +1293,18 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
-                    <button type="button" class="btn btn-danger" onclick="checkAuth(addExpense)">খরচ যোগ করুন</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                    <button class="btn btn-danger" onclick="checkAuth(addExpense)">খরচ যোগ করুন</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Barcode Modal -->
-    <div class="modal fade" id="barcodeModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-sm">
-            <div class="modal-content text-center">
-                <div class="modal-header">
-                    <h5 class="modal-title">বারকোড প্রিভিউ</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <svg id="barcodeSVG" class="w-100"></svg>
-                    <div class="mt-3 small text-muted" id="barcodeNumber"></div>
-                </div>
-                <div class="modal-footer">
-                    <button onclick="printBarcode()" class="btn btn-primary w-100">
-                        <i class="bi bi-printer me-2"></i>
-                        প্রিন্ট করুন
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Due Modal -->
-    <div class="modal fade" id="dueModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="dueModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-credit-card me-2"></i>
-                        বাকি তালিকা ও টাকা জমা
-                    </h5>
+                    <h5><i class="bi bi-credit-card me-2"></i>বাকি তালিকা ও টাকা জমা</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -1426,7 +1316,7 @@
                                     <th>বাকি টাকা</th>
                                     <th>তারিখ</th>
                                     <th>অ্যাকশন</th>
-                                </tr>
+                                 </tr>
                             </thead>
                             <tbody id="dueBody"></tbody>
                         </table>
@@ -1436,29 +1326,21 @@
         </div>
     </div>
 
-    <!-- Backup Manager Modal -->
-    <div class="modal fade" id="backupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="backupModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-database me-2"></i>
-                        ব্যাকআপ ম্যানেজার
-                    </h5>
+                    <h5><i class="bi bi-database me-2"></i>ব্যাকআপ ম্যানেজার</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="list-group mb-3" id="backupList">
-                        <!-- Backups will be listed here -->
-                    </div>
+                    <div class="list-group mb-3" id="backupList"></div>
                     <div class="d-grid gap-2">
                         <button onclick="checkAuth(createBackup)" class="btn btn-primary">
-                            <i class="bi bi-cloud-arrow-up me-2"></i>
-                            নতুন ব্যাকআপ তৈরি করুন
+                            <i class="bi bi-cloud-arrow-up me-2"></i> নতুন ব্যাকআপ
                         </button>
                         <button onclick="checkAuth(restoreBackup)" class="btn btn-success">
-                            <i class="bi bi-cloud-arrow-down me-2"></i>
-                            ব্যাকআপ থেকে পুনরুদ্ধার
+                            <i class="bi bi-cloud-arrow-down me-2"></i> ব্যাকআপ থেকে পুনরুদ্ধার
                         </button>
                     </div>
                 </div>
@@ -1466,33 +1348,41 @@
         </div>
     </div>
 
-    <!-- Quick View Modal -->
-    <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="barcodeModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content text-center">
+                <div class="modal-header">
+                    <h5>বারকোড প্রিভিউ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <svg id="barcodeSVG" class="w-100"></svg>
+                    <div class="mt-3 small text-muted" id="barcodeNumber"></div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="printBarcode()" class="btn btn-primary w-100">প্রিন্ট</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="quickViewModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-eye me-2"></i>
-                        পণ্যের বিস্তারিত তথ্য
-                    </h5>
+                    <h5><i class="bi bi-eye me-2"></i>পণ্যের বিস্তারিত তথ্য</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body" id="quickViewContent">
-                    <!-- Product details will be loaded here -->
-                </div>
+                <div class="modal-body" id="quickViewContent"></div>
             </div>
         </div>
     </div>
 
-    <!-- Expiry Report Modal -->
-    <div class="modal fade" id="expiryReportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="expiryReportModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-calendar-exclamation me-2"></i>
-                        মেয়াদোত্তীর্ণ পণ্যের রিপোর্ট
-                    </h5>
+                    <h5><i class="bi bi-calendar-exclamation me-2"></i>মেয়াদোত্তীর্ণ পণ্যের রিপোর্ট</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -1506,7 +1396,7 @@
                                     <th>মেয়াদ</th>
                                     <th>অবস্থা</th>
                                     <th>অ্যাকশন</th>
-                                </tr>
+                                 </tr>
                             </thead>
                             <tbody id="expiryReportBody"></tbody>
                         </table>
@@ -1516,621 +1406,347 @@
         </div>
     </div>
 
+    <div class="scanner-modal" id="scannerModal">
+        <div class="scanner-container">
+            <div class="scanner-header">
+                <h5><i class="bi bi-upc-scan me-2"></i>বারকোড স্ক্যানার</h5>
+                <button onclick="closeScanner()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="scanner-option" id="scannerOption">
+                <button class="btn-mobile" onclick="startMobileScanner()">
+                    <i class="bi bi-phone"></i> মোবাইল ক্যামেরা
+                </button>
+                <button class="btn-hardware" onclick="startHardwareScanner()">
+                    <i class="bi bi-upc-scan"></i> হার্ডওয়্যার স্ক্যানার
+                </button>
+            </div>
+            <div id="scanner-view" style="display: none;">
+                <div class="scanner-overlay">
+                    <div class="scanner-line"></div>
+                </div>
+            </div>
+            <div class="camera-controls" id="cameraControls" style="display: none;">
+                <button onclick="switchCamera()"><i class="bi bi-arrow-repeat"></i> ক্যামেরা সুইচ</button>
+                <button onclick="toggleTorch()" id="torchBtn"><i class="bi bi-brightness-high"></i> টর্চ</button>
+            </div>
+            <div class="scanner-result" id="scannerResult">স্ক্যান করার জন্য অপশন সিলেক্ট করুন...</div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // ==================== GLOBAL VARIABLES ====================
+        // ==================== AUTH & GLOBAL ====================
+        let currentUser = null;
         let products = [];
-        let cart = [];
-        let currentMemoNo = localStorage.getItem('lastMemoNo') ? parseInt(localStorage.getItem('lastMemoNo')) + 1 : 1;
-        let currentDiscount = 0;
-        let paymentMethod = 'cash';
-        let isOffline = false;
-        let currentHoldCartId = null;
-        
-        // Loading Spinner
-        function showLoading() {
-            document.getElementById('loadingSpinner').classList.add('show');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingSpinner').classList.remove('show');
-        }
-
-        // State Management
+        let suppliers = [];
+        let customers = [];
+        let sales = [];
+        let expenses = [];
+        let activityLogs = [];
         let currentChart = null;
         let categoryChart = null;
-        let activityLogs = [];
-        
         let currentPage = 1;
-        const rowsPerPage = 10;
+        let rowsPerPage = 10;
         let allProducts = [];
         let filteredProductsList = [];
-
-        // Section minimize states - ডিফল্ট true (মিনিমাইজড)
+        
         let salesChartMinimized = true;
         let categoryChartMinimized = true;
         let addProductMinimized = true;
         let logMinimized = true;
-
-        // Scanner Variables
+        
         let html5QrCode = null;
         let isScanning = false;
         let currentCameraId = null;
         let cameras = [];
         let lastScannedCode = null;
         let lastScanTime = 0;
-        let torchEnabled = false;
-        let scannerTargetInput = 'barcode'; // which input field to fill
-
-        // API Base URL
+        
         const API_BASE = '';
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // সেকশনগুলো ডিফল্ট মিনিমাইজড
-            initializeMinimizedSections();
-            
-            load();
-            initializeEventListeners();
-            setMinExpiryDate();
-            loadBackupList();
-        });
-
-        // ডিফল্ট মিনিমাইজড সেকশন সেটআপ
-        function initializeMinimizedSections() {
-            // আইকন আপডেট
-            document.getElementById('salesChartMinimizeIcon').className = 'bi bi-plus-lg';
-            document.getElementById('categoryChartMinimizeIcon').className = 'bi bi-plus-lg';
-            document.getElementById('addProductMinimizeIcon').className = 'bi bi-plus-lg';
-            document.getElementById('logMinimizeIcon').className = 'bi bi-plus-lg';
-            
-            // স্টেট আপডেট
-            salesChartMinimized = true;
-            categoryChartMinimized = true;
-            addProductMinimized = true;
-            logMinimized = true;
-        }
-
-        // Section minimize function
-        function toggleSection(sectionId, iconId) {
-            const container = document.getElementById(sectionId);
-            const icon = document.getElementById(iconId);
-            
-            if (!container || !icon) return;
-            
-            if (container.classList.contains('collapsed')) {
-                container.classList.remove('collapsed');
-                icon.classList.remove('bi-plus-lg');
-                icon.classList.add('bi-dash-lg');
-                
-                if (sectionId === 'salesChartContainer') {
-                    salesChartMinimized = false;
-                    // চার্ট রিফ্রেশ
-                    if (currentChart) {
-                        setTimeout(() => currentChart.resize(), 100);
-                    }
-                }
-                else if (sectionId === 'categoryChartContainer') {
-                    categoryChartMinimized = false;
-                    if (categoryChart) {
-                        setTimeout(() => categoryChart.resize(), 100);
-                    }
-                }
-                else if (sectionId === 'addProductContainer') {
-                    addProductMinimized = false;
-                }
-                else if (sectionId === 'logContainerWrapper') {
-                    logMinimized = false;
-                    renderLogs();
-                }
-            } else {
-                container.classList.add('collapsed');
-                icon.classList.remove('bi-dash-lg');
-                icon.classList.add('bi-plus-lg');
-                
-                if (sectionId === 'salesChartContainer') salesChartMinimized = true;
-                else if (sectionId === 'categoryChartContainer') categoryChartMinimized = true;
-                else if (sectionId === 'addProductContainer') addProductMinimized = true;
-                else if (sectionId === 'logContainerWrapper') logMinimized = true;
-            }
-        }
-
-        function setMinExpiryDate() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('expiryDate').setAttribute('min', today);
-            document.getElementById('editExpiryDate').setAttribute('min', today);
-        }
-
-        function initializeEventListeners() {
-            document.addEventListener('keydown', function(e) {
-                if (e.ctrlKey && e.key === 's') {
-                    e.preventDefault();
-                    checkAuth(save);
-                }
-                if (e.ctrlKey && e.key === 'f') {
-                    e.preventDefault();
-                    document.getElementById('pSearch').focus();
-                }
-                if (e.ctrlKey && e.key === 'd') {
-                    e.preventDefault();
-                    toggleDarkMode();
-                }
-                if (e.ctrlKey && e.key === 'e') {
-                    e.preventDefault();
-                    showExpiryReport();
-                }
-            });
-        }
-
-        // ==================== BARCODE SCANNER FUNCTIONS ====================
         
-        // Open scanner with options
-        function openBarcodeScanner() {
-            const modal = document.getElementById('scannerModal');
-            modal.classList.add('active');
-            
-            // Show scanner options, hide camera view
-            document.getElementById('scannerOption').style.display = 'block';
-            document.getElementById('scanner-view').style.display = 'none';
-            document.getElementById('cameraControls').style.display = 'none';
-            document.getElementById('scannerResult').innerHTML = '<i class="bi bi-upc-scan me-2"></i>স্ক্যান করার জন্য একটি অপশন সিলেক্ট করুন...';
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast-notification toast-${type}`;
+            toast.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
-
-        // Close scanner
-        function closeScanner() {
-            const modal = document.getElementById('scannerModal');
-            modal.classList.remove('active');
-            
-            // Stop scanner if running
-            if (html5QrCode && isScanning) {
-                try {
-                    html5QrCode.stop();
-                    html5QrCode.clear();
-                } catch (e) {}
-                html5QrCode = null;
-                isScanning = false;
-            }
-            
-            document.getElementById('scannerOption').style.display = 'block';
-            document.getElementById('scanner-view').style.display = 'none';
-            document.getElementById('cameraControls').style.display = 'none';
-        }
-
-        // Start mobile camera scanner
-        async function startMobileScanner() {
-            // Hide options, show camera view
-            document.getElementById('scannerOption').style.display = 'none';
-            document.getElementById('scanner-view').style.display = 'block';
-            document.getElementById('cameraControls').style.display = 'flex';
-            document.getElementById('scannerResult').innerHTML = 'ক্যামেরা চালু হচ্ছে...';
-            
-            try {
-                // Check camera support
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    throw new Error('ক্যামেরা সাপোর্ট করে না');
-                }
-
-                // Create scanner instance
-                html5QrCode = new Html5Qrcode("scanner-view");
-                
-                // Get cameras
-                cameras = await Html5Qrcode.getCameras();
-                
-                if (cameras && cameras.length > 0) {
-                    // Find back camera
-                    let backCameraId = null;
-                    for (let camera of cameras) {
-                        const label = camera.label.toLowerCase();
-                        if (label.includes('back') || label.includes('environment') || label.includes('rear')) {
-                            backCameraId = camera.id;
-                            break;
-                        }
-                    }
-                    
-                    const cameraId = backCameraId || cameras[0].id;
-                    await startCameraScanning(cameraId);
-                } else {
-                    throw new Error('কোনো ক্যামেরা পাওয়া যায়নি');
-                }
-            } catch (error) {
-                document.getElementById('scannerResult').innerHTML = `
-                    <span class="text-danger">
-                        <i class="bi bi-exclamation-circle"></i> ${error.message}
-                    </span>
-                `;
-            }
-        }
-
-        // Start camera scanning
-        async function startCameraScanning(cameraId) {
-            try {
-                currentCameraId = cameraId;
-                
-                const config = {
-                    fps: 10,
-                    qrbox: { width: 280, height: 150 },
-                    aspectRatio: 1.0
-                };
-                
-                await html5QrCode.start(
-                    cameraId,
-                    config,
-                    onScanSuccess,
-                    (error) => {} // silent error
-                );
-                
-                isScanning = true;
-                document.getElementById('scannerResult').innerHTML = 'বারকোড স্ক্যান করুন...';
-                
-            } catch (error) {
-                document.getElementById('scannerResult').innerHTML = `
-                    <span class="text-danger">
-                        <i class="bi bi-exclamation-circle"></i> ক্যামেরা চালু করতে সমস্যা
-                    </span>
-                `;
-            }
-        }
-
-        // Scan success callback
-        function onScanSuccess(decodedText, decodedResult) {
-            const currentTime = Date.now();
-            
-            // Prevent duplicate scans within 2 seconds
-            if (decodedText === lastScannedCode && (currentTime - lastScanTime) < 2000) {
-                return;
-            }
-            
-            lastScannedCode = decodedText;
-            lastScanTime = currentTime;
-            
-            // Play beep sound
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                oscillator.frequency.value = 800;
-                gainNode.gain.value = 0.5;
-                oscillator.start();
-                oscillator.stop(audioContext.currentTime + 0.1);
-            } catch (e) {}
-            
-            // Update result display
-            document.getElementById('scannerResult').innerHTML = `
-                <span class="text-success">
-                    <i class="bi bi-check-circle-fill"></i> স্ক্যান করা হয়েছে: ${decodedText}
-                </span>
-            `;
-            
-            // Fill barcode input field
-            document.getElementById('barcode').value = decodedText;
-            
-            // Auto-close after 1.5 seconds
-            setTimeout(() => {
-                closeScanner();
-            }, 1500);
-        }
-
-        // Start hardware scanner
-        function startHardwareScanner() {
-            // Hide options
-            document.getElementById('scannerOption').style.display = 'none';
-            
-            // Show message for hardware scanner
-            document.getElementById('scannerResult').innerHTML = `
-                <div class="text-center">
-                    <i class="bi bi-upc-scan" style="font-size: 3rem; color: #667eea;"></i>
-                    <p class="mt-3">অনুগ্রহ করে আসল বারকোড স্ক্যানার দিয়ে স্ক্যান করুন...</p>
-                    <p class="text-muted small">স্ক্যান করার পর এটি স্বয়ংক্রিয়ভাবে ইনপুট ফিল্ডে যুক্ত হবে</p>
-                </div>
-            `;
-            
-            // Focus on barcode input for hardware scanner
-            document.getElementById('barcode').focus();
-            
-            // Auto-close after 30 seconds
-            setTimeout(() => {
-                closeScanner();
-            }, 30000);
-        }
-
-        // Switch camera
-        async function switchCamera() {
-            if (!cameras || cameras.length < 2) {
-                alert('একাধিক ক্যামেরা পাওয়া যায়নি');
-                return;
-            }
-            
-            try {
-                if (html5QrCode && isScanning) {
-                    await html5QrCode.stop();
-                    isScanning = false;
-                }
-                
-                let nextCameraIndex = 0;
-                if (currentCameraId) {
-                    const currentIndex = cameras.findIndex(c => c.id === currentCameraId);
-                    nextCameraIndex = (currentIndex + 1) % cameras.length;
-                }
-                
-                document.getElementById('scannerResult').innerHTML = 'ক্যামেরা সুইচ করা হচ্ছে...';
-                await startCameraScanning(cameras[nextCameraIndex].id);
-                
-            } catch (error) {
-                console.error('Switch camera error:', error);
-            }
-        }
-
-        // Toggle torch
-        async function toggleTorch() {
-            if (!html5QrCode || !isScanning) return;
-            
-            try {
-                torchEnabled = !torchEnabled;
-                await html5QrCode.turnTorchOn(torchEnabled);
-                
-                const torchBtn = document.getElementById('torchBtn');
-                if (torchEnabled) {
-                    torchBtn.innerHTML = '<i class="bi bi-brightness-high-fill"></i> টর্চ অফ';
-                    torchBtn.style.background = '#10b981';
-                } else {
-                    torchBtn.innerHTML = '<i class="bi bi-brightness-high"></i> টর্চ';
-                    torchBtn.style.background = '#667eea';
-                }
-            } catch (error) {
-                alert('টর্চ এই ক্যামেরায় সাপোর্ট করে না');
-            }
-        }
-
-        // ==================== AUTH FUNCTIONS ====================
         
-        // 🔐 Password Protection
+        function showLoading() {
+            document.getElementById('loadingSpinner').classList.add('show');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingSpinner').classList.remove('show');
+        }
+        
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+        
         async function checkAuth(callback, ...args) {
-            let inputPassword = prompt("🔒 সিকিউরিটি পাসওয়ার্ড দিন:");
-            
-            if (!inputPassword) {
-                showToast("পাসওয়ার্ড দেওয়া হয়নি!", "warning");
+            const token = getToken();
+            if (!token) {
+                showToast('প্লিজ লগইন করুন', 'warning');
+                window.location.href = 'login.html';
                 return;
             }
             
-            showLoading();
             try {
-                const response = await fetch(`${API_BASE}/api/verify-password`, {
+                const response = await fetch(`${API_BASE}/api/verify-token`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: inputPassword })
+                    body: JSON.stringify({ token })
                 });
-                
                 const data = await response.json();
                 
                 if (data.valid) {
                     if (typeof callback === 'function') {
-                        callback(inputPassword, ...args);
+                        callback(...args);
                     }
-                    showToast("✅ পাসওয়ার্ড সঠিক!", "success");
                 } else {
-                    showToast("❌ ভুল পাসওয়ার্ড!", "error");
+                    showToast('সেশন এক্সপায়ার হয়েছে, পুনরায় লগইন করুন', 'error');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = 'login.html';
                 }
             } catch (error) {
-                console.error('Auth error:', error);
-                showToast("পাসওয়ার্ড ভেরিফাই করতে সমস্যা হয়েছে", "error");
-            } finally {
-                hideLoading();
+                showToast('অথেনটিকেশন চেক করতে সমস্যা', 'error');
             }
         }
-
-        // Password Update
+        
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+        
+        async function loadUserInfo() {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                currentUser = JSON.parse(userStr);
+                document.getElementById('userName').innerText = currentUser.username;
+                document.getElementById('userRole').innerText = currentUser.role === 'admin' ? 'অ্যাডমিন' : 'স্টাফ';
+                
+                if (currentUser.role === 'admin') {
+                    document.getElementById('userManagementBtn').style.display = 'block';
+                }
+            }
+        }
+        
         async function updatePassword() {
-            let oldP = document.getElementById('oldPass').value;
-            let newP = document.getElementById('newPass').value;
-            let confirmP = document.getElementById('confirmPass').value;
+            const oldPass = document.getElementById('oldPass').value;
+            const newPass = document.getElementById('newPass').value;
+            const confirmPass = document.getElementById('confirmPass').value;
             
-            if(newP !== confirmP) {
-                showToast("নতুন পাসওয়ার্ড মিলছে না!", "error");
+            if (newPass !== confirmPass) {
+                showToast('নতুন পাসওয়ার্ড মিলছে না', 'error');
                 return;
             }
             
-            if (newP.length < 4) {
-                showToast("পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে", "warning");
+            if (newPass.length < 4) {
+                showToast('পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে', 'warning');
                 return;
             }
+            
+            const user = currentUser;
+            if (!user) return;
             
             showLoading();
             try {
                 const response = await fetch(`${API_BASE}/api/update-password`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ oldPassword: oldP, newPassword: newP })
+                    body: JSON.stringify({ username: user.username, oldPassword: oldPass, newPassword: newPass })
                 });
-                
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast("✅ পাসওয়ার্ড সফলভাবে আপডেট হয়েছে", "success");
+                    showToast('পাসওয়ার্ড আপডেট হয়েছে', 'success');
                     bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
                     document.getElementById('oldPass').value = '';
                     document.getElementById('newPass').value = '';
                     document.getElementById('confirmPass').value = '';
                 } else {
-                    showToast(data.error || "পাসওয়ার্ড আপডেট করতে সমস্যা হয়েছে", "error");
+                    showToast(data.error || 'পাসওয়ার্ড আপডেট করতে সমস্যা', 'error');
                 }
             } catch (error) {
-                showToast("পাসওয়ার্ড আপডেট করতে সমস্যা হয়েছে", "error");
+                showToast('সার্ভার ত্রুটি', 'error');
             } finally {
                 hideLoading();
             }
         }
-
-        // Password Reset
-        async function removePassword() {
-            let input = prompt("🔒 পাসওয়ার্ড রিসেট করতে বর্তমান পাসওয়ার্ড দিন:");
-            if (!input) return;
+        
+        async function createUser() {
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newUserPass').value.trim() || '1234';
+            const role = document.getElementById('newUserRole').value;
             
+            if (!username) {
+                showToast('ইউজার নাম দিন', 'warning');
+                return;
+            }
+            
+            const token = getToken();
             showLoading();
             try {
-                const response = await fetch(`${API_BASE}/api/reset-password`, {
+                const response = await fetch(`${API_BASE}/api/users`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ currentPassword: input })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ username, password, role })
                 });
-                
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast("✅ পাসওয়ার্ড ডিফল্ট '1234' এ রিসেট করা হয়েছে", "success");
+                    showToast(`ইউজার "${username}" তৈরি হয়েছে`, 'success');
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newUserPass').value = '';
+                    loadUsers();
                 } else {
-                    showToast(data.error || "পাসওয়ার্ড রিসেট করতে সমস্যা হয়েছে", "error");
+                    showToast(data.error || 'ইউজার তৈরি করতে সমস্যা', 'error');
                 }
             } catch (error) {
-                showToast("পাসওয়ার্ড রিসেট করতে সমস্যা হয়েছে", "error");
+                showToast('সার্ভার ত্রুটি', 'error');
             } finally {
                 hideLoading();
             }
         }
-
-        // ==================== TOAST NOTIFICATION ====================
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast-notification toast-${type}`;
-            toast.innerHTML = `
-                <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
-                ${message}
-            `;
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${type === 'success' ? '#43e97b' : type === 'error' ? '#ff0844' : '#667eea'};
-                color: white;
-                padding: 15px 25px;
-                border-radius: 12px;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-                z-index: 9999;
-                animation: slideIn 0.3s ease;
-            `;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // ==================== UPDATE SYNC STATUS ====================
-        function updateSyncStatus() {
-            const statusEl = document.getElementById('syncStatus');
-            if (navigator.onLine) {
-                statusEl.className = 'badge bg-success';
-                statusEl.innerHTML = '<i class="bi bi-wifi"></i> অনলাইন';
-                if (isOffline) {
-                    isOffline = false;
-                    loadProducts();
-                    loadHeldCarts();
-                }
-            } else {
-                statusEl.className = 'badge bg-warning';
-                statusEl.innerHTML = '<i class="bi bi-wifi-off"></i> অফলাইন';
-                isOffline = true;
+        
+        async function loadUsers() {
+            const token = getToken();
+            try {
+                const response = await fetch(`${API_BASE}/api/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const users = await response.json();
+                
+                const tbody = document.getElementById('userListBody');
+                tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td>${u.username}</td>
+                        <td><span class="badge ${u.role === 'admin' ? 'bg-danger' : 'bg-success'}">${u.role === 'admin' ? 'অ্যাডমিন' : 'স্টাফ'}</span></td>
+                        <td>${new Date(u.createdAt).toLocaleDateString('bn-BD')}</td>
+                        <td>
+                            ${u.username !== 'admin' ? `<button class="btn btn-sm btn-danger" onclick="deleteUser('${u._id}', '${u.username}')"><i class="bi bi-trash"></i></button>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Load users error:', error);
             }
         }
-
-        window.addEventListener('online', updateSyncStatus);
-        window.addEventListener('offline', updateSyncStatus);
-        setInterval(updateSyncStatus, 5000);
-
-        // ==================== LOAD PRODUCTS ====================
+        
+        async function deleteUser(userId, username) {
+            if (!confirm(`"${username}" ইউজারটি ডিলিট করতে চান?`)) return;
+            
+            const token = getToken();
+            try {
+                const response = await fetch(`${API_BASE}/api/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(`ইউজার "${username}" ডিলিট হয়েছে`, 'success');
+                    loadUsers();
+                } else {
+                    showToast(data.error || 'ডিলিট করতে সমস্যা', 'error');
+                }
+            } catch (error) {
+                showToast('সার্ভার ত্রুটি', 'error');
+            }
+        }
+        
+        // ==================== MAIN LOAD FUNCTION ====================
         async function load() {
             showLoading();
             try {
-                const pRes = await fetch(`${API_BASE}/api/products`);
-                allProducts = await pRes.json();
+                const [pRes, sRes, eRes, lRes, supRes, cusRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/products`),
+                    fetch(`${API_BASE}/api/sales`),
+                    fetch(`${API_BASE}/api/expenses`),
+                    fetch(`${API_BASE}/api/logs`),
+                    fetch(`${API_BASE}/api/suppliers`),
+                    fetch(`${API_BASE}/api/customers`)
+                ]);
                 
-                filteredProductsList = [...allProducts]; 
+                allProducts = await pRes.json();
+                products = allProducts;
+                filteredProductsList = [...allProducts];
+                
+                sales = await sRes.json();
+                expenses = await eRes.json();
+                const logs = await lRes.json();
+                suppliers = await supRes.json();
+                customers = await cusRes.json();
+                
+                activityLogs = logs.map(log => ({ action: log.action, user: log.user, time: new Date(log.date).toLocaleString('bn-BD') }));
+                
+                updateStatistics();
                 updateCategoryFilter();
                 renderProductTable();
                 updateTableSummary();
-
-                const sRes = await fetch(`${API_BASE}/api/sales`);
-                const sales = await sRes.json();
-                
-                const eRes = await fetch(`${API_BASE}/api/expenses`);
-                const expenses = await eRes.json();
-                
-                const lRes = await fetch(`${API_BASE}/api/logs`);
-                const logs = await lRes.json();
-                activityLogs = logs.map(log => ({
-                    action: log.action,
-                    time: new Date(log.date).toLocaleString('bn-BD')
-                }));
-                
-                updateStatistics(sales, expenses);
-                
-                // শুধুমাত্র যদি আনমিনিমাইজড থাকে তাহলে চার্ট আপডেট
-                if (!categoryChartMinimized) {
-                    updateCategoryChart(sales);
-                }
-                
-                if (!salesChartMinimized) {
-                    renderGraph(sales);
-                }
-                
+                renderSuppliers();
+                renderCustomers();
+                renderReturns();
                 renderLogs();
                 checkLowStock();
                 checkExpiryProducts();
                 
+                if (!categoryChartMinimized) updateCategoryChart();
+                if (!salesChartMinimized) renderGraph();
+                
             } catch (error) {
-                console.error('Error loading data:', error);
-                showToast('ডাটা লোড করতে সমস্যা হয়েছে', 'error');
+                console.error('Load error:', error);
+                showToast('ডাটা লোড করতে সমস্যা', 'error');
             } finally {
                 hideLoading();
             }
         }
-
-        function updateStatistics(sales, expenses) {
+        
+        function updateStatistics() {
             let ts = 0, tp = 0, td = 0;
-            
-            sales.forEach(s => { 
-                ts += s.totalAmount; 
-                tp += s.profit; 
-                td += s.dueAmount; 
-            });
-
+            sales.forEach(s => { ts += s.totalAmount; tp += s.profit; td += s.dueAmount; });
             let totalExp = expenses.reduce((a, b) => a + b.amount, 0);
             let stockVal = allProducts.reduce((acc, p) => acc + (p.costPrice * p.stock), 0);
             
-            animateValue('tSales', 0, ts, 1000);
-            animateValue('tProfit', 0, tp, 1000);
-            animateValue('tExp', 0, totalExp, 1000);
-            animateValue('nProfit', 0, tp - totalExp, 1000);
-            animateValue('tDue', 0, td, 1000);
-            animateValue('tVal', 0, stockVal, 1000);
-
+            animateValue('tSales', 0, ts);
+            animateValue('tProfit', 0, tp);
+            animateValue('tExp', 0, totalExp);
+            animateValue('nProfit', 0, tp - totalExp);
+            animateValue('tDue', 0, td);
+            animateValue('tVal', 0, stockVal);
+            
             let percent = Math.min((ts / 1000000) * 100, 100).toFixed(1);
             document.getElementById('goalProgress').style.width = percent + '%';
             document.getElementById('goalProgress').innerText = percent + '%';
             document.getElementById('achievedAmount').innerText = ts.toLocaleString() + ' ৳';
-
-            updateDueTable(sales);
+            
+            updateDueTable();
         }
-
-        function animateValue(elementId, start, end, duration) {
+        
+        function animateValue(elementId, start, end) {
             const element = document.getElementById(elementId);
-            const range = end - start;
-            const increment = range / (duration / 10);
+            const duration = 1000;
+            const stepTime = 20;
+            const steps = duration / stepTime;
+            const increment = (end - start) / steps;
             let current = start;
+            let step = 0;
             
             const timer = setInterval(() => {
                 current += increment;
-                if (current >= end) {
+                step++;
+                if (step >= steps) {
                     current = end;
                     clearInterval(timer);
                 }
                 element.innerText = Math.round(current).toLocaleString() + '৳';
-            }, 10);
+            }, stepTime);
         }
-
-        function updateDueTable(sales) {
+        
+        function updateDueTable() {
             let dueHtml = '';
             sales.filter(s => s.dueAmount > 0).forEach(s => {
                 dueHtml += `<tr>
@@ -2141,506 +1757,229 @@
                         <button class="btn btn-sm btn-success" onclick="checkAuth(payDue, '${s._id}', ${s.dueAmount})">
                             <i class="bi bi-cash"></i> জমা
                         </button>
-                        <button class="btn btn-sm btn-info" onclick="printInvoice('${s._id}')">
-                            <i class="bi bi-printer"></i>
-                        </button>
                     </td>
                 </tr>`;
             });
             document.getElementById('dueBody').innerHTML = dueHtml || '<tr><td colspan="4" class="text-center">কোনো বাকি নেই</td></tr>';
         }
-
+        
+        async function payDue(password, saleId, currentDue) {
+            let amount = prompt(`বাকি আছে ${currentDue}৳। কত টাকা জমা নিতে চান?`, currentDue);
+            if (amount && !isNaN(amount) && amount > 0) {
+                showLoading();
+                try {
+                    await fetch(`${API_BASE}/api/sales/pay-due/${saleId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password, paidAmount: Number(amount) })
+                    });
+                    showToast(`${amount}৳ জমা নেয়া হয়েছে`, 'success');
+                    await load();
+                } catch (error) {
+                    showToast('টাকা জমা নিতে সমস্যা', 'error');
+                } finally {
+                    hideLoading();
+                }
+            }
+        }
+        
         function updateCategoryFilter() {
             const categories = [...new Set(allProducts.map(p => p.category).filter(Boolean))];
             const filter = document.getElementById('categoryFilter');
-            filter.innerHTML = '<option value="">সব ক্যাটাগরি</option>' + 
-                categories.map(c => `<option value="${c}">${c}</option>`).join('');
+            filter.innerHTML = '<option value="">সব ক্যাটাগরি</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
         }
-
+        
         function updateTableSummary() {
             document.getElementById('totalProducts').innerText = allProducts.length;
             const totalStock = allProducts.reduce((acc, p) => acc + p.stock, 0);
             document.getElementById('totalStock').innerText = totalStock;
-            
             const expiredCount = allProducts.filter(p => isExpired(p.expiryDate)).length;
             document.getElementById('expiredCount').innerText = expiredCount;
         }
-
-        function updateCategoryChart(sales) {
+        
+        function updateCategoryChart() {
             if (categoryChartMinimized) return;
-            
             let catStats = {};
             sales.forEach(s => {
                 s.items.forEach(item => {
                     catStats[item.category || 'General'] = (catStats[item.category || 'General'] || 0) + item.qty;
                 });
             });
-
             const ctx = document.getElementById('categoryChart').getContext('2d');
-            if(categoryChart) categoryChart.destroy();
-            
+            if (categoryChart) categoryChart.destroy();
             categoryChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(catStats),
-                    datasets: [{
-                        data: Object.values(catStats),
-                        backgroundColor: [
-                            '#667eea', '#43e97b', '#fa709a', '#ff0844', '#f093fb',
-                            '#f5576c', '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'
-                        ],
-                        borderWidth: 0
-                    }]
+                    datasets: [{ data: Object.values(catStats), backgroundColor: ['#667eea', '#43e97b', '#fa709a', '#ff0844', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'], borderWidth: 0 }]
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: { size: 12 }
-                            }
-                        }
-                    },
-                    cutout: '70%'
-                }
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } }, cutout: '70%' }
             });
         }
-
-        function renderGraph(sales) {
+        
+        function renderGraph() {
             if (salesChartMinimized) return;
-            
             const ctx = document.getElementById('salesChart').getContext('2d');
             const limit = parseInt(document.getElementById('chartFilter').value);
-            
             const recentSales = sales.slice(-limit);
             const labels = recentSales.map(s => new Date(s.date).toLocaleDateString('bn-BD'));
             const saleData = recentSales.map(s => s.totalAmount);
             const profitData = recentSales.map(s => s.profit);
-
             if (currentChart) currentChart.destroy();
-            
             currentChart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { 
-                            label: 'বিক্রি (৳)', 
-                            data: saleData, 
-                            borderColor: '#667eea',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                            tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: '#667eea'
-                        },
-                        { 
-                            label: 'লাভ (৳)', 
-                            data: profitData, 
-                            borderColor: '#43e97b',
-                            backgroundColor: 'rgba(67, 233, 123, 0.1)',
-                            tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: '#43e97b'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
-                }
+                data: { labels, datasets: [{ label: 'বিক্রি (৳)', data: saleData, borderColor: '#667eea', backgroundColor: 'rgba(102,126,234,0.1)', tension: 0.4, fill: true }, { label: 'লাভ (৳)', data: profitData, borderColor: '#43e97b', backgroundColor: 'rgba(67,233,123,0.1)', tension: 0.4, fill: true }] },
+                options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true } } }
             });
         }
-
-        function refreshChart() {
-            load();
-        }
-
-        // Expiry Date Functions
+        
+        function refreshChart() { load(); }
+        
         function isExpired(expiryDate) {
             if (!expiryDate) return false;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const expiry = new Date(expiryDate);
-            expiry.setHours(0, 0, 0, 0);
+            const today = new Date(); today.setHours(0,0,0,0);
+            const expiry = new Date(expiryDate); expiry.setHours(0,0,0,0);
             return expiry < today;
         }
-
+        
         function isExpiringSoon(expiryDate, days = 7) {
             if (!expiryDate) return false;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const expiry = new Date(expiryDate);
-            expiry.setHours(0, 0, 0, 0);
+            const today = new Date(); today.setHours(0,0,0,0);
+            const expiry = new Date(expiryDate); expiry.setHours(0,0,0,0);
             const diffDays = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
             return diffDays > 0 && diffDays <= days;
         }
-
+        
         function getExpiryStatus(expiryDate) {
             if (!expiryDate) return { class: 'badge-success', text: 'নেই', label: 'কোনো মেয়াদ নেই' };
             if (isExpired(expiryDate)) return { class: 'badge-expired', text: 'মেয়াদোত্তীর্ণ', label: 'মেয়াদোত্তীর্ণ' };
             if (isExpiringSoon(expiryDate, 7)) return { class: 'badge-expiry', text: 'নিকটে', label: `${getDaysUntilExpiry(expiryDate)} দিন বাকি` };
-            if (isExpiringSoon(expiryDate, 30)) return { class: 'badge-expiry-soon', text: 'সতর্ক', label: `${getDaysUntilExpiry(expiryDate)} দিন বাকি` };
             return { class: 'badge-success', text: 'ভালো', label: `${getDaysUntilExpiry(expiryDate)} দিন বাকি` };
         }
-
+        
         function getDaysUntilExpiry(expiryDate) {
             if (!expiryDate) return 0;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const expiry = new Date(expiryDate);
-            expiry.setHours(0, 0, 0, 0);
+            const today = new Date(); today.setHours(0,0,0,0);
+            const expiry = new Date(expiryDate); expiry.setHours(0,0,0,0);
             return Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
         }
-
+        
         function formatExpiryDate(expiryDate) {
             if (!expiryDate) return 'N/A';
             return new Date(expiryDate).toLocaleDateString('bn-BD');
         }
-
+        
         function checkExpiryProducts() {
             const expiredProducts = allProducts.filter(p => isExpired(p.expiryDate));
             const expiringSoonProducts = allProducts.filter(p => isExpiringSoon(p.expiryDate, 7));
-            
             const expiryNotiContent = document.getElementById('expiryNotiContent');
             const expiryNotiHeaderCount = document.getElementById('expiryNotiHeaderCount');
-            
             const totalExpiryWarnings = expiredProducts.length + expiringSoonProducts.length;
             expiryNotiHeaderCount.innerText = totalExpiryWarnings;
-            
             if (totalExpiryWarnings > 0) {
                 let notiHtml = '';
-                
                 expiredProducts.forEach(p => {
-                    notiHtml += `
-                        <div class="dropdown-item py-3 border-bottom expiry-critical">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong class="text-dark">${p.name}</strong>
-                                    <br>
-                                    <small class="text-dark">
-                                        <span class="badge bg-dark me-1">মেয়াদ: ${formatExpiryDate(p.expiryDate)}</span>
-                                        <span class="badge bg-danger">মেয়াদোত্তীর্ণ</span>
-                                    </small>
-                                </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-danger" onclick="checkAuth(markExpiredForDiscount, '${p._id}')" title="ডিসকাউন্টে বিক্রি">
-                                        <i class="bi bi-tag"></i> ডিসকাউন্ট
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                    notiHtml += `<div class="dropdown-item py-3 border-bottom expiry-critical"><div class="d-flex justify-content-between"><div><strong>${p.name}</strong><br><small><span class="badge bg-dark me-1">মেয়াদ: ${formatExpiryDate(p.expiryDate)}</span><span class="badge bg-danger">মেয়াদোত্তীর্ণ</span></small></div><div><button class="btn btn-sm btn-outline-danger" onclick="checkAuth(markExpiredForDiscount, '${p._id}')"><i class="bi bi-tag"></i> ডিসকাউন্ট</button></div></div></div>`;
                 });
-                
                 expiringSoonProducts.forEach(p => {
                     if (!isExpired(p.expiryDate)) {
-                        notiHtml += `
-                            <div class="dropdown-item py-3 border-bottom expiry-warning">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong class="text-dark">${p.name}</strong>
-                                        <br>
-                                        <small class="text-dark">
-                                            <span class="badge bg-warning text-dark me-1">মেয়াদ: ${formatExpiryDate(p.expiryDate)}</span>
-                                            <span class="badge bg-warning text-dark">${getDaysUntilExpiry(p.expiryDate)} দিন বাকি</span>
-                                        </small>
-                                    </div>
-                                    <div>
-                                        <button class="btn btn-sm btn-outline-warning" onclick="checkAuth(extendExpiryAlert, '${p._id}')" title="সতর্কতা স্নুজ">
-                                            <i class="bi bi-alarm"></i> মনে করান
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+                        notiHtml += `<div class="dropdown-item py-3 border-bottom expiry-warning"><div class="d-flex justify-content-between"><div><strong>${p.name}</strong><br><small><span class="badge bg-warning text-dark me-1">মেয়াদ: ${formatExpiryDate(p.expiryDate)}</span><span class="badge bg-warning text-dark">${getDaysUntilExpiry(p.expiryDate)} দিন বাকি</span></small></div><div><button class="btn btn-sm btn-outline-warning" onclick="checkAuth(extendExpiryAlert, '${p._id}')"><i class="bi bi-alarm"></i> মনে করান</button></div></div></div>`;
                     }
                 });
-                
                 expiryNotiContent.innerHTML = notiHtml;
             } else {
                 expiryNotiContent.innerHTML = '<div class="text-center p-4"><i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i><p class="text-muted mt-2">✅ কোনো মেয়াদোত্তীর্ণ পণ্য নেই</p></div>';
             }
-
             const expiryAlert = document.getElementById('expiryAlert');
             if (totalExpiryWarnings > 0) {
                 expiryAlert.classList.remove('d-none');
                 const allExpiryWarnings = [...expiredProducts, ...expiringSoonProducts];
-                document.getElementById('expiryList').innerHTML = allExpiryWarnings.map(p => 
-                    `<span class="badge ${isExpired(p.expiryDate) ? 'bg-dark' : 'bg-warning text-dark'} me-1">${p.name} (${formatExpiryDate(p.expiryDate)})</span>`
-                ).join('');
+                document.getElementById('expiryList').innerHTML = allExpiryWarnings.map(p => `<span class="badge ${isExpired(p.expiryDate) ? 'bg-dark' : 'bg-warning text-dark'} me-1">${p.name} (${formatExpiryDate(p.expiryDate)})</span>`).join('');
             } else {
                 expiryAlert.classList.add('d-none');
             }
-
-            const lowStockProducts = allProducts.filter(p => p.stock < (p.alertLimit || 5));
-            document.getElementById('notiCount').innerText = lowStockProducts.length + totalExpiryWarnings;
-            document.getElementById('notiHeaderCount').innerText = lowStockProducts.length;
         }
-
+        
         function markExpiredForDiscount(password, productId) {
             const product = allProducts.find(p => p._id === productId);
             if (product) {
-                const discountPrice = prompt(`"${product.name}" এর জন্য ডিসকাউন্ট মূল্য দিন (বর্তমান মূল্য: ${product.price}৳):`, Math.round(product.price * 0.7));
+                const discountPrice = prompt(`"${product.name}" এর জন্য ডিসকাউন্ট মূল্য দিন (বর্তমান: ${product.price}৳):`, Math.round(product.price * 0.7));
                 if (discountPrice && !isNaN(discountPrice) && discountPrice > 0) {
                     updateProductPrice(password, productId, Number(discountPrice));
                 }
             }
         }
-
+        
         function extendExpiryAlert(password, productId) {
             showToast('আগামীকাল আবার মনে করানো হবে', 'success');
         }
-
+        
         async function updateProductPrice(password, productId, newPrice) {
             showLoading();
             try {
-                await fetch(`${API_BASE}/api/products/${productId}`, { 
-                    method: 'PUT', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ password, price: newPrice })
-                });
+                await fetch(`${API_BASE}/api/products/${productId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, price: newPrice }) });
                 await load();
-                showToast('মূল্য আপডেট করা হয়েছে', 'success');
+                showToast('মূল্য আপডেট হয়েছে', 'success');
             } catch (error) {
-                showToast('মূল্য আপডেট করতে সমস্যা হয়েছে', 'error');
+                showToast('মূল্য আপডেট করতে সমস্যা', 'error');
             } finally {
                 hideLoading();
             }
         }
-
+        
         function showExpiryReport() {
-            const expiredProducts = allProducts.filter(p => p.expiryDate);
-            const sortedProducts = expiredProducts.sort((a, b) => {
-                if (!a.expiryDate) return 1;
-                if (!b.expiryDate) return -1;
-                return new Date(a.expiryDate) - new Date(b.expiryDate);
-            });
-            
+            const expiredProducts = allProducts.filter(p => p.expiryDate).sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
             let reportHtml = '';
-            sortedProducts.forEach(p => {
+            expiredProducts.forEach(p => {
                 const status = getExpiryStatus(p.expiryDate);
-                reportHtml += `
-                    <tr class="${isExpired(p.expiryDate) ? 'table-danger' : isExpiringSoon(p.expiryDate, 7) ? 'table-warning' : ''}">
-                        <td><strong>${p.name}</strong></td>
-                        <td>${p.category || 'N/A'}</td>
-                        <td><span class="badge bg-primary">${p.stock}</span></td>
-                        <td>${formatExpiryDate(p.expiryDate)}</td>
-                        <td><span class="badge ${status.class}">${status.label}</span></td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary" onclick="quickView('${p._id}')">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
+                reportHtml += `<tr class="${isExpired(p.expiryDate) ? 'table-danger' : isExpiringSoon(p.expiryDate,7) ? 'table-warning' : ''}">
+                    <td><strong>${p.name}</strong></td>
+                    <td>${p.category || 'N/A'}</td>
+                    <td><span class="badge bg-primary">${p.stock}</span></td>
+                    <td>${formatExpiryDate(p.expiryDate)}</td>
+                    <td><span class="badge ${status.class}">${status.label}</span></td>
+                    <td><button class="btn btn-sm btn-outline-primary" onclick="quickView('${p._id}')"><i class="bi bi-eye"></i></button></td>
+                </tr>`;
             });
-            
             document.getElementById('expiryReportBody').innerHTML = reportHtml || '<tr><td colspan="6" class="text-center">কোনো মেয়াদযুক্ত পণ্য নেই</td></tr>';
             new bootstrap.Modal(document.getElementById('expiryReportModal')).show();
         }
-
+        
         function renderProductTable() {
             const tbody = document.getElementById('pBody');
             tbody.innerHTML = '';
-            
             const start = (currentPage - 1) * rowsPerPage;
             const end = start + rowsPerPage;
             const paginatedItems = filteredProductsList.slice(start, end);
-
             paginatedItems.forEach(p => {
                 let limit = p.alertLimit || 5;
                 let stockClass = p.stock < limit ? 'badge-critical' : (p.stock < (limit + 5) ? 'badge-low' : 'badge-success');
                 let status = p.stock < limit ? 'কম' : (p.stock < (limit + 5) ? 'মাঝারি' : 'স্বাভাবিক');
-                
                 let expiryStatus = getExpiryStatus(p.expiryDate);
-                let expiryDisplay = p.expiryDate ? 
-                    `<span class="badge ${expiryStatus.class} expiry-badge" title="${expiryStatus.label}">${formatExpiryDate(p.expiryDate)}</span>` : 
-                    '<span class="badge badge-success">N/A</span>';
-                
-                tbody.innerHTML += `<tr class="${isExpired(p.expiryDate) ? 'expiry-critical' : isExpiringSoon(p.expiryDate, 7) ? 'expiry-warning' : ''}">
+                let expiryDisplay = p.expiryDate ? `<span class="badge ${expiryStatus.class} expiry-badge" title="${expiryStatus.label}">${formatExpiryDate(p.expiryDate)}</span>` : '<span class="badge badge-success">N/A</span>';
+                let supplierName = p.supplier ? (typeof p.supplier === 'object' ? p.supplier.name : suppliers.find(s => s._id === p.supplier)?.name || 'N/A') : 'N/A';
+                tbody.innerHTML += `<tr class="${isExpired(p.expiryDate) ? 'expiry-critical' : isExpiringSoon(p.expiryDate,7) ? 'expiry-warning' : ''}">
                     <td><span class="badge bg-light text-dark">${p.barcode || 'N/A'}</span></td>
-                    <td>
-                        <strong>${p.name}</strong>
-                        <br>
-                        <small class="text-muted">ID: ${p._id.slice(-6)}</small>
-                    </td>
+                    <td><strong>${p.name}</strong><br><small class="text-muted">ID: ${p._id.slice(-6)}</small></td>
                     <td>${p.category || 'N/A'}</td>
-                    <td>${p.supplier || 'N/A'}</td>
+                    <td>${supplierName}</td>
                     <td>${p.costPrice}৳</td>
                     <td>${p.price}৳</td>
                     <td><span class="badge ${stockClass}">${p.stock}</span></td>
                     <td>${expiryDisplay}</td>
-                    <td>
-                        <span class="badge ${stockClass}">${status}</span>
-                        ${isExpired(p.expiryDate) ? '<br><small class="badge badge-expired mt-1">মেয়াদোত্তীর্ণ</small>' : ''}
-                    </td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary" onclick="checkAuth(openEditModal, '${p._id}')" title="এডিট">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-outline-info" onclick="quickView('${p._id}')" title="দ্রুত দেখুন">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                            <button class="btn btn-outline-danger" onclick="checkAuth(deleteProduct, '${p._id}', '${p.name}')" title="ডিলিট">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>`;
-            });
-
-            updateNotifications();
-            renderPagination();
-        }
-
-        function quickView(productId) {
-            const product = allProducts.find(p => p._id === productId);
-            if(!product) return;
-            
-            const expiryStatus = getExpiryStatus(product.expiryDate);
-            const content = `
-                <div class="text-center mb-4">
-                    <h4>${product.name}</h4>
-                    <span class="badge bg-primary">${product.category || 'N/A'}</span>
-                </div>
-                <table class="table table-bordered">
-                    <tr>
-                        <th>বারকোড</th>
-                        <td>${product.barcode || 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <th>সরবরাহকারী</th>
-                        <td>${product.supplier || 'N/A'}</td>
-                    </tr>
-                    <tr>
-                        <th>কেনা দাম</th>
-                        <td>${product.costPrice}৳</td>
-                    </tr>
-                    <tr>
-                        <th>বিক্রয় মূল্য</th>
-                        <td>${product.price}৳</td>
-                    </tr>
-                    <tr>
-                        <th>স্টক</th>
-                        <td><span class="badge ${product.stock < (product.alertLimit || 5) ? 'bg-danger' : 'bg-success'}">${product.stock}</span></td>
-                    </tr>
-                    <tr>
-                        <th>মেয়াদোত্তীর্ণ তারিখ</th>
-                        <td>
-                            ${product.expiryDate ? formatExpiryDate(product.expiryDate) : 'N/A'}
-                            ${product.expiryDate ? `<br><small class="badge ${expiryStatus.class} mt-1">${expiryStatus.label}</small>` : ''}
+                    <td><span class="badge ${stockClass}">${status}</span>${isExpired(p.expiryDate) ? '<br><small class="badge badge-expired mt-1">মেয়াদোত্তীর্ণ</small>' : ''}</td>
+                    <td>                            <div class="btn-group btn-group-sm"><button class="btn btn-outline-primary" onclick="checkAuth(openEditModal, '${p._id}')"><i class="bi bi-pencil"></i></button><button class="btn btn-outline-info" onclick="quickView('${p._id}')"><i class="bi bi-eye"></i></button><button class="btn btn-outline-danger" onclick="checkAuth(deleteProduct, '${p._id}', '${p.name}')"><i class="bi bi-trash"></i></button></div>
                         </td>
-                    </tr>
-                    <tr>
-                        <th>মোট মূল্য (স্টক)</th>
-                        <td>${product.costPrice * product.stock}৳</td>
-                    </tr>
-                </table>
-            `;
-            
-            document.getElementById('quickViewContent').innerHTML = content;
-            new bootstrap.Modal(document.getElementById('quickViewModal')).show();
-        }
-
-        function updateNotifications() {
-            let lowStockProducts = allProducts.filter(p => p.stock < (p.alertLimit || 5));
-            let expiredProducts = allProducts.filter(p => isExpired(p.expiryDate));
-            let expiringSoonProducts = allProducts.filter(p => isExpiringSoon(p.expiryDate, 7));
-            
-            const notiCount = document.getElementById('notiCount');
-            const notiHeaderCount = document.getElementById('notiHeaderCount');
-            const notiContent = document.getElementById('notiContent');
-            
-            notiCount.innerText = lowStockProducts.length + expiredProducts.length + expiringSoonProducts.length;
-            notiHeaderCount.innerText = lowStockProducts.length;
-            
-            if (lowStockProducts.length > 0) {
-                let notiHtml = '';
-                lowStockProducts.forEach(p => {
-                    notiHtml += `
-                        <div class="dropdown-item py-3 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong class="text-danger">${p.name}</strong>
-                                    <br>
-                                    <small class="text-muted">
-                                        <span class="badge bg-danger me-1">স্টক: ${p.stock}</span>
-                                        <span class="badge bg-warning text-dark">সীমা: ${p.alertLimit || 5}</span>
-                                    </small>
-                                </div>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-primary" onclick="checkAuth(restockProduct, '${p._id}')" title="স্টক যোগ করুন">
-                                        <i class="bi bi-plus-circle"></i> যোগ করুন
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                notiContent.innerHTML = notiHtml;
-            } else {
-                notiContent.innerHTML = '<div class="text-center p-4"><i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i><p class="text-muted mt-2">✅ সব স্টক ঠিক আছে</p></div>';
-            }
-
-            if (lowStockProducts.length > 0) {
-                const alert = document.getElementById('lowStockAlert');
-                alert.classList.remove('d-none');
-                document.getElementById('lowStockList').innerHTML = lowStockProducts.map(p => `<span class="badge bg-danger me-1">${p.name} (${p.stock})</span>`).join('');
-            } else {
-                document.getElementById('lowStockAlert').classList.add('d-none');
-            }
-        }
-
-        function restockProduct(password, productId) {
-            let qty = prompt("কত Quantity যোগ করতে চান?");
-            if(qty && !isNaN(qty) && parseInt(qty) > 0) {
-                const product = allProducts.find(p => p._id === productId);
-                if(product) {
-                    updateProductStock(password, productId, product.stock + parseInt(qty));
-                }
-            }
-        }
-
-        async function updateProductStock(password, productId, newStock) {
-            showLoading();
-            try {
-                await fetch(`${API_BASE}/api/products/${productId}`, { 
-                    method: 'PUT', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ password, stock: newStock })
-                });
-                showToast('স্টক আপডেট করা হয়েছে', 'success');
-                await load();
-            } catch (error) {
-                showToast('স্টক আপডেট করতে সমস্যা হয়েছে', 'error');
-            } finally {
-                hideLoading();
-            }
+                    </tr>`;
+            });
+            renderPagination();
         }
 
         function renderPagination() {
             const pageCount = Math.ceil(filteredProductsList.length / rowsPerPage);
             const container = document.getElementById('pagination');
-            
-            if(pageCount <= 1) {
-                container.innerHTML = '';
-                return;
-            }
-
-            let html = `
-                <button class="btn btn-sm" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-                    <i class="bi bi-chevron-left"></i>
-                </button>
-            `;
-            
+            if (pageCount <= 1) { container.innerHTML = ''; return; }
+            let html = `<button class="btn btn-sm" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i></button>`;
             for (let i = 1; i <= pageCount; i++) {
                 if (i === 1 || i === pageCount || (i >= currentPage - 2 && i <= currentPage + 2)) {
                     html += `<button class="btn btn-sm ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
@@ -2648,174 +1987,121 @@
                     html += `<button class="btn btn-sm" disabled>...</button>`;
                 }
             }
-            
-            html += `
-                <button class="btn btn-sm" onclick="changePage(${currentPage + 1})" ${currentPage === pageCount ? 'disabled' : ''}>
-                    <i class="bi bi-chevron-right"></i>
-                </button>
-            `;
-            
+            html += `<button class="btn btn-sm" onclick="changePage(${currentPage + 1})" ${currentPage === pageCount ? 'disabled' : ''}><i class="bi bi-chevron-right"></i></button>`;
             container.innerHTML = html;
         }
 
-        function changePage(page) {
-            currentPage = page;
-            renderProductTable();
-        }
+        function changePage(page) { currentPage = page; renderProductTable(); }
 
         function filterProducts() {
             let searchTerm = document.getElementById('pSearch').value.toUpperCase();
             let category = document.getElementById('categoryFilter').value;
             let expiryFilter = document.getElementById('expiryFilter').value;
-            
             filteredProductsList = allProducts.filter(p => {
-                const matchesSearch = `${p.name} ${p.barcode} ${p.category} ${p.supplier}`.toUpperCase().includes(searchTerm);
+                const matchesSearch = `${p.name} ${p.barcode} ${p.category}`.toUpperCase().includes(searchTerm);
                 const matchesCategory = !category || p.category === category;
-                
                 let matchesExpiry = true;
-                if (expiryFilter === 'expired') {
-                    matchesExpiry = isExpired(p.expiryDate);
-                } else if (expiryFilter === 'expiringSoon') {
-                    matchesExpiry = isExpiringSoon(p.expiryDate, 7);
-                } else if (expiryFilter === 'valid') {
-                    matchesExpiry = !p.expiryDate || (!isExpired(p.expiryDate) && !isExpiringSoon(p.expiryDate, 7));
-                }
-                
+                if (expiryFilter === 'expired') matchesExpiry = isExpired(p.expiryDate);
+                else if (expiryFilter === 'expiringSoon') matchesExpiry = isExpiringSoon(p.expiryDate, 7);
+                else if (expiryFilter === 'valid') matchesExpiry = !p.expiryDate || (!isExpired(p.expiryDate) && !isExpiringSoon(p.expiryDate, 7));
                 return matchesSearch && matchesCategory && matchesExpiry;
             });
-            
-            currentPage = 1; 
+            currentPage = 1;
             renderProductTable();
         }
 
         function checkLowStock() {
             let lowStock = allProducts.filter(p => p.stock < (p.alertLimit || 5));
-            if (lowStock.length > 0) {
-                showToast(`${lowStock.length} টি পণ্যের স্টক কম!`, 'warning');
+            if (lowStock.length > 0) showToast(`${lowStock.length} টি পণ্যের স্টক কম!`, 'warning');
+            updateNotifications(lowStock);
+        }
+
+        function updateNotifications(lowStockProducts) {
+            const notiCount = document.getElementById('notiCount');
+            const notiHeaderCount = document.getElementById('notiHeaderCount');
+            const notiContent = document.getElementById('notiContent');
+            notiCount.innerText = lowStockProducts.length;
+            notiHeaderCount.innerText = lowStockProducts.length;
+            if (lowStockProducts.length > 0) {
+                let notiHtml = '';
+                lowStockProducts.forEach(p => {
+                    notiHtml += `<div class="dropdown-item py-3 border-bottom"><div class="d-flex justify-content-between"><div><strong class="text-danger">${p.name}</strong><br><small><span class="badge bg-danger me-1">স্টক: ${p.stock}</span><span class="badge bg-warning text-dark">সীমা: ${p.alertLimit || 5}</span></small></div><div><button class="btn btn-sm btn-outline-primary" onclick="checkAuth(restockProduct, '${p._id}')"><i class="bi bi-plus-circle"></i> যোগ করুন</button></div></div></div>`;
+                });
+                notiContent.innerHTML = notiHtml;
+            } else {
+                notiContent.innerHTML = '<div class="text-center p-4"><i class="bi bi-check-circle-fill text-success" style="font-size: 2rem;"></i><p class="text-muted mt-2">✅ সব স্টক ঠিক আছে</p></div>';
+            }
+            const alert = document.getElementById('lowStockAlert');
+            if (lowStockProducts.length > 0) {
+                alert.classList.remove('d-none');
+                document.getElementById('lowStockList').innerHTML = lowStockProducts.map(p => `<span class="badge bg-danger me-1">${p.name} (${p.stock})</span>`).join('');
+            } else {
+                alert.classList.add('d-none');
             }
         }
 
-        // CRUD Operations
-        async function save(password) {
-            if (!validateProductInput()) return;
-            
+        function restockProduct(password, productId) {
+            let qty = prompt("কত Quantity যোগ করতে চান?");
+            if (qty && !isNaN(qty) && parseInt(qty) > 0) {
+                const product = allProducts.find(p => p._id === productId);
+                if (product) updateProductStock(password, productId, product.stock + parseInt(qty));
+            }
+        }
+
+        async function updateProductStock(password, productId, newStock) {
             showLoading();
             try {
-                const payload = { 
-                    password,
-                    barcode: document.getElementById('barcode').value,
-                    name: document.getElementById('name').value, 
-                    category: document.getElementById('category').value,
-                    supplier: document.getElementById('supplier').value,
-                    costPrice: Number(document.getElementById('cost').value),
-                    price: Number(document.getElementById('price').value), 
-                    stock: Number(document.getElementById('stock').value),
-                    alertLimit: Number(document.getElementById('alertLimit').value) || 5,
+                await fetch(`${API_BASE}/api/products/${productId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, stock: newStock }) });
+                showToast('স্টক আপডেট হয়েছে', 'success');
+                await load();
+            } catch (error) {
+                showToast('স্টক আপডেট করতে সমস্যা', 'error');
+            } finally { hideLoading(); }
+        }
+
+        async function save(password) {
+            if (!document.getElementById('name').value) { showToast('পণ্যের নাম দিন', 'warning'); return; }
+            if (!document.getElementById('cost').value || document.getElementById('cost').value <= 0) { showToast('সঠিক কেনা দাম দিন', 'warning'); return; }
+            if (!document.getElementById('price').value || document.getElementById('price').value <= 0) { showToast('সঠিক বিক্রয় মূল্য দিন', 'warning'); return; }
+            if (!document.getElementById('stock').value || document.getElementById('stock').value < 0) { showToast('স্টক পরিমাণ দিন', 'warning'); return; }
+            showLoading();
+            try {
+                const payload = {
+                    password, barcode: document.getElementById('barcode').value, name: document.getElementById('name').value,
+                    category: document.getElementById('category').value, supplier: document.getElementById('supplier').value || null,
+                    costPrice: Number(document.getElementById('cost').value), price: Number(document.getElementById('price').value),
+                    stock: Number(document.getElementById('stock').value), alertLimit: Number(document.getElementById('alertLimit').value) || 5,
                     expiryDate: document.getElementById('expiryDate').value || null
                 };
-                
-                await fetch(`${API_BASE}/api/products`, { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(payload)
-                });
-                
-                showToast('পণ্য সফলভাবে যোগ করা হয়েছে', 'success');
-                clearProductForm();
+                await fetch(`${API_BASE}/api/products`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                showToast('পণ্য যোগ করা হয়েছে', 'success');
+                document.getElementById('barcode').value = ''; document.getElementById('name').value = ''; document.getElementById('category').value = '';
+                document.getElementById('supplier').value = ''; document.getElementById('cost').value = ''; document.getElementById('price').value = '';
+                document.getElementById('stock').value = ''; document.getElementById('alertLimit').value = '5'; document.getElementById('expiryDate').value = '';
                 await load();
-                
-            } catch (error) {
-                showToast('পণ্য যোগ করতে সমস্যা হয়েছে', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function validateProductInput() {
-            const name = document.getElementById('name').value;
-            const cost = document.getElementById('cost').value;
-            const price = document.getElementById('price').value;
-            const stock = document.getElementById('stock').value;
-            
-            if (!name) {
-                showToast('পণ্যের নাম দিন', 'warning');
-                return false;
-            }
-            if (!cost || cost <= 0) {
-                showToast('সঠিক কেনা দাম দিন', 'warning');
-                return false;
-            }
-            if (!price || price <= 0) {
-                showToast('সঠিক বিক্রয় মূল্য দিন', 'warning');
-                return false;
-            }
-            if (!stock || stock < 0) {
-                showToast('স্টক পরিমাণ দিন', 'warning');
-                return false;
-            }
-            return true;
-        }
-
-        function clearProductForm() {
-            document.getElementById('barcode').value = '';
-            document.getElementById('name').value = '';
-            document.getElementById('category').value = '';
-            document.getElementById('supplier').value = '';
-            document.getElementById('cost').value = '';
-            document.getElementById('price').value = '';
-            document.getElementById('stock').value = '';
-            document.getElementById('alertLimit').value = '5';
-            document.getElementById('expiryDate').value = '';
+            } catch (error) { showToast('পণ্য যোগ করতে সমস্যা', 'error'); } finally { hideLoading(); }
         }
 
         async function updateProduct(password) {
             const id = document.getElementById('editId').value;
-            const payload = {
-                password,
-                name: document.getElementById('editName').value,
-                costPrice: Number(document.getElementById('editCost').value),
-                price: Number(document.getElementById('editPrice').value),
-                stock: Number(document.getElementById('editStock').value),
-                expiryDate: document.getElementById('editExpiryDate').value || null
-            };
-            
+            const payload = { password, name: document.getElementById('editName').value, costPrice: Number(document.getElementById('editCost').value), price: Number(document.getElementById('editPrice').value), stock: Number(document.getElementById('editStock').value), expiryDate: document.getElementById('editExpiryDate').value || null };
             showLoading();
             try {
-                await fetch(`${API_BASE}/api/products/${id}`, { 
-                    method: 'PUT', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(payload)
-                });
-                
-                showToast('পণ্য আপডেট করা হয়েছে', 'success');
-                
+                await fetch(`${API_BASE}/api/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                showToast('পণ্য আপডেট হয়েছে', 'success');
                 bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
                 await load();
-                
-            } catch (error) {
-                showToast('আপডেট করতে সমস্যা হয়েছে', 'error');
-            } finally {
-                hideLoading();
-            }
+            } catch (error) { showToast('আপডেট করতে সমস্যা', 'error'); } finally { hideLoading(); }
         }
 
         async function deleteProduct(password, id, name) {
-            if (confirm(`আপনি কি "${name}" পণ্যটি ডিলিট করতে চান?`)) {
+            if (confirm(`"${name}" পণ্যটি ডিলিট করতে চান?`)) {
                 showLoading();
                 try {
-                    await fetch(`${API_BASE}/api/products/${id}`, { 
-                        method: 'DELETE',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ password })
-                    });
-                    showToast('পণ্য ডিলিট করা হয়েছে', 'success');
+                    await fetch(`${API_BASE}/api/products/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
+                    showToast('পণ্য ডিলিট হয়েছে', 'success');
                     await load();
-                    
-                } catch (error) {
-                    showToast('ডিলিট করতে সমস্যা হয়েছে', 'error');
-                } finally {
-                    hideLoading();
-                }
+                } catch (error) { showToast('ডিলিট করতে সমস্যা', 'error'); } finally { hideLoading(); }
             }
         }
 
@@ -2832,312 +2118,226 @@
             }
         }
 
-        // Expense Management
+        function quickView(productId) {
+            const product = allProducts.find(p => p._id === productId);
+            if (!product) return;
+            const expiryStatus = getExpiryStatus(product.expiryDate);
+            const supplierName = product.supplier ? (typeof product.supplier === 'object' ? product.supplier.name : suppliers.find(s => s._id === product.supplier)?.name || 'N/A') : 'N/A';
+            const content = `<div class="text-center mb-4"><h4>${product.name}</h4><span class="badge bg-primary">${product.category || 'N/A'}</span></div>
+                <table class="table table-bordered"><tr><th>বারকোড</th><td>${product.barcode || 'N/A'}</td></tr>
+                <tr><th>সরবরাহকারী</th><td>${supplierName}</td></tr>
+                <tr><th>কেনা দাম</th><td>${product.costPrice}৳</td></tr>
+                <tr><th>বিক্রয় মূল্য</th><td>${product.price}৳</td></tr>
+                <tr><th>স্টক</th><td><span class="badge ${product.stock < (product.alertLimit || 5) ? 'bg-danger' : 'bg-success'}">${product.stock}</span></td></tr>
+                <tr><th>মেয়াদোত্তীর্ণ তারিখ</th><td>${product.expiryDate ? formatExpiryDate(product.expiryDate) : 'N/A'} ${product.expiryDate ? `<br><small class="badge ${expiryStatus.class} mt-1">${expiryStatus.label}</small>` : ''}</td></tr>
+                <tr><th>মোট মূল্য (স্টক)</th><td>${product.costPrice * product.stock}৳</td></tr></table>`;
+            document.getElementById('quickViewContent').innerHTML = content;
+            new bootstrap.Modal(document.getElementById('quickViewModal')).show();
+        }
+
         async function addExpense(password) {
             let title = document.getElementById('expTitle').value;
             let amount = Number(document.getElementById('expAmount').value);
             let category = document.getElementById('expCategory').value;
-            
-            if (!title || !amount) {
-                showToast('সব তথ্য দিন', 'warning');
-                return;
-            }
-            
-            if (amount <= 0) {
-                showToast('সঠিক পরিমাণ দিন', 'warning');
-                return;
-            }
-            
+            if (!title || !amount || amount <= 0) { showToast('সব তথ্য দিন', 'warning'); return; }
             showLoading();
             try {
-                const expenseData = { 
-                    password,
-                    title, 
-                    amount, 
-                    category,
-                    date: new Date() 
-                };
-                
-                await fetch(`${API_BASE}/api/expenses`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(expenseData)
-                });
-                
+                await fetch(`${API_BASE}/api/expenses`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, title, amount, category }) });
                 showToast('খরচ যোগ করা হয়েছে', 'success');
-                
-                document.getElementById('expTitle').value = '';
-                document.getElementById('expAmount').value = '';
+                document.getElementById('expTitle').value = ''; document.getElementById('expAmount').value = '';
                 bootstrap.Modal.getInstance(document.getElementById('expenseModal')).hide();
                 await load();
-                
-            } catch (error) {
-                showToast('খরচ যোগ করতে সমস্যা হয়েছে', 'error');
-            } finally {
-                hideLoading();
-            }
+            } catch (error) { showToast('খরচ যোগ করতে সমস্যা', 'error'); } finally { hideLoading(); }
         }
 
-        // Due Payment
-        async function payDue(password, saleId, currentDue) {
-            let amount = prompt(`বাকি আছে ${currentDue}৳। কত টাকা জমা নিতে চান?`, currentDue);
-            if(amount && !isNaN(amount) && amount > 0) {
+        // Supplier Functions
+        function renderSuppliers() {
+            const tbody = document.getElementById('supplierBody');
+            tbody.innerHTML = suppliers.map(s => `
+                <tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td>${s.phone}</td>
+                    <td>${s.email || 'N/A'}</td>
+                    <td>${s.address || 'N/A'}</td>
+                    <td class="text-danger">${s.dueAmount || 0}৳</td>
+                    <td><button class="btn btn-sm btn-outline-primary" onclick="editSupplier('${s._id}')"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="checkAuth(deleteSupplier, '${s._id}', '${s.name}')"><i class="bi bi-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function openSupplierModal(supplier = null) {
+            if (supplier) {
+                document.getElementById('supplierId').value = supplier._id;
+                document.getElementById('supplierName').value = supplier.name;
+                document.getElementById('supplierPhone').value = supplier.phone;
+                document.getElementById('supplierEmail').value = supplier.email || '';
+                document.getElementById('supplierAddress').value = supplier.address || '';
+                document.getElementById('supplierNote').value = supplier.note || '';
+            } else {
+                document.getElementById('supplierId').value = '';
+                document.getElementById('supplierName').value = '';
+                document.getElementById('supplierPhone').value = '';
+                document.getElementById('supplierEmail').value = '';
+                document.getElementById('supplierAddress').value = '';
+                document.getElementById('supplierNote').value = '';
+            }
+            new bootstrap.Modal(document.getElementById('supplierModal')).show();
+        }
+
+        function editSupplier(id) {
+            const supplier = suppliers.find(s => s._id === id);
+            if (supplier) openSupplierModal(supplier);
+        }
+
+        async function saveSupplier(password) {
+            const id = document.getElementById('supplierId').value;
+            const data = {
+                name: document.getElementById('supplierName').value,
+                phone: document.getElementById('supplierPhone').value,
+                email: document.getElementById('supplierEmail').value,
+                address: document.getElementById('supplierAddress').value,
+                note: document.getElementById('supplierNote').value
+            };
+            if (!data.name || !data.phone) { showToast('নাম এবং ফোন দিন', 'warning'); return; }
+            showLoading();
+            try {
+                if (id) {
+                    await fetch(`${API_BASE}/api/suppliers/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, ...data }) });
+                    showToast('সাপ্লায়ার আপডেট হয়েছে', 'success');
+                } else {
+                    await fetch(`${API_BASE}/api/suppliers`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, ...data }) });
+                    showToast('সাপ্লায়ার যোগ হয়েছে', 'success');
+                }
+                bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide();
+                await load();
+                loadSupplierDropdown();
+            } catch (error) { showToast('সাপ্লায়ার সংরক্ষণে সমস্যা', 'error'); } finally { hideLoading(); }
+        }
+
+        async function deleteSupplier(password, id, name) {
+            if (confirm(`"${name}" সাপ্লায়ারটি ডিলিট করতে চান?`)) {
                 showLoading();
                 try {
-                    await fetch(`${API_BASE}/api/sales/pay-due/${saleId}`, { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({ password, paidAmount: Number(amount) })
-                    });
-                    
-                    showToast(`${amount}৳ জমা নেয়া হয়েছে`, 'success');
+                    await fetch(`${API_BASE}/api/suppliers/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
+                    showToast('সাপ্লায়ার ডিলিট হয়েছে', 'success');
                     await load();
-                    
-                } catch (error) {
-                    showToast('টাকা জমা নিতে সমস্যা হয়েছে', 'error');
-                } finally {
-                    hideLoading();
+                    loadSupplierDropdown();
+                } catch (error) { showToast('ডিলিট করতে সমস্যা', 'error'); } finally { hideLoading(); }
+            }
+        }
+
+        function loadSupplierDropdown() {
+            const select = document.getElementById('supplier');
+            select.innerHTML = '<option value="">সিলেক্ট করুন</option>' + suppliers.map(s => `<option value="${s._id}">${s.name}</option>`).join('');
+        }
+
+        // Customer Functions
+        function renderCustomers() {
+            const tbody = document.getElementById('customerBody');
+            tbody.innerHTML = customers.map(c => `
+                <tr>
+                    <td><strong>${c.name}</strong></td>
+                    <td>${c.phone || 'N/A'}</td>
+                    <td>${c.address || 'N/A'}</td>
+                    <td class="text-danger">${c.totalDue || 0}৳</td>
+                    <td><button class="btn btn-sm btn-outline-primary" onclick="editCustomer('${c._id}')"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="checkAuth(deleteCustomer, '${c._id}', '${c.name}')"><i class="bi bi-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        function openCustomerModal(customer = null) {
+            if (customer) {
+                document.getElementById('customerId').value = customer._id;
+                document.getElementById('customerNameInput').value = customer.name;
+                document.getElementById('customerPhone').value = customer.phone || '';
+                document.getElementById('customerAddressInput').value = customer.address || '';
+            } else {
+                document.getElementById('customerId').value = '';
+                document.getElementById('customerNameInput').value = '';
+                document.getElementById('customerPhone').value = '';
+                document.getElementById('customerAddressInput').value = '';
+            }
+            new bootstrap.Modal(document.getElementById('customerModal')).show();
+        }
+
+        function editCustomer(id) {
+            const customer = customers.find(c => c._id === id);
+            if (customer) openCustomerModal(customer);
+        }
+
+        async function saveCustomer(password) {
+            const id = document.getElementById('customerId').value;
+            const data = {
+                name: document.getElementById('customerNameInput').value,
+                phone: document.getElementById('customerPhone').value,
+                address: document.getElementById('customerAddressInput').value
+            };
+            if (!data.name || !data.phone) { showToast('নাম এবং ফোন দিন', 'warning'); return; }
+            showLoading();
+            try {
+                if (id) {
+                    await fetch(`${API_BASE}/api/customers/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, ...data }) });
+                    showToast('কাস্টমার আপডেট হয়েছে', 'success');
+                } else {
+                    await fetch(`${API_BASE}/api/customers`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, ...data }) });
+                    showToast('কাস্টমার যোগ হয়েছে', 'success');
                 }
+                bootstrap.Modal.getInstance(document.getElementById('customerModal')).hide();
+                await load();
+            } catch (error) { showToast('কাস্টমার সংরক্ষণে সমস্যা', 'error'); } finally { hideLoading(); }
+        }
+
+        async function deleteCustomer(password, id, name) {
+            if (confirm(`"${name}" কাস্টমারটি ডিলিট করতে চান?`)) {
+                showLoading();
+                try {
+                    await fetch(`${API_BASE}/api/customers/${id}`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
+                    showToast('কাস্টমার ডিলিট হয়েছে', 'success');
+                    await load();
+                } catch (error) { showToast('ডিলিট করতে সমস্যা', 'error'); } finally { hideLoading(); }
             }
         }
 
-        // Barcode Functions
-        function generateBarcode() {
-            let code = document.getElementById('barcode').value;
-            if (!code) {
-                code = Math.floor(Math.random() * 1000000000).toString().padStart(9, '0');
-                document.getElementById('barcode').value = code;
-            }
-            
-            JsBarcode("#barcodeSVG", code, { 
-                format: "CODE128",
-                lineColor: "#000",
-                width: 2,
-                height: 50,
-                displayValue: true
-            });
-            
-            document.getElementById('barcodeNumber').innerText = code;
-            new bootstrap.Modal(document.getElementById('barcodeModal')).show();
+        // Return Functions
+        async function renderReturns() {
+            try {
+                const res = await fetch(`${API_BASE}/api/returns`);
+                const returns = await res.json();
+                const tbody = document.getElementById('returnBody');
+                tbody.innerHTML = returns.map(r => `
+                    <tr>
+                        <td>${new Date(r.date).toLocaleDateString('bn-BD')}</td>
+                        <td>${r.saleId?.invoiceNo || 'N/A'}</td>
+                        <td>${r.saleId?.customerName || 'N/A'}</td>
+                        <td>${r.items.map(i => `${i.name} x${i.qty}`).join(', ')}</td>
+                        <td class="text-danger">${r.totalRefund}৳</td>
+                        <td>${r.reason || '-'}</td>
+                    </tr>
+                `).join('');
+            } catch (error) { console.error('Load returns error:', error); }
         }
 
-        function printBarcode() {
-            window.print();
-        }
-
-        // Log Management - আপডেটেড
+        // Log Functions
         function renderLogs() {
-            const logCount = document.getElementById('logCount');
-            if (logCount) {
-                logCount.innerText = `(${activityLogs.length})`;
-            }
-            
+            document.getElementById('logCount').innerText = `(${activityLogs.length})`;
             if (!logMinimized) {
                 const container = document.getElementById('logContainer');
-                if (container) {
-                    if (activityLogs.length === 0) {
-                        container.innerHTML = '<div class="text-center text-muted p-3">📭 কোনো লগ নেই</div>';
-                    } else {
-                        container.innerHTML = activityLogs.map(log => `
-                            <div class="d-flex justify-content-between align-items-start">
-                                <span>${log.action}</span>
-                                <small class="text-muted ms-2">${log.time}</small>
-                            </div>
-                        `).join('');
-                    }
-                }
+                if (activityLogs.length === 0) container.innerHTML = '<div class="text-center text-muted p-3">📭 কোনো লগ নেই</div>';
+                else container.innerHTML = activityLogs.map(log => `<div class="d-flex justify-content-between"><span>${log.action}</span><small class="text-muted">${log.time}</small></div>`).join('');
             }
         }
 
-        // লগ ক্লিয়ার ফাংশন - আপডেটেড
         async function clearLogs(password) {
-            if (!confirm('⚠️ সব লগ স্থায়ীভাবে মুছে ফেলতে চান? এই কাজ পূর্বাবস্থায় ফেরানো যাবে না।')) {
-                return;
-            }
-            
+            if (!confirm('⚠️ সব লগ মুছে ফেলতে চান?')) return;
             showLoading();
             try {
-                const response = await fetch(`${API_BASE}/api/logs`, {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password })
-                });
-                
+                const response = await fetch(`${API_BASE}/api/logs`, { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
                 const data = await response.json();
-                
-                if (data.success) {
-                    activityLogs = [];
-                    renderLogs();
-                    showToast(`✅ ${data.deletedCount || 'সব'} লগ মুছে ফেলা হয়েছে`, 'success');
-                } else {
-                    showToast(data.error || 'লগ মুছতে সমস্যা হয়েছে', 'error');
-                }
-            } catch (error) {
-                console.error('Error clearing logs:', error);
-                showToast('লগ মুছতে সমস্যা হয়েছে: ' + error.message, 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // Export Functions
-        function exportExcel() {
-            showLoading();
-            try {
-                const data = allProducts.map(p => ({
-                    'বারকোড': p.barcode || 'N/A',
-                    'পণ্যের নাম': p.name,
-                    'ক্যাটাগরি': p.category || 'N/A',
-                    'সরবরাহকারী': p.supplier || 'N/A',
-                    'কেনা দাম': p.costPrice,
-                    'বিক্রয় মূল্য': p.price,
-                    'স্টক': p.stock,
-                    'স্টক মূল্য': p.costPrice * p.stock,
-                    'সতর্কতা সীমা': p.alertLimit || 5,
-                    'মেয়াদোত্তীর্ণ তারিখ': p.expiryDate ? new Date(p.expiryDate).toLocaleDateString('bn-BD') : 'N/A',
-                    'অবস্থা': p.expiryDate ? (isExpired(p.expiryDate) ? 'মেয়াদোত্তীর্ণ' : (isExpiringSoon(p.expiryDate, 7) ? 'মেয়াদ নিকটে' : 'ভালো')) : 'N/A'
-                }));
-                
-                const ws = XLSX.utils.json_to_sheet(data);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Inventory");
-                
-                const expiredCount = allProducts.filter(p => isExpired(p.expiryDate)).length;
-                const expiringCount = allProducts.filter(p => isExpiringSoon(p.expiryDate, 7)).length;
-                
-                const summary = [
-                    ['মোট পণ্য', allProducts.length],
-                    ['মোট স্টক', allProducts.reduce((acc, p) => acc + p.stock, 0)],
-                    ['মেয়াদোত্তীর্ণ পণ্য', expiredCount],
-                    ['মেয়াদ নিকটে (৭ দিন)', expiringCount]
-                ];
-                const wsSummary = XLSX.utils.aoa_to_sheet(summary);
-                XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
-                
-                XLSX.writeFile(wb, `Inventory_${new Date().toISOString().slice(0,10)}.xlsx`);
-                showToast('রিপোর্ট এক্সপোর্ট করা হয়েছে', 'success');
-                
-            } catch (error) {
-                showToast('এক্সপোর্ট করতে সমস্যা হয়েছে', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function exportPDF() {
-            showLoading();
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                doc.setFontSize(20);
-                doc.setTextColor(102, 126, 234);
-                doc.text("Morsalin Supershop", 70, 20);
-                
-                doc.setFontSize(12);
-                doc.setTextColor(0, 0, 0);
-                doc.text(`রিপোর্ট তারিখ: ${new Date().toLocaleDateString('bn-BD')}`, 15, 35);
-                
-                const tableData = allProducts.map(p => [
-                    p.name,
-                    p.category || 'N/A',
-                    p.price,
-                    p.stock,
-                    p.price * p.stock,
-                    p.expiryDate ? new Date(p.expiryDate).toLocaleDateString('bn-BD') : 'N/A'
-                ]);
-                
-                doc.autoTable({
-                    startY: 45,
-                    head: [['পণ্য', 'ক্যাটাগরি', 'মূল্য', 'স্টক', 'মোট', 'মেয়াদ']],
-                    body: tableData,
-                    headStyles: { fillColor: [102, 126, 234] },
-                    columnStyles: {
-                        5: { cellWidth: 30 }
-                    }
-                });
-                
-                doc.save(`Inventory_${new Date().toISOString().slice(0,10)}.pdf`);
-                showToast('পিডিএফ তৈরি হয়েছে', 'success');
-                
-            } catch (error) {
-                showToast('পিডিএফ তৈরি করতে সমস্যা হয়েছে', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function printReport() {
-            window.print();
-        }
-
-        function exportTemplate() {
-            const template = [{
-                'বারকোড': '123456789',
-                'পণ্যের নাম': 'নমুনা পণ্য',
-                'ক্যাটাগরি': 'চাল',
-                'সরবরাহকারী': 'Supplier Name',
-                'কেনা দাম': 50,
-                'বিক্রয় মূল্য': 55,
-                'স্টক': 100,
-                'সতর্কতা সীমা': 10,
-                'মেয়াদোত্তীর্ণ তারিখ': new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]
-            }];
-            
-            const ws = XLSX.utils.json_to_sheet(template);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Template");
-            XLSX.writeFile(wb, "Import_Template.xlsx");
-        }
-
-        // Print Invoice
-        async function printInvoice(saleId) {
-            showLoading();
-            try {
-                const sRes = await fetch(`${API_BASE}/api/sales`);
-                const sales = await sRes.json();
-                const sale = sales.find(s => s._id === saleId);
-                
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                doc.setFontSize(22);
-                doc.setTextColor(102, 126, 234);
-                doc.text("SuperShop Pro", 70, 20);
-                
-                doc.setFontSize(12);
-                doc.setTextColor(0, 0, 0);
-                doc.text(`Invoice #: ${saleId.slice(-8)}`, 15, 35);
-                doc.text(`Customer: ${sale.customerName || 'N/A'}`, 15, 45);
-                doc.text(`Date: ${new Date(sale.date).toLocaleDateString('bn-BD')}`, 140, 35);
-                doc.text(`Time: ${new Date(sale.date).toLocaleTimeString('bn-BD')}`, 140, 45);
-                
-                const tableData = sale.items.map(i => [i.name, i.qty, i.price, i.qty * i.price]);
-                doc.autoTable({
-                    startY: 55,
-                    head: [['পণ্য', 'পরিমাণ', 'দর', 'মোট']],
-                    body: tableData,
-                    foot: [['', '', 'মোট:', sale.totalAmount + ' ৳']],
-                    headStyles: { fillColor: [102, 126, 234] },
-                    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0] }
-                });
-                
-                const finalY = doc.lastAutoTable.finalY + 10;
-                doc.text(`মোট: ${sale.totalAmount} ৳`, 140, finalY);
-                doc.text(`পেইড: ${sale.paidAmount} ৳`, 140, finalY + 10);
-                doc.text(`বাকি: ${sale.dueAmount} ৳`, 140, finalY + 20);
-                
-                doc.setFontSize(10);
-                doc.setTextColor(128, 128, 128);
-                doc.text("ধন্যবাদ দিয়ে কেনার জন্য!", 70, finalY + 40);
-                
-                doc.save(`Invoice_${saleId.slice(-8)}.pdf`);
-                
-            } catch (error) {
-                showToast('ইনভয়েস তৈরি করতে সমস্যা হয়েছে', 'error');
-            } finally {
-                hideLoading();
-            }
+                if (data.success) { activityLogs = []; renderLogs(); showToast('লগ মুছে ফেলা হয়েছে', 'success'); }
+                else showToast(data.error || 'লগ মুছতে সমস্যা', 'error');
+            } catch (error) { showToast('লগ মুছতে সমস্যা', 'error'); } finally { hideLoading(); }
         }
 
         // Backup Functions
@@ -3145,125 +2345,207 @@
             try {
                 const res = await fetch(`${API_BASE}/api/backups`);
                 const backups = await res.json();
-                
-                const list = document.getElementById('backupList');
-                list.innerHTML = backups.map(b => `
-                    <a href="#" class="list-group-item list-group-item-action" onclick="checkAuth(selectBackup, '${b._id}')">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">${new Date(b.date).toLocaleString('bn-BD')}</h6>
-                            <small>${(b.size / 1024).toFixed(2)} KB</small>
-                        </div>
-                        <small>${b.name}</small>
-                    </a>
-                `).join('');
-            } catch (error) {
-                console.error('Error loading backups:', error);
-            }
+                document.getElementById('backupList').innerHTML = backups.map(b => `<a href="#" class="list-group-item list-group-item-action" onclick="checkAuth(selectBackup, '${b._id}')"><div class="d-flex justify-content-between"><h6 class="mb-1">${new Date(b.date).toLocaleString('bn-BD')}</h6><small>${(b.size / 1024).toFixed(2)} KB</small></div><small>${b.name}</small></a>`).join('');
+            } catch (error) { console.error('Load backups error:', error); }
         }
 
         async function createBackup(password) {
             showLoading();
             try {
-                await fetch(`${API_BASE}/api/backup`, { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password })
-                });
+                await fetch(`${API_BASE}/api/backup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
                 showToast('ব্যাকআপ তৈরি হয়েছে', 'success');
                 loadBackupList();
-            } catch (error) {
-                showToast('ব্যাকআপ তৈরি করতে সমস্যা হয়েছে', 'error');
-            } finally {
-                hideLoading();
-            }
+            } catch (error) { showToast('ব্যাকআপ তৈরি করতে সমস্যা', 'error'); } finally { hideLoading(); }
         }
 
-        async function restoreBackup(password) {
-            showLoading();
-            try {
-                showToast('পুনরুদ্ধার ফিচার ব্যাকআপ সিলেক্ট করুন', 'info');
-            } catch (error) {
-                showToast('পুনরুদ্ধার করতে সমস্যা হয়েছে', 'error');
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function selectBackup(password, backupId) {
-            if (confirm('এই ব্যাকআপ থেকে ডাটা পুনরুদ্ধার করতে চান?')) {
-                restoreFromBackup(password, backupId);
-            }
-        }
-
+        async function restoreBackup(password) { showToast('পুনরুদ্ধার করতে ব্যাকআপ সিলেক্ট করুন', 'info'); }
+        function selectBackup(password, backupId) { if (confirm('এই ব্যাকআপ থেকে ডাটা পুনরুদ্ধার করতে চান?')) restoreFromBackup(password, backupId); }
         async function restoreFromBackup(password, backupId) {
             showLoading();
             try {
-                await fetch(`${API_BASE}/api/restore`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password, backupId })
-                });
+                await fetch(`${API_BASE}/api/restore`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, backupId }) });
                 showToast('ডাটা পুনরুদ্ধার করা হয়েছে', 'success');
                 await load();
                 bootstrap.Modal.getInstance(document.getElementById('backupModal')).hide();
-            } catch (error) {
-                showToast('পুনরুদ্ধার করতে সমস্যা হয়েছে', 'error');
-            } finally {
-                hideLoading();
-            }
+            } catch (error) { showToast('পুনরুদ্ধার করতে সমস্যা', 'error'); } finally { hideLoading(); }
+        }
+
+        // Export Functions
+        function exportExcel() {
+            const data = allProducts.map(p => ({ 'বারকোড': p.barcode || 'N/A', 'পণ্যের নাম': p.name, 'ক্যাটাগরি': p.category || 'N/A', 'কেনা দাম': p.costPrice, 'বিক্রয় মূল্য': p.price, 'স্টক': p.stock, 'মেয়াদ': p.expiryDate ? formatExpiryDate(p.expiryDate) : 'N/A' }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Inventory");
+            XLSX.writeFile(wb, `Inventory_${new Date().toISOString().slice(0,10)}.xlsx`);
+            showToast('রিপোর্ট এক্সপোর্ট করা হয়েছে', 'success');
+        }
+
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(20); doc.setTextColor(102, 126, 234); doc.text("Morsalin Supershop", 70, 20);
+            doc.setFontSize(12); doc.setTextColor(0, 0, 0); doc.text(`রিপোর্ট: ${new Date().toLocaleDateString('bn-BD')}`, 15, 35);
+            doc.autoTable({ startY: 45, head: [['পণ্য', 'ক্যাটাগরি', 'মূল্য', 'স্টক']], body: allProducts.map(p => [p.name, p.category || 'N/A', p.price, p.stock]), headStyles: { fillColor: [102, 126, 234] } });
+            doc.save(`Inventory_${new Date().toISOString().slice(0,10)}.pdf`);
+            showToast('পিডিএফ তৈরি হয়েছে', 'success');
+        }
+
+        function printReport() { window.print(); }
+        function exportTemplate() {
+            const template = [{ 'বারকোড': '123456789', 'পণ্যের নাম': 'নমুনা পণ্য', 'ক্যাটাগরি': 'চাল', 'কেনা দাম': 50, 'বিক্রয় মূল্য': 55, 'স্টক': 100, 'সতর্কতা সীমা': 10, 'মেয়াদোত্তীর্ণ তারিখ': new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0] }];
+            const ws = XLSX.utils.json_to_sheet(template);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Template");
+            XLSX.writeFile(wb, "Import_Template.xlsx");
         }
 
         function importJSON(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
             checkAuth(async function(password) {
                 showLoading();
                 const reader = new FileReader();
-                
                 reader.onload = async function(e) {
                     try {
                         const data = JSON.parse(e.target.result);
-                        
                         if (data.products) {
                             for (let product of data.products) {
-                                await fetch(`${API_BASE}/api/products`, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ password, ...product })
-                                });
+                                await fetch(`${API_BASE}/api/products`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password, ...product }) });
                             }
                         }
-                        
                         showToast('ডাটা ইমপোর্ট করা হয়েছে', 'success');
                         await load();
-                        
-                    } catch (error) {
-                        showToast('ফাইল প্রসেস করতে সমস্যা হয়েছে', 'error');
-                    } finally {
-                        hideLoading();
-                    }
+                    } catch (error) { showToast('ফাইল প্রসেস করতে সমস্যা', 'error'); } finally { hideLoading(); }
                 };
-                
                 reader.readAsText(file);
             });
         }
 
+        // Barcode Functions
+        function generateBarcode() {
+            let code = document.getElementById('barcode').value;
+            if (!code) { code = Math.floor(Math.random() * 1000000000).toString().padStart(9, '0'); document.getElementById('barcode').value = code; }
+            JsBarcode("#barcodeSVG", code, { format: "CODE128", lineColor: "#000", width: 2, height: 50, displayValue: true });
+            document.getElementById('barcodeNumber').innerText = code;
+            new bootstrap.Modal(document.getElementById('barcodeModal')).show();
+        }
+
+        function printBarcode() { window.print(); }
+
+        // Scanner Functions
+        async function openBarcodeScanner() {
+            const modal = document.getElementById('scannerModal');
+            modal.classList.add('active');
+            document.getElementById('scannerOption').style.display = 'block';
+            document.getElementById('scanner-view').style.display = 'none';
+            document.getElementById('cameraControls').style.display = 'none';
+        }
+
+        function closeScanner() {
+            const modal = document.getElementById('scannerModal');
+            modal.classList.remove('active');
+            if (html5QrCode && isScanning) { try { html5QrCode.stop(); html5QrCode.clear(); } catch(e) {} html5QrCode = null; isScanning = false; }
+        }
+
+        async function startMobileScanner() {
+            document.getElementById('scannerOption').style.display = 'none';
+            document.getElementById('scanner-view').style.display = 'block';
+            document.getElementById('cameraControls').style.display = 'flex';
+            try {
+                html5QrCode = new Html5Qrcode("scanner-view");
+                cameras = await Html5Qrcode.getCameras();
+                if (cameras && cameras.length > 0) {
+                    let backCamera = cameras.find(c => c.label.toLowerCase().includes('back') || c.label.toLowerCase().includes('environment'));
+                    await startCameraScanning(backCamera ? backCamera.id : cameras[0].id);
+                } else throw new Error('ক্যামেরা পাওয়া যায়নি');
+            } catch (error) { document.getElementById('scannerResult').innerHTML = `<span class="text-danger">${error.message}</span>`; }
+        }
+
+        async function startCameraScanning(cameraId) {
+            try {
+                currentCameraId = cameraId;
+                await html5QrCode.start(cameraId, { fps: 10, qrbox: { width: 280, height: 150 } }, onScanSuccess, () => {});
+                isScanning = true;
+                document.getElementById('scannerResult').innerHTML = 'বারকোড স্ক্যান করুন...';
+            } catch (error) { document.getElementById('scannerResult').innerHTML = `<span class="text-danger">ক্যামেরা চালু করতে সমস্যা</span>`; }
+        }
+
+        function onScanSuccess(decodedText) {
+            const now = Date.now();
+            if (decodedText === lastScannedCode && now - lastScanTime < 2000) return;
+            lastScannedCode = decodedText; lastScanTime = now;
+            playBeep();
+            document.getElementById('scannerResult').innerHTML = `<span class="text-success">স্ক্যান: ${decodedText}</span>`;
+            document.getElementById('barcode').value = decodedText;
+            setTimeout(() => closeScanner(), 1500);
+        }
+
+        function playBeep() { try { new AudioContext(); } catch(e) {} }
+
+        function startHardwareScanner() {
+            document.getElementById('scannerOption').style.display = 'none';
+            document.getElementById('scannerResult').innerHTML = 'হার্ডওয়্যার স্ক্যানার ব্যবহার করুন...';
+            document.getElementById('barcode').focus();
+            setTimeout(() => closeScanner(), 30000);
+        }
+
+        async function switchCamera() {
+            if (!cameras || cameras.length < 2) { showToast('একাধিক ক্যামেরা নেই', 'warning'); return; }
+            try {
+                if (html5QrCode && isScanning) await html5QrCode.stop();
+                let nextIndex = (cameras.findIndex(c => c.id === currentCameraId) + 1) % cameras.length;
+                await startCameraScanning(cameras[nextIndex].id);
+            } catch (error) { showToast('ক্যামেরা সুইচ করতে সমস্যা', 'error'); }
+        }
+
+        async function toggleTorch() {
+            if (!html5QrCode || !isScanning) return;
+            try { await html5QrCode.turnTorchOn(!torchEnabled); torchEnabled = !torchEnabled; } catch(e) { showToast('টর্চ সাপোর্ট করে না', 'warning'); }
+        }
+
         // UI Functions
-        function toggleDarkMode() { 
+        function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
             const icon = document.querySelector('button[onclick="toggleDarkMode()"] i');
-            if (document.body.classList.contains('dark-mode')) {
-                icon.className = 'bi bi-brightness-high';
+            icon.className = document.body.classList.contains('dark-mode') ? 'bi bi-brightness-high' : 'bi bi-moon';
+        }
+
+        function toggleSection(sectionId, iconId) {
+            const container = document.getElementById(sectionId);
+            const icon = document.getElementById(iconId);
+            if (container.classList.contains('collapsed')) {
+                container.classList.remove('collapsed');
+                icon.classList.remove('bi-plus-lg'); icon.classList.add('bi-dash-lg');
+                if (sectionId === 'salesChartContainer') { salesChartMinimized = false; setTimeout(() => currentChart?.resize(), 100); }
+                else if (sectionId === 'categoryChartContainer') { categoryChartMinimized = false; setTimeout(() => categoryChart?.resize(), 100); updateCategoryChart(); }
+                else if (sectionId === 'addProductContainer') addProductMinimized = false;
+                else if (sectionId === 'logContainerWrapper') { logMinimized = false; renderLogs(); }
             } else {
-                icon.className = 'bi bi-moon';
+                container.classList.add('collapsed');
+                icon.classList.remove('bi-dash-lg'); icon.classList.add('bi-plus-lg');
+                if (sectionId === 'salesChartContainer') salesChartMinimized = true;
+                else if (sectionId === 'categoryChartContainer') categoryChartMinimized = true;
+                else if (sectionId === 'addProductContainer') addProductMinimized = true;
+                else if (sectionId === 'logContainerWrapper') logMinimized = true;
             }
         }
 
-        // Auto-refresh every 5 minutes
-        setInterval(() => {
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserInfo();
             load();
-        }, 300000);
+            loadBackupList();
+            loadSupplierDropdown();
+            setMinExpiryDate();
+        });
+
+        function setMinExpiryDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('expiryDate').setAttribute('min', today);
+            document.getElementById('editExpiryDate').setAttribute('min', today);
+        }
+
+        setInterval(() => { if (navigator.onLine) load(); }, 300000);
     </script>
 </body>
 </html>
